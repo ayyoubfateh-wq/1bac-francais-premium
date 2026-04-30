@@ -1,0 +1,9 @@
+{
+  "name": "play-bac-premium",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "generate-codes": "node tools/generate-codes.mjs 20 BAC",
+    "generate-codes:50": "node tools/generate-codes.mjs 50 BAC"
+  }
+}
