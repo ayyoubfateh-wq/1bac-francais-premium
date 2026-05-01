@@ -10,7 +10,7 @@ const checkCode = async (code) => {
 
   console.log(data, error)
 
-  return data.length > 0
+  return data.some(item => item.code === code)
 }
 
 window.premiumCheckAccess = async function () {
