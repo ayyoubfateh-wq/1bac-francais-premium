@@ -1639,7 +1639,7 @@ const OPTIMIZED_IMAGE_ASSETS = {
     if(_lockUntil>now){ setError('Acces bloque. Reessayez dans '+Math.ceil((_lockUntil-now)/1000)+'s.'); return; }
     clearError(); if(btn){ btn.textContent='Verification...'; btn.disabled=true; }
     try{ var data=await validateOnServer(code); if(data&&data.ok){ _attempts=0; doUnlock(data.expiresIn||28800); } else { _attempts++; if(_attempts>=3){ _lockUntil=Date.now()+120000; } setError(_attempts>=3?'Trop de tentatives. Acces bloque 2 minutes.':'Code incorrect. '+(3-_attempts)+' tentative(s) restante(s).'); if(input){ input.value=''; input.focus(); } } }
-    catch(e){ setError('Validation indisponible pour le moment. Verifiez le deploiement Netlify Functions et la variable PREMIUM_CODE_HASHES.'); }
+    catch(e){ setError(''); }
     finally{ if(btn){ btn.textContent='Acceder maintenant'; btn.disabled=false; } }
   };
   document.addEventListener('DOMContentLoaded', function(){ if(!restoreSession()){ var lock=document.getElementById('premiumLockScreen'), input=document.getElementById('premiumAccessCode'); if(lock){ lock.style.display='flex'; } if(input){ input.addEventListener('keydown', function(e){ if(e.key==='Enter') window.premiumCheckAccess(); }); } } });
