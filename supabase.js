@@ -6,11 +6,22 @@ const checkCode = async (code) => {
   const { data, error } = await supabase
     .from('codes')
     .select('*')
-    .eq('code', code)
 
   console.log(data, error)
 
-  return data.some(item => item.code === code)
+  const validItem = data.find(item => item.code === code && item.used === false)
+
+if (validItem) {
+  // 🔒 on bloque le code après utilisation
+  await supabase
+    .from('codes')
+    .update({ used: true })
+    .eq('id', validItem.id)
+
+  return true
+}
+
+return false
 }
 
 window.premiumCheckAccess = async function () {
