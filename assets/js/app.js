@@ -1661,3 +1661,22 @@ const OPTIMIZED_IMAGE_ASSETS = {
   var oldResetQuiz=window.resetQuiz; if(typeof oldResetQuiz==='function'){window.resetQuiz=function(){var r=oldResetQuiz.apply(this,arguments); renderPanel(); return r;};}
   var oldShowScreen=window.showScreen; if(typeof oldShowScreen==='function'){window.showScreen=function(id,btn){var r=oldShowScreen.apply(this,arguments); if(id==='quiz') setTimeout(renderPanel,0); return r;};}
 })();
+/* ACCESS_FIX_ONLY */
+window.premiumCheckAccess = function(){
+  var input = document.getElementById("premiumAccessCode");
+  var code = input ? input.value.trim() : "";
+
+  if(code === "Ayoub123"){
+    var lock = document.getElementById("premiumLockScreen");
+    if(lock){ lock.style.display = "none"; }
+
+    var content = document.getElementById("premiumContent");
+    if(content){ content.style.display = "block"; }
+
+    try{
+      sessionStorage.setItem("pf1bac_server_access_until", String(Date.now() + 28800 * 1000));
+    }catch(e){}
+  } else {
+    alert("Code invalide");
+  }
+};
