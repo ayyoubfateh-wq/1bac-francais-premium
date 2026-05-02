@@ -1639,14 +1639,18 @@ const OPTIMIZED_IMAGE_ASSETS = {
   };
 }
 
-window.premiumCheckAccess = async function(){
-    var now=Date.now(), input=document.getElementById('premiumAccessCode'), btn=document.querySelector('[onclick="premiumCheckAccess()"]'), code=input?input.value.trim():'';
-    if(!code){ if(input) input.focus(); return; }
-    if(_lockUntil>now){ setError('Acces bloque. Reessayez dans '+Math.ceil((_lockUntil-now)/1000)+'s.'); return; }
-    clearError(); if(btn){ btn.textContent='Verification...'; btn.disabled=true; }
-    var data= validateOnServer(code); if (data.ok){ _attempts=0; doUnlock(data.expiresIn||28800); } else { _attempts++; if(_attempts>=3){ _lockUntil=Date.now()+120000; } setError(_attempts>=3?'Trop de tentatives. Acces bloque 2 minutes.':'Code incorrect. '+(3-_attempts)+' tentative(s) restante(s).'); if(input){ input.value=''; input.focus(); } } }
-    finally{ if(btn){ btn.textContent='Acceder maintenant'; btn.disabled=false; } }
-  };
+
+window.premiumCheckAccess = function(){
+  var input = document.getElementById('premiumAccessCode');
+  var code = input ? input.value.trim() : "";
+
+  if(code === "Ayoub123"){
+    alert("Accès autorisé");
+  } else {
+    alert("Code invalide");
+  }
+};
+
   document.addEventListener('DOMContentLoaded', function(){ if(!restoreSession()){ var lock=document.getElementById('premiumLockScreen'), input=document.getElementById('premiumAccessCode'); if(lock){ lock.style.display='flex'; } if(input){ input.addEventListener('keydown', function(e){ if(e.key==='Enter') window.premiumCheckAccess(); }); } } });
 })();
 
