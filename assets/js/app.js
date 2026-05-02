@@ -1624,7 +1624,7 @@ const OPTIMIZED_IMAGE_ASSETS = {
    ================================================================ */
 (function(){
   'use strict';
-  var API_ENDPOINT = window.PF1BAC_ACCESS_API || '/api/validate-access';
+  var API_ENDPOINT = null;
   var SESSION_KEY = 'pf1bac_server_access_until';
   var _attempts = 0;
   var _lockUntil = 0;
@@ -1632,7 +1632,7 @@ const OPTIMIZED_IMAGE_ASSETS = {
   function clearError(){ var error=document.getElementById('premiumAccessError'); if(error){ error.textContent=''; error.style.display='none'; } }
   function doUnlock(expiresIn){ var lock=document.getElementById('premiumLockScreen'); if(lock){ lock.style.display='none'; } document.documentElement.classList.add('premium-unlocked'); try{ sessionStorage.setItem(SESSION_KEY, String(Date.now()+Number(expiresIn||28800)*1000)); }catch(e){} }
   function restoreSession(){ try{ var until=Number(sessionStorage.getItem(SESSION_KEY)||0); if(until>Date.now()){ doUnlock(Math.ceil((until-Date.now())/1000)); return true; } sessionStorage.removeItem(SESSION_KEY); }catch(e){} return false; } 
-  async function validateOnServer(code){
+  function validateOnServer(code){
   return {
     ok: String(code).trim() === "Ayoub123",
     expiresIn: 28800
