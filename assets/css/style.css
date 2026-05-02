@@ -1355,3 +1355,42 @@ font-size:27px;}
     padding-right:1.25rem!important;
   }
 }
+/* PREMIUM EFFECT SAFE */
+#premiumContent{
+  animation: premiumFadeUp .65s ease both;
+}
+
+@keyframes premiumFadeUp{
+  from{
+    opacity:0;
+    transform:translateY(18px) scale(.98);
+    filter:blur(6px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0) scale(1);
+    filter:blur(0);
+  }
+}
+
+#premiumLockScreen{
+  transition:opacity .35s ease, transform .35s ease;
+}
+
+#premiumAccessCode{
+  transition:box-shadow .25s ease, transform .25s ease;
+}
+
+#premiumAccessCode:focus{
+  transform:scale(1.01);
+  box-shadow:0 0 0 4px rgba(201,151,52,.22);
+}
+
+button[onclick*="premiumCheckAccess"]{
+  transition:transform .2s ease, box-shadow .2s ease;
+}
+
+button[onclick*="premiumCheckAccess"]:hover{
+  transform:translateY(-2px);
+  box-shadow:0 12px 30px rgba(201,151,52,.28);
+}
