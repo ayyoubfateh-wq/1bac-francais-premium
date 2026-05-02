@@ -1632,8 +1632,14 @@ const OPTIMIZED_IMAGE_ASSETS = {
   function clearError(){ var error=document.getElementById('premiumAccessError'); if(error){ error.textContent=''; error.style.display='none'; } }
   function doUnlock(expiresIn){ var lock=document.getElementById('premiumLockScreen'); if(lock){ lock.style.display='none'; } document.documentElement.classList.add('premium-unlocked'); try{ sessionStorage.setItem(SESSION_KEY, String(Date.now()+Number(expiresIn||28800)*1000)); }catch(e){} }
   function restoreSession(){ try{ var until=Number(sessionStorage.getItem(SESSION_KEY)||0); if(until>Date.now()){ doUnlock(Math.ceil((until-Date.now())/1000)); return true; } sessionStorage.removeItem(SESSION_KEY); }catch(e){} return false; } 
-  function validateOnServer(code){ return { ok: String(code).trim() === "Ayoub123", expiresIn: 28800 }; }
-  window.premiumCheckAccess = async function(){
+  async function validateOnServer(code){
+  return {
+    ok: String(code).trim() === "Ayoub123",
+    expiresIn: 28800
+  };
+}
+
+window.premiumCheckAccess = async function(){
     var now=Date.now(), input=document.getElementById('premiumAccessCode'), btn=document.querySelector('[onclick="premiumCheckAccess()"]'), code=input?input.value.trim():'';
     if(!code){ if(input) input.focus(); return; }
     if(_lockUntil>now){ setError('Acces bloque. Reessayez dans '+Math.ceil((_lockUntil-now)/1000)+'s.'); return; }
