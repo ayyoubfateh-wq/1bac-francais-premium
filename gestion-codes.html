@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Gestion des codes — Play-Bac (vendeur)</title>
+<style>
+  :root{--ink:#1a1008;--gold:#c8922a;--gold-light:#e8c97a;--teal:#1a6b5a;--terracotta:#b5432a;--cream:#f7f2e8;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',Tahoma,sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;}
+  .card{width:100%;max-width:430px;background:#fff;border-radius:20px;padding:28px 24px;box-shadow:0 18px 50px rgba(26,16,8,.14);}
+  h1{font-size:20px;margin-bottom:4px;}
+  .sub{font-size:12px;color:rgba(26,16,8,.55);margin-bottom:20px;}
+  label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gold);margin:14px 0 5px;}
+  input{width:100%;border:2px solid #e0d0b0;border-radius:12px;padding:12px 14px;font-size:15px;}
+  input:focus{border-color:var(--gold);outline:none;}
+  .row{display:flex;gap:10px;margin-top:18px;}
+  button{flex:1;border:none;border-radius:12px;padding:14px;font-size:13px;font-weight:800;letter-spacing:.04em;cursor:pointer;color:#fff;}
+  .verifier{background:var(--teal);}
+  .liberer{background:var(--terracotta);}
+  button:disabled{opacity:.5;cursor:wait;}
+  #resultat{margin-top:18px;border-radius:12px;padding:14px;font-size:14px;line-height:1.6;display:none;}
+  #resultat.ok{display:block;background:#eef8f2;border:1px solid #bfe3d0;}
+  #resultat.err{display:block;background:#fdf0ed;border:1px solid #f0c7bc;}
+  .note{margin-top:16px;font-size:11px;color:rgba(26,16,8,.5);line-height:1.6;}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>🔑 Gestion des codes clients</h1>
+  <p class="sub">Espace vendeur — Play-Bac 1BAC Français</p>
+
+  <label for="cle">Votre clé d'administration</label>
+  <input id="cle" type="password" placeholder="Clé secrète" autocomplete="off">
+
+  <label for="code">Code client (ex : BAC-XXXXX-XXXXX)</label>
+  <input id="code" type="text" placeholder="BAC-…" autocomplete="off" style="text-transform:uppercase;">
+
+  <div class="row">
+    <button class="verifier" onclick="agir('check')">VÉRIFIER</button>
+    <button class="liberer" onclick="agir('reset')">LIBÉRER</button>
+  </div>
+
+  <div id="resultat"></div>
+
+  <p class="note">
+    <b>Vérifier</b> : voir sur combien d'appareils ce code est utilisé (maximum autorisé : 2).<br>
+    <b>Libérer</b> : détacher le code de tous ses appareils — utile quand un client change de téléphone.
+    Sa progression (XP, parcours) est conservée : elle est liée au code, pas à l'appareil.
+  </p>
+</div>
+<script>
+  var cle = document.getElementById('cle');
+  var code = document.getElementById('code');
+  var res = document.getElementById('resultat');
+  try { cle.value = localStorage.getItem('pb_admin_key') || ''; } catch(e){}
+
+  function agir(action){
+    var k = cle.value.trim(), c = code.value.trim().toUpperCase();
+    if (!k) { montrer('err', 'Entrez votre clé d\'administration.'); cle.focus(); return; }
+    if (!c) { montrer('err', 'Entrez le code du client.'); code.focus(); return; }
+    if (action === 'reset' && !confirm('Libérer le code ' + c + ' de tous ses appareils ?')) return;
+    try { localStorage.setItem('pb_admin_key', k); } catch(e){}
+    document.querySelectorAll('button').forEach(function(b){ b.disabled = true; });
+    fetch('/api/admin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ adminKey: k, action: action, code: c })
+    }).then(function(r){ return r.json(); }).then(function(d){
+      if (!d.ok) {
+        montrer('err', d.error === 'forbidden' ? '❌ Clé d\'administration incorrecte.' : '❌ Erreur : ' + (d.error || 'inconnue'));
+      } else if (action === 'check') {
+        montrer('ok', d.used
+          ? '✅ Code <b>utilisé</b> sur <b>' + d.deviceCount + '</b> appareil(s) / 2.' + (d.lastUsed ? '<br>Dernière activation : ' + new Date(d.lastUsed).toLocaleString('fr-FR') : '')
+          : 'ℹ️ Ce code n\'a encore été activé sur <b>aucun</b> appareil.');
+      } else {
+        montrer('ok', '✅ Code <b>' + c + '</b> libéré. Le client peut l\'activer sur un nouvel appareil.');
+      }
+    }).catch(function(){
+      montrer('err', '❌ Serveur injoignable. Réessayez.');
+    }).finally(function(){
+      document.querySelectorAll('button').forEach(function(b){ b.disabled = false; });
+    });
+  }
+  function montrer(type, html){ res.className = type; res.innerHTML = html; }
+</script>
+</body>
+</html>

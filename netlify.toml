@@ -21,3 +21,13 @@
   from = "/api/leaderboard"
   to = "/.netlify/functions/leaderboard"
   status = 200
+
+[[redirects]]
+  from = "/api/progress"
+  to = "/.netlify/functions/progress"
+  status = 200
+
+[[redirects]]
+  from = "/api/admin"
+  to = "/.netlify/functions/admin"
+  status = 200

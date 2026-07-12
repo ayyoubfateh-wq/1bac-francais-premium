@@ -1662,7 +1662,14 @@ const OPTIMIZED_IMAGE_ASSETS = {
     if(!code){ if(input) input.focus(); return; }
     if(_lockUntil>now){ setError('Acces bloque. Reessayez dans '+Math.ceil((_lockUntil-now)/1000)+'s.'); return; }
     clearError(); if(btn){ btn.textContent='Verification...'; btn.disabled=true; }
-    try{ var data=await validateOnServer(code); if(data&&data.ok){ _attempts=0; doUnlock(data.expiresIn||28800); } else if(data&&data.message==='device_limit'){ setError('Ce code est déjà utilisé sur 2 appareils. Contactez le support WhatsApp pour le débloquer.'); } else { _attempts++; if(_attempts>=3){ _lockUntil=Date.now()+120000; } setError(_attempts>=3?'Trop de tentatives. Acces bloque 2 minutes.':'Code incorrect. '+(3-_attempts)+' tentative(s) restante(s).'); if(input){ input.value=''; input.focus(); } } }
+    try{ var data=await validateOnServer(code); if(data&&data.ok){ _attempts=0; doUnlock(data.expiresIn||28800);
+      /* clé de sauvegarde nuage = SHA-256 du code (jamais le code en clair) */
+      try{ crypto.subtle.digest('SHA-256', new TextEncoder().encode(code.toUpperCase())).then(function(buf){
+        var hex=Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+        localStorage.setItem('pf1bac_sync_key', hex);
+        if(typeof window.gCloudSync==='function') window.gCloudSync();
+      }); }catch(e){}
+    } else if(data&&data.message==='device_limit'){ setError('Ce code est déjà utilisé sur 2 appareils. Contactez le support WhatsApp pour le débloquer.'); } else { _attempts++; if(_attempts>=3){ _lockUntil=Date.now()+120000; } setError(_attempts>=3?'Trop de tentatives. Acces bloque 2 minutes.':'Code incorrect. '+(3-_attempts)+' tentative(s) restante(s).'); if(input){ input.value=''; input.focus(); } } }
     catch(e){ setError(''); }
     finally{ if(btn){ btn.textContent='Acceder maintenant'; btn.disabled=false; } }
   };
