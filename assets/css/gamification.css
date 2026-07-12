@@ -1,0 +1,352 @@
+/* ============================================================================
+   GAMIFICATION — HUD, parcours, leçons, célébrations
+   Neuroergonomie : feedback saillant mais bref (200-450ms), une seule zone
+   animée à la fois, contrastes élevés, cibles tactiles ≥ 44px.
+============================================================================ */
+
+/* ------------------------------------------------------------------- HUD */
+#gameHud{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+  padding:10px 2rem;
+  background:var(--white);
+  border-bottom:1px solid var(--sand);
+  position:sticky;
+  top:0;
+  z-index:90;
+}
+.g-hud-item{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  border:none;
+  background:transparent;
+  font-family:'Tajawal',sans-serif;
+  min-height:40px;
+}
+button.g-hud-item{cursor:pointer;border-radius:10px;padding:4px 10px;}
+button.g-hud-item:hover{background:var(--gold-pale);}
+
+.g-streak b{font-size:17px;color:var(--terracotta);}
+.g-streak .g-flame{font-size:19px;filter:grayscale(1);opacity:.45;}
+.g-streak.lit .g-flame{filter:none;opacity:1;}
+.g-streak.risk .g-flame{
+  filter:none;opacity:.85;
+  animation:gFlicker 1.6s ease-in-out infinite;
+}
+@keyframes gFlicker{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+
+.g-level{flex:1;min-width:150px;max-width:320px;}
+.g-level-name{
+  font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--gold);white-space:nowrap;
+}
+.g-xpbar{
+  flex:1;height:10px;border-radius:99px;background:var(--sand-light);
+  overflow:hidden;min-width:60px;
+}
+.g-xpfill{
+  height:100%;border-radius:99px;
+  background:linear-gradient(90deg,var(--gold),var(--gold-light));
+  transition:width .5s cubic-bezier(.22,1,.36,1);
+}
+.g-xp-count{font-size:11px;font-weight:700;color:var(--muted);white-space:nowrap;}
+
+.g-daily{position:relative;width:40px;justify-content:center;}
+.g-ring{width:36px;height:36px;transform:rotate(-90deg);}
+.g-ring-bg{fill:none;stroke:var(--sand-light);stroke-width:4;}
+.g-ring-fg{
+  fill:none;stroke:var(--teal);stroke-width:4;stroke-linecap:round;
+  transition:stroke-dasharray .5s cubic-bezier(.22,1,.36,1);
+}
+.g-daily-icon{position:absolute;font-size:12px;}
+
+.g-hearts{gap:1px;}
+.g-heart{font-size:14px;line-height:1;}
+.g-heart.empty{opacity:.5;}
+.g-sound{font-size:16px;}
+
+/* --------------------------------------------------------------- parcours */
+#parcours .g-book-tabs{
+  display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.2rem;
+}
+.g-book-tab{
+  display:flex;align-items:center;gap:8px;
+  font-family:'Tajawal',sans-serif;font-size:12px;font-weight:700;
+  padding:10px 14px;border-radius:12px;cursor:pointer;
+  border:2px solid var(--sand);background:var(--white);color:var(--ink);
+  min-height:44px;transition:border-color .2s,background .2s;
+}
+.g-book-tab.active{border-color:var(--gold);background:var(--gold-pale);}
+.g-tab-prog{
+  font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;
+  background:var(--sand-light);color:var(--muted);
+}
+.g-book-tab.active .g-tab-prog{background:var(--gold);color:#fff;}
+
+#gContinueCard{
+  display:none;
+  align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  border:1px solid var(--border);border-radius:16px;
+  background:var(--gold-pale);
+  padding:14px 18px;margin-bottom:1.4rem;
+  box-shadow:0 6px 18px rgba(26,16,8,.06);
+}
+.g-cont-txt{display:flex;flex-direction:column;gap:2px;}
+.g-cont-eyebrow{
+  font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--gold);
+}
+.g-cont-txt b{font-size:15px;}
+.g-cont-book{font-size:11px;color:var(--muted);}
+.g-cont-btn{
+  border:none;border-radius:12px;color:#fff;cursor:pointer;
+  font-family:'Tajawal',sans-serif;font-size:12px;font-weight:700;
+  letter-spacing:.08em;padding:12px 20px;min-height:44px;
+  box-shadow:0 4px 0 rgba(0,0,0,.22);
+  transition:transform .12s,box-shadow .12s;
+}
+.g-cont-btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.22);}
+
+#gPath{
+  position:relative;
+  width:340px;max-width:100%;
+  margin:0 auto;
+}
+.g-path-line{position:absolute;left:0;top:0;pointer-events:none;}
+
+.g-node{
+  position:absolute;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:50%;
+  border:none;cursor:pointer;
+  background:var(--node-color,#9a9a94);
+  box-shadow:0 5px 0 rgba(0,0,0,.25), 0 8px 18px rgba(26,16,8,.18);
+  transition:transform .12s, box-shadow .12s, filter .2s;
+  z-index:2;
+}
+.g-node:active{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,.25);}
+.g-node.locked{
+  background:#cfc9bc;
+  box-shadow:0 4px 0 rgba(0,0,0,.12);
+  cursor:not-allowed;
+}
+.g-node.done{filter:saturate(.85);}
+.g-node.done::after{
+  content:'✓';position:absolute;right:-2px;top:-2px;
+  width:22px;height:22px;border-radius:50%;
+  background:#2e7d32;color:#fff;font-size:13px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  border:2px solid var(--white);
+}
+.g-node.exam{border-radius:22px;}
+.g-node-icon{font-size:26px;}
+.g-node.exam .g-node-icon{font-size:32px;}
+
+/* gradient d'objectif : le nœud courant appelle l'action, seul point animé */
+.g-node.current{animation:gBounce 1.8s ease-in-out infinite;}
+@keyframes gBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.g-node-pulse{
+  position:absolute;inset:-9px;border-radius:inherit;
+  border:3px solid var(--node-color,#c8922a);
+  opacity:.55;animation:gPulse 1.8s ease-out infinite;
+  pointer-events:none;
+}
+@keyframes gPulse{0%{transform:scale(.92);opacity:.55}100%{transform:scale(1.25);opacity:0}}
+.g-node-cta{
+  position:absolute;top:-34px;left:50%;transform:translateX(-50%);
+  background:var(--ink);color:var(--gold-light);
+  font-size:9px;font-weight:700;letter-spacing:.1em;
+  padding:5px 10px;border-radius:8px;white-space:nowrap;
+}
+.g-node-cta::after{
+  content:'';position:absolute;left:50%;bottom:-4px;transform:translateX(-50%);
+  border-left:5px solid transparent;border-right:5px solid transparent;
+  border-top:5px solid var(--ink);
+}
+
+.g-node-label{
+  position:absolute;width:140px;text-align:center;z-index:1;
+  display:flex;flex-direction:column;align-items:center;gap:1px;
+}
+.g-node-label span:first-child{
+  font-size:11px;font-weight:700;color:var(--muted);line-height:1.3;
+}
+.g-node-stars{display:flex;gap:1px;}
+.g-star{color:#d8d2c4;font-size:13px;}
+.g-star.on{color:var(--gold);text-shadow:0 1px 0 rgba(0,0,0,.15);}
+
+/* ------------------------------------------------------------ barre leçon */
+#gLessonBar{
+  display:none;
+  align-items:center;gap:12px;
+  margin-bottom:14px;padding:8px 0;
+}
+.g-lesson-quit{
+  border:none;background:var(--sand-light);color:var(--muted);
+  width:34px;height:34px;min-height:34px;border-radius:50%;cursor:pointer;
+  font-size:15px;display:flex;align-items:center;justify-content:center;
+}
+.g-lesson-quit:hover{background:var(--sand);}
+.g-lesson-title{font-size:12px;font-weight:700;color:var(--muted);flex:1;}
+.g-combo{
+  font-size:12px;font-weight:800;color:var(--terracotta);
+  animation:gComboPop .3s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes gComboPop{from{transform:scale(.4)}to{transform:scale(1)}}
+.g-lesson-hearts .g-heart{font-size:15px;}
+
+/* ------------------------------------------------------------ XP flottant */
+.g-float{
+  position:fixed;z-index:9999;pointer-events:none;
+  transform:translateX(-50%);
+  font-family:'Tajawal',sans-serif;font-size:16px;font-weight:800;
+  animation:gFloatUp 1.05s cubic-bezier(.22,1,.36,1) forwards;
+  white-space:nowrap;
+}
+.g-float.ok{color:#2e7d32;text-shadow:0 1px 0 #fff;}
+.g-float.ko{color:#c62828;text-shadow:0 1px 0 #fff;}
+.g-float.crit{
+  color:var(--gold);font-size:19px;
+  text-shadow:0 1px 0 #fff,0 0 14px rgba(200,146,42,.55);
+}
+@keyframes gFloatUp{
+  0%{opacity:0;translate:0 6px;scale:.6;}
+  18%{opacity:1;scale:1.12;}
+  30%{scale:1;}
+  100%{opacity:0;translate:0 -46px;}
+}
+
+/* ---------------------------------------------------- overlays / cartes */
+.g-overlay{
+  position:fixed;inset:0;z-index:10000;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(26,16,8,.55);
+  backdrop-filter:blur(3px);
+  padding:16px;
+  animation:gFadeIn .22s ease;
+}
+@keyframes gFadeIn{from{opacity:0}to{opacity:1}}
+.g-card{
+  position:relative;overflow:hidden;
+  width:100%;max-width:380px;
+  background:var(--white);
+  border-radius:22px;
+  padding:26px 22px 22px;
+  text-align:center;
+  box-shadow:0 24px 60px rgba(0,0,0,.35);
+  animation:gCardIn .32s cubic-bezier(.34,1.4,.64,1);
+  max-height:92vh;overflow-y:auto;
+}
+@keyframes gCardIn{from{transform:translateY(26px) scale(.92);opacity:0}to{transform:none;opacity:1}}
+.g-confetti{position:absolute;left:50%;top:0;transform:translateX(-50%);pointer-events:none;}
+.g-card h3{
+  font-family:'Playfair Display',serif;font-size:24px;color:var(--ink);
+  margin:6px 0 2px;
+}
+.g-card-sub{font-size:12px;color:var(--muted);margin:0 0 6px;}
+.g-card-score{
+  font-size:13px;font-weight:700;color:var(--ink);margin-bottom:12px;
+}
+.g-card-stars{display:flex;justify-content:center;gap:6px;}
+.g-card-stars .g-star{font-size:34px;}
+.g-card-stars .g-star.on{animation:gStarIn .45s cubic-bezier(.34,1.56,.64,1) backwards;}
+.g-card-stars .g-star.on:nth-child(2){animation-delay:.15s;}
+.g-card-stars .g-star.on:nth-child(3){animation-delay:.3s;}
+@keyframes gStarIn{from{transform:scale(0) rotate(-40deg);opacity:0}to{transform:none;opacity:1}}
+
+.g-xp-detail{
+  text-align:left;background:var(--gold-pale);
+  border:1px solid var(--border);border-radius:14px;
+  padding:12px 14px;margin:0 0 16px;
+}
+.g-xp-row{
+  display:flex;justify-content:space-between;gap:10px;
+  font-size:12px;color:var(--muted);padding:3px 0;
+}
+.g-xp-row b{color:var(--teal);}
+.g-xp-total{
+  display:flex;justify-content:space-between;
+  border-top:1px dashed var(--border);margin-top:6px;padding-top:8px;
+  font-size:13px;font-weight:700;
+}
+.g-xp-total b{color:var(--gold);font-size:16px;}
+
+.g-btn-primary{
+  display:block;width:100%;
+  border:none;border-radius:14px;cursor:pointer;
+  background:var(--gold);color:#fff;
+  font-family:'Tajawal',sans-serif;font-size:13px;font-weight:800;
+  letter-spacing:.08em;padding:14px;min-height:48px;
+  box-shadow:0 4px 0 rgba(0,0,0,.2);
+  transition:transform .12s,box-shadow .12s,filter .15s;
+}
+.g-btn-primary:hover{filter:brightness(1.06);}
+.g-btn-primary:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.2);}
+.g-btn-ghost{
+  display:block;width:100%;margin-top:8px;
+  border:none;background:transparent;cursor:pointer;
+  color:var(--muted);font-family:'Tajawal',sans-serif;
+  font-size:12px;font-weight:700;padding:10px;min-height:40px;
+}
+.g-btn-ghost:hover{color:var(--ink);}
+.g-fail-hint{font-size:12px;color:var(--terracotta);margin:0 0 10px;}
+
+/* révision éclair */
+.g-flash{
+  text-align:left;border:1px solid var(--border);border-radius:14px;
+  background:var(--gold-pale);padding:16px;margin:12px 0 16px;
+  min-height:120px;
+  animation:gCardIn .28s ease;
+}
+.g-flash b{
+  display:block;font-family:'Playfair Display',serif;
+  font-size:16px;margin-bottom:6px;color:var(--ink);
+}
+.g-flash p{font-size:13px;line-height:1.7;color:rgba(26,16,8,.78);margin:0;}
+.g-flash-num{
+  font-size:10px;font-weight:700;letter-spacing:.1em;
+  color:var(--gold);margin-bottom:6px;
+}
+
+/* level-up */
+.g-levelup-badge{font-size:52px;animation:gBadgeIn .5s cubic-bezier(.34,1.56,.64,1);}
+@keyframes gBadgeIn{from{transform:scale(0) rotate(-30deg)}to{transform:none}}
+.g-levelup-name{
+  font-family:'Playfair Display',serif;font-style:italic;
+  font-size:18px;color:var(--gold);margin:0 0 16px;
+}
+
+/* toast */
+.g-toast{
+  position:fixed;left:50%;bottom:26px;transform:translateX(-50%);
+  z-index:10001;
+  background:var(--ink);color:var(--gold-light);
+  font-family:'Tajawal',sans-serif;font-size:13px;font-weight:700;
+  padding:12px 20px;border-radius:99px;
+  box-shadow:0 10px 30px rgba(0,0,0,.3);
+  animation:gToastIn .3s cubic-bezier(.34,1.4,.64,1);
+  max-width:92vw;text-align:center;
+}
+.g-toast.out{opacity:0;transition:opacity .45s ease;}
+@keyframes gToastIn{from{transform:translate(-50%,18px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+
+/* ------------------------------------------------------------ responsive */
+@media(max-width:768px){
+  #gameHud{padding:8px 1rem;gap:8px;}
+  .g-level{min-width:110px;}
+  .g-level-name{display:none;}
+  .g-hearts .g-heart{font-size:12px;}
+}
+@media(max-width:430px){
+  .g-xp-count{display:none;}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .g-node.current,.g-node-pulse,.g-streak.risk .g-flame,
+  .g-float,.g-card,.g-overlay,.g-toast,
+  .g-card-stars .g-star.on,.g-levelup-badge,.g-combo{animation:none!important;}
+  .g-float{opacity:1;}
+}

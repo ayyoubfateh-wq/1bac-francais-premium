@@ -107,6 +107,7 @@ E. JS LOGIQUE : navigation, quiz, chat, interactions
 
 <!-- Version pédagogique finale : formulation institutionnelle prudente + critères de relecture renforcés -->
 <link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/gamification.css">
 </head>
 <body>
 <!-- Acces premium: configurer window.PF1BAC_ACCESS_API si votre endpoint n est pas /api/validate-access. Exemple fourni dans server-example/server.js. -->
@@ -217,8 +218,11 @@ E. JS LOGIQUE : navigation, quiz, chat, interactions
     </div>
   </div>
 
-  <div class="sidebar-menu">
+  <button class="nav-toggle" type="button" aria-label="Ouvrir le menu de navigation" aria-expanded="false" aria-controls="sidebarMenu" onclick="toggleMobileNav(this)">☰</button>
+
+  <div class="sidebar-menu" id="sidebarMenu">
     <button class="active" onclick="showScreen('home',this)">🏠 <span>Accueil</span></button>
+    <button onclick="showScreen('parcours',this)">🗺️ <span>Parcours</span></button>
     <button onclick="showScreen('auteurs',this)">✍️ <span>Auteurs</span></button>
     <button onclick="showScreen('resumes',this)">📖 <span>Résumés</span></button>
     <button onclick="showScreen('fiches',this)">📋 <span>Fiches</span></button>
@@ -233,11 +237,39 @@ E. JS LOGIQUE : navigation, quiz, chat, interactions
   </div>
 </nav>
 
+<!-- HUD GAMIFICATION : streak, niveau/XP, objectif du jour, cœurs -->
+<div id="gameHud" role="status" aria-label="Progression de l'élève"></div>
+
+<!-- SECTION : PARCOURS GAMIFIÉ -->
+<div id="parcours" class="screen pad">
+  <div class="eyebrow">Apprends en jouant — 5 questions par leçon</div>
+  <div class="heading">Ton parcours vers le régional</div>
+
+  <div id="gContinueCard"></div>
+
+  <div class="g-book-tabs">
+    <button class="g-book-tab active" data-book="boite" onclick="gShowParcoursBook('boite',this)">📦 La Boîte à Merveilles <span class="g-tab-prog">0/7</span></button>
+    <button class="g-book-tab" data-book="antigone" onclick="gShowParcoursBook('antigone',this)">🏛️ Antigone <span class="g-tab-prog">0/7</span></button>
+    <button class="g-book-tab" data-book="condamne" onclick="gShowParcoursBook('condamne',this)">⛓️ Le Dernier Jour <span class="g-tab-prog">0/7</span></button>
+  </div>
+
+  <div id="gPath"></div>
+</div>
+
 
 <!-- SECTION : ACCUEIL -->
 <div id="home" class="screen active pad">
   <div class="eyebrow">Programme 1BAC Maroc</div>
   <div class="heading">Les trois œuvres au programme</div>
+
+  <div id="gContinueCardHome" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border:1px solid var(--border);border-radius:16px;background:var(--gold-pale);padding:14px 18px;margin-bottom:1.4rem;">
+    <div class="g-cont-txt">
+      <span class="g-cont-eyebrow">Révision gamifiée</span>
+      <b>🗺️ Ton parcours t'attend</b>
+      <span class="g-cont-book">Leçons de 5 questions · gagne des XP · garde ta série 🔥</span>
+    </div>
+    <button class="g-cont-btn" style="background:var(--teal);" onclick="showScreen('parcours', gGetParcoursBtn())">JOUER →</button>
+  </div>
   
   <div class="home-intro-pro">
     <h2>Plateforme complète de préparation au régional de Français</h2>
@@ -2793,5 +2825,6 @@ E. JS LOGIQUE : navigation, quiz, chat, interactions
 
 
 <script src="assets/js/app.js" defer></script>
+<script src="assets/js/gamification.js" defer></script>
 </body>
 </html>
