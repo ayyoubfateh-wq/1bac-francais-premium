@@ -1,2 +1,6 @@
 .claude/
 generated-codes/
+
+# Local Netlify folder
+.netlify
+.env

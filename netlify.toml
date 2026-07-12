@@ -16,3 +16,8 @@
   from = "/api/validate-access"
   to = "/.netlify/functions/validate-access"
   status = 200
+
+[[redirects]]
+  from = "/api/leaderboard"
+  to = "/.netlify/functions/leaderboard"
+  status = 200

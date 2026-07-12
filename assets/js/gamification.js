@@ -22,6 +22,8 @@ var XP_NODE_DONE = 20;
 var XP_PERFECT = 15;
 var XP_EXAM_DONE = 40;
 var XP_REVIEW_DONE = 15;      // bonus "mémoire consolidée"
+var XP_TIMED = 10;            // bonus examen réussi sous chrono
+var EXAM_SECONDS = 12 * 60;   // 10 questions × ~72 s, comme au régional
 var XP_GRADUATED = 5;         // par question définitivement maîtrisée
 var SRS_INTERVALS = [1, 3, 7]; // jours avant re-présentation (boîtes de Leitner)
 var REVIEW_MAX = 10;          // questions max par session de révision
@@ -99,11 +101,14 @@ function load(){
     nodes: {},   // 'boite-0' -> { stars: 1..3, best: score }
     srs: {},     // 'boite:12' -> { box: 0..2, due: 'YYYY-MM-DD' }
     badges: {},  // 'serie-3' -> 'YYYY-MM-DD' (date d'obtention)
+    catStats: {}, // 'Analyse' -> { ok: 12, total: 15 }
     graduatedTotal: 0,
     reviewsDone: 0,
     perfectLessons: 0,
     sound: true,
-    trialUsed: false
+    trialUsed: false,
+    pseudo: '',
+    week: { id: '', xp: 0 }
   };
   try {
     var raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
@@ -173,12 +178,22 @@ var SFX = {
 };
 
 /* -------------------------------------------------------------------- XP */
+function isoWeekId(){
+  var d = new Date(Date.UTC(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()));
+  var day = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - day);
+  var y0 = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return d.getUTCFullYear() + '-W' + String(Math.ceil((((d - y0) / 86400000) + 1) / 7)).padStart(2, '0');
+}
+
 function grantXP(amount, opts){
   opts = opts || {};
   rolloverDaily();
   var before = levelIndex(G.xp);
   G.xp += amount;
   G.daily.xp += amount;
+  if (G.week.id !== isoWeekId()) G.week = { id: isoWeekId(), xp: 0 };
+  G.week.xp += amount;
   touchStreak();
   var after = levelIndex(G.xp);
   save();
@@ -444,6 +459,34 @@ window.gStartLesson = function(book, index){
     return;
   }
   if (nodeState(book, index) === 'locked') return;
+
+  // examen blanc : proposer les conditions réelles (chrono)
+  if (NODE_DEFS[index].exam) {
+    var m = BOOK_META[book];
+    var overlay = document.createElement('div');
+    overlay.className = 'g-overlay';
+    overlay.id = 'gExamChoice';
+    overlay.innerHTML =
+      '<div class="g-card">' +
+        '<div class="g-levelup-badge">🏆</div>' +
+        '<h3>Examen blanc</h3>' +
+        '<p class="g-card-sub">' + m.icon + ' ' + m.name + ' — 10 questions</p>' +
+        '<button class="g-btn-primary" style="background:' + m.color + ';" onclick="gLaunchLesson(\'' + book + '\',' + index + ',true)">⏱️ AVEC CHRONO (12 min) — comme au régional</button>' +
+        '<button class="g-btn-primary" style="background:var(--gold);margin-top:8px;" onclick="gLaunchLesson(\'' + book + '\',' + index + ',false)">SANS CHRONO — à mon rythme</button>' +
+        '<button class="g-btn-ghost" onclick="document.getElementById(\'gExamChoice\').remove()">Annuler</button>' +
+      '</div>';
+    document.body.appendChild(overlay);
+    return;
+  }
+  window.gLaunchLesson(book, index, false);
+};
+
+var examTimer = null;
+function stopExamTimer(){ if (examTimer) { clearInterval(examTimer); examTimer = null; } }
+
+window.gLaunchLesson = function(book, index, timed){
+  var choice = document.getElementById('gExamChoice');
+  if (choice) choice.remove();
   regenHearts();
   if (G.hearts <= 0) { showRefillModal(book); return; }
 
@@ -460,7 +503,7 @@ window.gStartLesson = function(book, index){
     qsel = pool.slice(def.slice[0], def.slice[1]);
   }
 
-  session = { book: book, index: index, exam: !!def.exam, combo: 0, comboMax: 0, xpBase: 0, xpCombo: 0, xpCrit: 0 };
+  session = { book: book, index: index, exam: !!def.exam, timed: !!timed, timerText: '', combo: 0, comboMax: 0, xpBase: 0, xpCombo: 0, xpCrit: 0 };
 
   // réutilise le moteur de quiz existant
   currentBookName = BOOK_META[book].name;
@@ -474,6 +517,27 @@ window.gStartLesson = function(book, index){
   document.getElementById('quiz-game-screen').style.display = 'block';
   ensureLessonBar();
   renderQ();
+
+  if (timed) {
+    var deadline = Date.now() + EXAM_SECONDS * 1000;
+    stopExamTimer();
+    examTimer = setInterval(function(){
+      if (!session) { stopExamTimer(); return; }
+      var left = Math.max(0, Math.round((deadline - Date.now()) / 1000));
+      var mm = Math.floor(left / 60), ss = left % 60;
+      session.timerText = mm + ':' + String(ss).padStart(2, '0');
+      var el = document.getElementById('gTimer');
+      if (el) {
+        el.textContent = '⏱️ ' + session.timerText;
+        el.classList.toggle('urgent', left <= 60);
+      }
+      if (left <= 0) {
+        stopExamTimer();
+        toast('⏱️ Temps écoulé — comme au vrai examen !');
+        window.showResults(); // questions restantes = non répondues
+      }
+    }, 1000);
+  }
   updateLessonBar();
 };
 
@@ -521,11 +585,13 @@ function updateLessonBar(){
   bar.innerHTML =
     '<button class="g-lesson-quit" onclick="gQuitLesson()" aria-label="Quitter la leçon">✕</button>' +
     '<span class="g-lesson-title">' + title + '</span>' +
+    (session.timed ? '<span class="g-timer" id="gTimer">⏱️ ' + (session.timerText || '12:00') + '</span>' : '') +
     (session.combo >= 3 ? '<span class="g-combo">🔥 x' + session.combo + '</span>' : '') +
     (session.review ? '' : '<span class="g-lesson-hearts">' + heartsMarkup(G.hearts) + '</span>');
 }
 window.gQuitLesson = function(){
   session = null;
+  stopExamTimer();
   ensureLessonBar();
   window.showScreen('parcours', window.gGetParcoursBtn());
   if (typeof window.resetQuiz === 'function') window.resetQuiz();
@@ -551,6 +617,13 @@ window.answerQ = function(idx, btn){
   var q = qs[cur];
   var ok = idx === q.ans;
   origAnswerQ.apply(this, arguments);
+
+  // bilan : statistiques par catégorie de question (tous modes confondus)
+  var cat = q.cat || 'Autre';
+  var cs = G.catStats[cat] = G.catStats[cat] || { ok: 0, total: 0 };
+  cs.total++;
+  if (ok) cs.ok++;
+  save();
 
   // répétition espacée : toute erreur est planifiée à J+1, toute réussite
   // d'une question suivie avance sa boîte (leçon, révision ou quiz libre)
@@ -609,6 +682,7 @@ function loseHeart(){
 
 function abortLesson(book){
   session = null;
+  stopExamTimer();
   ensureLessonBar();
   showRefillModal(book, true);
 }
@@ -634,6 +708,7 @@ function starsForScore(score, total, exam){
 
 function finishLesson(){
   var s = session; session = null;
+  stopExamTimer();
   ensureLessonBar();
   var total = qs.length;
   var sc = score;
@@ -645,6 +720,7 @@ function finishLesson(){
   var bonus = 0;
   if (passed) {
     bonus += s.exam ? XP_EXAM_DONE : XP_NODE_DONE;
+    if (s.timed) bonus += XP_TIMED;
     if (sc === total) { bonus += XP_PERFECT; G.perfectLessons++; }
     var id = nodeId(s.book, s.index);
     var prev = G.nodes[id] || { stars: 0, best: 0 };
@@ -673,6 +749,7 @@ function finishLesson(){
         (s.xpCombo ? row('Combo 🔥 (max x' + s.comboMax + ')', '+' + s.xpCombo) : '') +
         (s.xpCrit ? row('Critiques ⚡', '+' + s.xpCrit) : '') +
         (passed ? row(s.exam ? 'Examen réussi 🏆' : 'Leçon terminée', '+' + (s.exam ? XP_EXAM_DONE : XP_NODE_DONE)) : '') +
+        (passed && s.timed ? row('Sous pression ⏱️', '+' + XP_TIMED) : '') +
         (passed && sc === total ? row('Sans faute ✨', '+' + XP_PERFECT) : '') +
         '<div class="g-xp-total"><span>Total</span><b>+' + totalXP + ' XP</b></div>' +
       '</div>' +
@@ -746,6 +823,8 @@ window.gCloseResult = function(toParcours){
   if (typeof window.resetQuiz === 'function') window.resetQuiz();
   if (toParcours) window.showScreen('parcours', window.gGetParcoursBtn());
   renderPath();
+  renderBilan();
+  syncLeaderboard();
 };
 window.gRetryLesson = function(book, index){
   var o = document.getElementById('gLessonResult');
@@ -796,6 +875,156 @@ window.gFlashNext = function(){
 window.gCloseRefill = function(){
   var o = document.getElementById('gRefill');
   if (o) o.remove();
+};
+
+/* ---------------------------------------------------------------- bilan
+   Visibilité de la progression = motivation ; diagnostic par catégorie
+   = l'élève sait exactement QUOI réviser (métacognition guidée). */
+var CAT_META = {
+  'Contextualisation':  { label: 'Contexte & auteur',   screen: 'auteurs',  advice: 'Relis les fiches Auteurs : vies, courants, dates clés.' },
+  'Analyse':            { label: 'Analyse de l’œuvre', screen: 'resumes',  advice: 'Reprends les résumés et les personnages, chapitre par chapitre.' },
+  'Fait de langue':     { label: 'Langue & style',      screen: 'methode',  advice: 'Revois les figures de style et les procédés dans Méthode.' },
+  'Réaction / opinion': { label: 'Réaction & opinion',  screen: 'modeles',  advice: 'Inspire-toi des réponses modèles pour structurer ton avis.' }
+};
+
+function readiness(){
+  var maxStars = BOOKS.length * NODE_DEFS.length * 3, stars = 0;
+  for (var k in G.nodes) stars += (G.nodes[k].stars || 0);
+  var starsPct = stars / maxStars;
+
+  var ok = 0, total = 0;
+  for (var c in G.catStats) { ok += G.catStats[c].ok; total += G.catStats[c].total; }
+  var catPct = total > 0 ? ok / total : 0;
+
+  var tracked = Object.keys(G.srs).length;
+  var srsPct = tracked === 0 ? (total > 0 ? 1 : 0) : Math.max(0, 1 - srsDueIds().length / tracked);
+
+  return Math.round(100 * (0.5 * starsPct + 0.3 * catPct + 0.2 * srsPct));
+}
+
+function renderBilan(){
+  var wrap = document.getElementById('gBilan');
+  if (!wrap) return;
+  var pct = readiness();
+  var label = pct >= 95 ? 'Prêt pour le régional !' : pct >= 80 ? 'Presque prêt' : pct >= 60 ? 'Bien parti' : pct >= 30 ? 'En progression' : 'Début du chemin';
+  var color = pct >= 80 ? 'var(--teal)' : pct >= 45 ? 'var(--gold)' : 'var(--terracotta)';
+
+  var bars = '', weakest = null;
+  Object.keys(CAT_META).forEach(function(cat){
+    var s = G.catStats[cat];
+    var meta = CAT_META[cat];
+    var rate = s && s.total > 0 ? Math.round(100 * s.ok / s.total) : null;
+    if (s && s.total >= 3 && (weakest === null || rate < weakest.rate)) weakest = { cat: cat, rate: rate };
+    bars += '<div class="g-cat-row">' +
+      '<span class="g-cat-label">' + meta.label + '</span>' +
+      '<div class="g-cat-bar"><div class="g-cat-fill" style="width:' + (rate === null ? 0 : rate) + '%;background:' + (rate === null ? 'var(--sand)' : rate >= 70 ? 'var(--teal)' : rate >= 45 ? 'var(--gold)' : 'var(--terracotta)') + ';"></div></div>' +
+      '<span class="g-cat-rate">' + (rate === null ? '—' : rate + '%') + '</span>' +
+      '</div>';
+  });
+
+  var advice = '';
+  if (weakest && weakest.rate < 70) {
+    var m = CAT_META[weakest.cat];
+    advice = '<div class="g-bilan-advice">' +
+      '<b>🎯 Ta priorité : ' + m.label + ' (' + weakest.rate + '% de réussite)</b>' +
+      '<span>' + m.advice + '</span>' +
+      '<button class="g-cont-btn" style="background:var(--ink);" onclick="showScreen(\'' + m.screen + '\', gGetParcoursBtn())">RÉVISER ÇA →</button>' +
+      '</div>';
+  }
+
+  var ring = 2 * Math.PI * 52;
+  wrap.innerHTML =
+    '<div class="g-badges-head"><span class="eyebrow">Ton diagnostic</span>' +
+    '<h3>📊 Bilan de préparation</h3></div>' +
+    '<div class="g-bilan-grid">' +
+      '<div class="g-bilan-gauge">' +
+        '<svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" class="g-gauge-bg"/>' +
+        '<circle cx="60" cy="60" r="52" class="g-gauge-fg" style="stroke:' + color + ';" stroke-dasharray="' + (pct/100*ring).toFixed(1) + ' ' + ring.toFixed(1) + '"/></svg>' +
+        '<div class="g-gauge-txt"><b style="color:' + color + ';">' + pct + '%</b><span>' + label + '</span></div>' +
+      '</div>' +
+      '<div class="g-bilan-cats">' + bars + '</div>' +
+    '</div>' + advice;
+}
+
+/* ------------------------------------------------------------ classement
+   Comparaison sociale entre pairs = levier d'engagement majeur chez les
+   ados. Pseudo librement choisi, XP de la semaine, zéro donnée perso. */
+function syncLeaderboard(){
+  if (!isPremium() || !G.pseudo || !G.week.xp) return;
+  try {
+    fetch('/api/leaderboard', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ deviceId: window.pf1bacDeviceId ? window.pf1bacDeviceId() : '', pseudo: G.pseudo, xp: G.week.xp })
+    }).then(function(){ renderLeaderboard(); }).catch(function(){});
+  } catch(e){}
+}
+
+function renderLeaderboard(){
+  var wrap = document.getElementById('gLeague');
+  if (!wrap) return;
+  var head = '<div class="g-badges-head"><span class="eyebrow">Cette semaine</span>' +
+    '<h3>🏆 Ligue des élèves</h3></div>';
+
+  if (!isPremium()) {
+    wrap.innerHTML = head + '<p class="g-league-empty">🔒 La ligue est réservée aux membres — débloque le pack pour te mesurer aux autres élèves du Maroc.</p>';
+    return;
+  }
+
+  if (!G.pseudo) {
+    wrap.innerHTML = head +
+      '<div class="g-league-join">' +
+        '<p>Choisis un pseudo pour entrer dans la ligue et te mesurer aux autres élèves du Maroc :</p>' +
+        '<div class="g-league-form">' +
+          '<input id="gPseudoInput" type="text" maxlength="15" placeholder="Ton pseudo (ex: Fatima_Fès)" aria-label="Choisis un pseudo">' +
+          '<button class="g-cont-btn" style="background:var(--teal);" onclick="gJoinLeague()">REJOINDRE →</button>' +
+        '</div>' +
+      '</div>';
+    return;
+  }
+
+  wrap.innerHTML = head + '<div class="g-league-list" id="gLeagueList"><p class="g-league-empty">Chargement du classement…</p></div>';
+  try {
+    fetch('/api/leaderboard').then(function(r){ return r.json(); }).then(function(data){
+      var list = document.getElementById('gLeagueList');
+      if (!list) return;
+      if (!data.ok || !data.top || !data.top.length) {
+        list.innerHTML = '<p class="g-league-empty">Sois le premier de la semaine — chaque XP compte ! 🚀</p>';
+        return;
+      }
+      var myId = window.pf1bacDeviceId ? window.pf1bacDeviceId() : '';
+      var medals = ['🥇', '🥈', '🥉'];
+      var html = '';
+      data.top.forEach(function(row, i){
+        var me = row.id === myId;
+        html += '<div class="g-league-row' + (me ? ' me' : '') + '">' +
+          '<span class="g-league-rank">' + (medals[i] || (i + 1)) + '</span>' +
+          '<span class="g-league-name">' + row.pseudo + (me ? ' (toi)' : '') + '</span>' +
+          '<b class="g-league-xp">' + row.xp + ' XP</b>' +
+          '</div>';
+      });
+      var inTop = data.top.some(function(r){ return r.id === myId; });
+      if (!inTop && G.week.xp > 0) {
+        html += '<div class="g-league-row me"><span class="g-league-rank">…</span>' +
+          '<span class="g-league-name">' + G.pseudo + ' (toi)</span><b class="g-league-xp">' + G.week.xp + ' XP</b></div>';
+      }
+      list.innerHTML = html;
+    }).catch(function(){
+      var list = document.getElementById('gLeagueList');
+      if (list) list.innerHTML = '<p class="g-league-empty">Classement indisponible pour le moment.</p>';
+    });
+  } catch(e){}
+}
+
+window.gJoinLeague = function(){
+  var inp = document.getElementById('gPseudoInput');
+  var pseudo = (inp && inp.value || '').replace(/[<>"'&\\/]/g, '').trim().slice(0, 15);
+  if (!pseudo) { if (inp) inp.focus(); return; }
+  G.pseudo = pseudo;
+  save();
+  toast('🏆 Bienvenue dans la ligue, ' + pseudo + ' !');
+  syncLeaderboard();
+  renderLeaderboard();
 };
 
 /* ---------------------------------------------------------------- badges
@@ -1030,7 +1259,10 @@ document.addEventListener('DOMContentLoaded', function(){
   rolloverDaily();
   renderHUD();
   renderPath();
+  renderBilan();
   renderBadges();
+  renderLeaderboard();
+  syncLeaderboard();
   updateTrialBanner(); // visiteur de retour non premium : montre ses acquis
   setInterval(regenHearts, 60000);
 

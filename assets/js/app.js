@@ -1640,17 +1640,29 @@ const OPTIMIZED_IMAGE_ASSETS = {
   var SESSION_KEY = 'pf1bac_server_access_until';
   var _attempts = 0;
   var _lockUntil = 0;
+  /* Identifiant d'appareil stable (anti-partage : 1 code = 2 appareils max) */
+  function deviceId(){
+    try {
+      var id = localStorage.getItem('pf1bac_device_id');
+      if (!id) {
+        id = 'd-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 12);
+        localStorage.setItem('pf1bac_device_id', id);
+      }
+      return id;
+    } catch(e){ return 'd-anonyme'; }
+  }
+  window.pf1bacDeviceId = deviceId;
   function setError(message){ var error=document.getElementById('premiumAccessError'); if(error){ error.textContent=message; error.style.display='block'; } }
   function clearError(){ var error=document.getElementById('premiumAccessError'); if(error){ error.textContent=''; error.style.display='none'; } }
   function doUnlock(expiresIn){ var lock=document.getElementById('premiumLockScreen'); if(lock){ lock.style.display='none'; } document.documentElement.classList.add('premium-unlocked'); try{ sessionStorage.setItem(SESSION_KEY, String(Date.now()+Number(expiresIn||28800)*1000)); }catch(e){} }
   function restoreSession(){ try{ var until=Number(sessionStorage.getItem(SESSION_KEY)||0); if(until>Date.now()){ doUnlock(Math.ceil((until-Date.now())/1000)); return true; } sessionStorage.removeItem(SESSION_KEY); }catch(e){} return false; }
-  async function validateOnServer(code){ var res=await fetch(API_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify({code:code})}); if(!res.ok){ throw new Error('HTTP '+res.status); } return await res.json(); }
+  async function validateOnServer(code){ var res=await fetch(API_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify({code:code,deviceId:deviceId()})}); if(!res.ok){ throw new Error('HTTP '+res.status); } return await res.json(); }
   window.premiumCheckAccess = async function(){
     var now=Date.now(), input=document.getElementById('premiumAccessCode'), btn=document.querySelector('[onclick="premiumCheckAccess()"]'), code=input?input.value.trim():'';
     if(!code){ if(input) input.focus(); return; }
     if(_lockUntil>now){ setError('Acces bloque. Reessayez dans '+Math.ceil((_lockUntil-now)/1000)+'s.'); return; }
     clearError(); if(btn){ btn.textContent='Verification...'; btn.disabled=true; }
-    try{ var data=await validateOnServer(code); if(data&&data.ok){ _attempts=0; doUnlock(data.expiresIn||28800); } else { _attempts++; if(_attempts>=3){ _lockUntil=Date.now()+120000; } setError(_attempts>=3?'Trop de tentatives. Acces bloque 2 minutes.':'Code incorrect. '+(3-_attempts)+' tentative(s) restante(s).'); if(input){ input.value=''; input.focus(); } } }
+    try{ var data=await validateOnServer(code); if(data&&data.ok){ _attempts=0; doUnlock(data.expiresIn||28800); } else if(data&&data.message==='device_limit'){ setError('Ce code est déjà utilisé sur 2 appareils. Contactez le support WhatsApp pour le débloquer.'); } else { _attempts++; if(_attempts>=3){ _lockUntil=Date.now()+120000; } setError(_attempts>=3?'Trop de tentatives. Acces bloque 2 minutes.':'Code incorrect. '+(3-_attempts)+' tentative(s) restante(s).'); if(input){ input.value=''; input.focus(); } } }
     catch(e){ setError(''); }
     finally{ if(btn){ btn.textContent='Acceder maintenant'; btn.disabled=false; } }
   };
