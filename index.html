@@ -231,27 +231,36 @@ E. JS LOGIQUE : navigation, quiz, chat, interactions
   <button class="nav-toggle" type="button" aria-label="Ouvrir le menu de navigation" aria-expanded="false" aria-controls="sidebarMenu" onclick="toggleMobileNav(this)">☰</button>
 
   <div class="sidebar-menu" id="sidebarMenu">
-    <button class="active" onclick="showScreen('home',this)">🏠 <span>Accueil</span></button>
-    <button onclick="showScreen('parcours',this)">🗺️ <span>Parcours</span></button>
+    <button class="active" onclick="showScreen('parcours',this)">🗺️ <span>Parcours</span></button>
+    <button onclick="showScreen('espace',this)">📈 <span>Mon espace</span></button>
+
+    <div class="sidebar-group">Comprendre</div>
     <button onclick="showScreen('auteurs',this)">✍️ <span>Auteurs</span></button>
     <button onclick="showScreen('resumes',this)">📖 <span>Résumés</span></button>
     <button onclick="showScreen('fiches',this)">📋 <span>Fiches</span></button>
-    <button onclick="showScreen('methode',this)">✏️ <span>Méthode régional</span></button>
     <button onclick="showScreen('vocabulaire',this)">📘 <span>Vocabulaire</span></button>
-    <button onclick="showScreen('bareme',this)">⚖️ <span>Barème de référence</span></button>
-    <button onclick="showScreen('quiz',this)">🎯 <span>Quiz</span></button>
-    <button onclick="showScreen('regionaux',this)">📝 <span>Sujets régionaux</span></button>
+
+    <div class="sidebar-group">Méthode de l'examen</div>
+    <button onclick="showScreen('methode',this)">✏️ <span>Méthode régional</span></button>
+    <button onclick="showScreen('bareme',this)">⚖️ <span>Barème</span></button>
     <button onclick="showScreen('modeles',this)">✅ <span>Réponses modèles</span></button>
     <button onclick="showScreen('cadre',this)">📑 <span>Cadre Réf.</span></button>
+
+    <div class="sidebar-group">S'entraîner</div>
+    <button onclick="showScreen('quiz',this)">🎯 <span>Quiz libre</span></button>
+    <button onclick="showScreen('regionaux',this)">📝 <span>Sujets régionaux</span></button>
+
+    <div class="sidebar-group">Aide</div>
     <button onclick="showScreen('chat',this)">🤖 <span>Assistant pédagogique</span></button>
+    <button onclick="showScreen('home',this)">🏠 <span>Présentation</span></button>
   </div>
 </nav>
 
 <!-- HUD GAMIFICATION : streak, niveau/XP, objectif du jour, cœurs -->
 <div id="gameHud" role="status" aria-label="Progression de l'élève"></div>
 
-<!-- SECTION : PARCOURS GAMIFIÉ -->
-<div id="parcours" class="screen pad">
+<!-- SECTION : PARCOURS GAMIFIÉ (écran d'accueil des membres) -->
+<div id="parcours" class="screen active pad">
   <div class="eyebrow">Apprends en jouant — 5 questions par leçon</div>
   <div class="heading">Ton parcours vers le régional</div>
 
@@ -265,16 +274,23 @@ E. JS LOGIQUE : navigation, quiz, chat, interactions
   </div>
 
   <div id="gPath"></div>
+</div>
 
-  <div id="gInstallCard" style="display:none;"></div>
+
+<!-- SECTION : MON ESPACE (bilan, ligue, trophées) -->
+<div id="espace" class="screen pad">
+  <div class="eyebrow">Progression personnelle</div>
+  <div class="heading">Mon espace</div>
+
   <div id="gBilan"></div>
   <div id="gLeague"></div>
   <div id="gBadges"></div>
+  <div id="gInstallCard" style="display:none;"></div>
 </div>
 
 
 <!-- SECTION : ACCUEIL -->
-<div id="home" class="screen active pad">
+<div id="home" class="screen pad">
   <div class="eyebrow">Programme 1BAC Maroc</div>
   <div class="heading">Les trois œuvres au programme</div>
 

@@ -50,16 +50,35 @@ var BOOK_META = {
   condamne: { name: 'Le Dernier Jour d’un Condamné', color: '#b5432a', icon: '⛓️' }
 };
 
-/* 6 leçons de 5 questions (tranches ordonnées de la banque de 30) + examen blanc */
+/* 6 leçons thématiques + examen blanc. Chaque leçon PIOCHE 5 questions dans
+   son pool (catégorie ou mélange) : deux passages ne montrent jamais
+   exactement la même série — la connaissance est testée, pas la mémoire
+   de la position des réponses. */
 var NODE_DEFS = [
-  { slice: [0, 5],   name: 'Contexte & auteur',    icon: '✍️' },
-  { slice: [5, 10],  name: 'Contexte approfondi',  icon: '📚' },
-  { slice: [10, 15], name: 'Analyse de l’œuvre', icon: '🔍' },
-  { slice: [15, 20], name: 'Langue & style',       icon: '🖋️' },
-  { slice: [20, 25], name: 'Figures & procédés',   icon: '🎭' },
-  { slice: [25, 30], name: 'Réaction & opinion',   icon: '💬' },
-  { exam: true,      name: 'Examen blanc',         icon: '🏆' }
+  { cat: 'Contextualisation',  name: 'Contexte & auteur',    icon: '✍️' },
+  { cat: 'Analyse',            name: 'Analyse de l’œuvre', icon: '🔍' },
+  { cat: 'Fait de langue',     name: 'Langue & style',       icon: '🖋️' },
+  { cat: 'Réaction / opinion', name: 'Réaction & opinion',   icon: '💬' },
+  { mix: true,                 name: 'Révision générale',    icon: '📚' },
+  { mix: true,                 name: 'Consolidation',        icon: '🧩' },
+  { exam: true,                name: 'Examen blanc',         icon: '🏆' }
 ];
+
+/* Copie d'une question avec réponses mélangées. __src pointe vers l'objet
+   d'origine pour que la répétition espacée (qid par identité) continue de
+   fonctionner. */
+function shuffleQuestion(q){
+  var order = q.opts.map(function(_, i){ return i; }).sort(function(){ return Math.random() - .5; });
+  return {
+    __src: q.__src || q,
+    cat: q.cat, q: q.q, exp: q.exp,
+    opts: order.map(function(i){ return q.opts[i]; }),
+    ans: order.indexOf(q.ans)
+  };
+}
+function samplePool(pool, n){
+  return pool.slice().sort(function(){ return Math.random() - .5; }).slice(0, n).map(shuffleQuestion);
+}
 
 /* Révision éclair : 3 rappels par œuvre — regagner un cœur = réviser vraiment */
 var FLASHCARDS = {
@@ -220,8 +239,9 @@ function dateInDays(n){
   return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
 }
 function qid(q){
+  var src = q.__src || q; // les copies mélangées gardent la référence d'origine
   for (var b = 0; b < BOOKS.length; b++) {
-    var i = QUESTIONS[BOOKS[b]].indexOf(q);
+    var i = QUESTIONS[BOOKS[b]].indexOf(src);
     if (i > -1) return BOOKS[b] + ':' + i;
   }
   return null;
@@ -498,9 +518,12 @@ window.gLaunchLesson = function(book, index, timed){
 
   var qsel;
   if (def.exam) {
-    qsel = pool.slice().sort(function(){ return Math.random() - .5; }).slice(0, 10);
+    qsel = samplePool(pool, 10);
+  } else if (def.cat) {
+    var themed = pool.filter(function(q){ return q.cat === def.cat; });
+    qsel = samplePool(themed.length >= 5 ? themed : pool, 5);
   } else {
-    qsel = pool.slice(def.slice[0], def.slice[1]);
+    qsel = samplePool(pool, 5);
   }
 
   session = { book: book, index: index, exam: !!def.exam, timed: !!timed, timerText: '', combo: 0, comboMax: 0, xpBase: 0, xpCombo: 0, xpCrit: 0 };
@@ -545,9 +568,7 @@ window.gStartReview = function(){
   if (!isPremium()) { window.gShowPaywall(); return; }
   var due = srsDueIds();
   if (!due.length) return;
-  var qsel = due.map(qFromId).filter(Boolean)
-    .sort(function(){ return Math.random() - .5; })
-    .slice(0, REVIEW_MAX);
+  var qsel = samplePool(due.map(qFromId).filter(Boolean), REVIEW_MAX);
   if (!qsel.length) return;
 
   session = { review: true, graduated: 0, combo: 0, comboMax: 0, xpBase: 0, xpCombo: 0, xpCrit: 0 };
@@ -1140,8 +1161,9 @@ function updateTrialBanner(){
 
 /* barrières : au-delà de la leçon offerte, tout mène au paywall */
 var origShowScreenG = window.showScreen;
+var TRIAL_SCREENS = { parcours: 1, quiz: 1, espace: 1 }; // l'essai voit sa progression (dotation)
 window.showScreen = function(id, btn){
-  if (!isPremium() && id !== 'parcours' && id !== 'quiz') {
+  if (!isPremium() && !TRIAL_SCREENS[id]) {
     window.gShowPaywall();
     return;
   }
@@ -1150,7 +1172,12 @@ window.showScreen = function(id, btn){
 var origStartQuiz = window.startQuiz;
 window.startQuiz = function(){
   if (!isPremium()) { window.gShowPaywall(); return; }
-  return origStartQuiz.apply(this, arguments);
+  var r = origStartQuiz.apply(this, arguments);
+  // quiz libre : réponses mélangées aussi (jamais de mémorisation par position)
+  qs = qs.map(shuffleQuestion);
+  cur = 0;
+  renderQ();
+  return r;
 };
 
 /* -------------------------------------------------------- célébrations */

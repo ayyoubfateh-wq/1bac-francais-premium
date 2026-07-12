@@ -97,6 +97,15 @@ body::before{
   flex-direction:column;
   gap:6px;
 }
+.sidebar-group{
+  font-size:9px;
+  font-weight:700;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:rgba(232,201,122,.55);
+  padding:14px 12px 2px;
+  user-select:none;
+}
 .sidebar-menu button{
   width:100%;
   display:flex;
