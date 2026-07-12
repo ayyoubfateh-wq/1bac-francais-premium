@@ -1137,11 +1137,23 @@ function showScreen(id,btn){
   document.querySelectorAll('.nav button,.sidebar-nav button').forEach(b=>b.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   btn.classList.add('active');
+  closeMobileNav();
 
   // Remonter en haut à chaque changement de rubrique
   setTimeout(() => {
     window.scrollTo({top:0, behavior:'smooth'});
   }, 30);
+}
+function toggleMobileNav(toggleBtn){
+  const nav=document.querySelector('.sidebar-nav');
+  const open=nav.classList.toggle('nav-open');
+  toggleBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+function closeMobileNav(){
+  const nav=document.querySelector('.sidebar-nav');
+  nav.classList.remove('nav-open');
+  const toggleBtn=document.querySelector('.nav-toggle');
+  if(toggleBtn) toggleBtn.setAttribute('aria-expanded','false');
 }
 function showCTab(id,btn){
   document.querySelectorAll('#cadre .resume-panel').forEach(p=>p.classList.remove('active'));
