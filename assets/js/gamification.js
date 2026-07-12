@@ -98,7 +98,8 @@ function load(){
     daily: { day: todayStr(), xp: 0 },
     nodes: {},   // 'boite-0' -> { stars: 1..3, best: score }
     srs: {},     // 'boite:12' -> { box: 0..2, due: 'YYYY-MM-DD' }
-    sound: true
+    sound: true,
+    trialUsed: false
   };
   try {
     var raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
@@ -432,6 +433,11 @@ window.gJumpToTarget = function(){
 var session = null; // { book, index, exam, combo, comboMax, xpBase, xpCombo, xpCrit }
 
 window.gStartLesson = function(book, index){
+  // essai gratuit : seule la première leçon est ouverte sans code premium
+  if (!isPremium() && !(book === 'boite' && index === 0)) {
+    window.gShowPaywall();
+    return;
+  }
   if (nodeState(book, index) === 'locked') return;
   regenHearts();
   if (G.hearts <= 0) { showRefillModal(book); return; }
@@ -467,6 +473,7 @@ window.gStartLesson = function(book, index){
 };
 
 window.gStartReview = function(){
+  if (!isPremium()) { window.gShowPaywall(); return; }
   var due = srsDueIds();
   if (!due.length) return;
   var qsel = due.map(qFromId).filter(Boolean)
@@ -664,7 +671,10 @@ function finishLesson(){
         '<div class="g-xp-total"><span>Total</span><b>+' + totalXP + ' XP</b></div>' +
       '</div>' +
       (passed
-        ? '<button class="g-btn-primary" style="background:' + m.color + '" onclick="gCloseResult(true)">CONTINUER LE PARCOURS →</button>'
+        ? (isPremium()
+            ? '<button class="g-btn-primary" style="background:' + m.color + '" onclick="gCloseResult(true)">CONTINUER LE PARCOURS →</button>'
+            : '<p class="g-fail-hint" style="color:var(--teal);">🎁 Leçon gratuite réussie ✓ — la suite du parcours se débloque avec le pack complet.</p>' +
+              '<button class="g-btn-primary" style="background:' + m.color + '" onclick="gCloseResult(true)">VOIR MON PARCOURS →</button>')
         : '<p class="g-fail-hint">Il faut au moins ' + (s.exam ? '7/10' : '3/5') + ' pour débloquer la suite.</p>' +
           '<button class="g-btn-primary" onclick="gRetryLesson(\'' + s.book + '\',' + s.index + ')">RÉESSAYER</button>' +
           '<button class="g-btn-ghost" onclick="gCloseResult(true)">Retour au parcours</button>') +
@@ -780,6 +790,61 @@ window.gCloseRefill = function(){
   if (o) o.remove();
 };
 
+/* ------------------------------------------------ onboarding / essai gratuit
+   Pied dans la porte : le visiteur joue la leçon 1 sans inscription et gagne
+   ses premiers XP. Toute tentative d'aller plus loin ré-affiche le paywall,
+   enrichi de la progression déjà gagnée (effet de dotation : on ne veut pas
+   perdre ce qu'on possède déjà). */
+function isPremium(){
+  return document.documentElement.classList.contains('premium-unlocked');
+}
+window.gStartTrial = function(){
+  var lock = document.getElementById('premiumLockScreen');
+  if (lock) lock.style.display = 'none';
+  G.trialUsed = true; save();
+  window.showScreen('parcours', window.gGetParcoursBtn());
+  setTimeout(function(){ window.gStartLesson('boite', 0); }, 350);
+};
+window.gShowPaywall = function(){
+  updateTrialBanner();
+  var lock = document.getElementById('premiumLockScreen');
+  if (lock) { lock.style.display = 'flex'; lock.scrollTop = 0; }
+};
+function updateTrialBanner(){
+  var b = document.getElementById('trialProgressBanner');
+  if (!b) return;
+  if (G.xp > 0 && !isPremium()) {
+    var li = levelIndex(G.xp);
+    var done = 0;
+    for (var k in G.nodes) if (G.nodes[k].stars > 0) done++;
+    b.style.display = 'block';
+    b.innerHTML = '⭐ <b>Ta progression : ' + G.xp + ' XP' +
+      (done > 0 ? ' · ' + done + ' leçon' + (done > 1 ? 's' : '') + ' réussie' + (done > 1 ? 's' : '') + ' ✓' : '') + '</b>' +
+      '<span>Niveau « ' + LEVELS[li].name + ' » — ta progression est sauvegardée et t’attend après le déblocage.</span>';
+  } else {
+    b.style.display = 'none';
+  }
+  var tbtn = document.getElementById('trialStartBtn');
+  if (tbtn && G.trialUsed) {
+    tbtn.innerHTML = '🎮 Rejouer ma leçon gratuite<span>Ta progression est conservée</span>';
+  }
+}
+
+/* barrières : au-delà de la leçon offerte, tout mène au paywall */
+var origShowScreenG = window.showScreen;
+window.showScreen = function(id, btn){
+  if (!isPremium() && id !== 'parcours' && id !== 'quiz') {
+    window.gShowPaywall();
+    return;
+  }
+  return origShowScreenG.apply(this, arguments);
+};
+var origStartQuiz = window.startQuiz;
+window.startQuiz = function(){
+  if (!isPremium()) { window.gShowPaywall(); return; }
+  return origStartQuiz.apply(this, arguments);
+};
+
 /* -------------------------------------------------------- célébrations */
 function celebrateLevelUp(levelIdx){
   var overlay = document.createElement('div');
@@ -838,6 +903,7 @@ document.addEventListener('DOMContentLoaded', function(){
   rolloverDaily();
   renderHUD();
   renderPath();
+  updateTrialBanner(); // visiteur de retour non premium : montre ses acquis
   setInterval(regenHearts, 60000);
 
   // rappels au chargement — un seul toast à la fois, priorité aux révisions
