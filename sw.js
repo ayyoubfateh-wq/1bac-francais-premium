@@ -1,12 +1,13 @@
 /* Service worker — app shell en cache, stale-while-revalidate.
    Les appels /api/ (validation premium) ne sont jamais interceptés. */
-var CACHE = 'pf1bac-v1';
+var CACHE = 'pf1bac-v2';
 var SHELL = [
   './',
   './index.html',
   './assets/css/style.css',
   './assets/css/gamification.css',
   './assets/js/app.js',
+  './assets/js/questions-extra.js',
   './assets/js/gamification.js',
   './manifest.webmanifest'
 ];
