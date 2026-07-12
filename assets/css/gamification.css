@@ -323,6 +323,58 @@ button.g-hud-item:hover{background:var(--gold-pale);}
   font-size:18px;color:var(--gold);margin:0 0 16px;
 }
 
+/* ----------------------------------------------------------------- badges */
+#gBadges{margin-top:2.2rem;}
+.g-badges-head .eyebrow{
+  font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--gold);
+}
+.g-badges-head h3{
+  font-family:'Playfair Display',serif;font-size:20px;color:var(--ink);
+  margin:2px 0 14px;
+}
+.g-badges-count{
+  font-family:'Tajawal',sans-serif;font-size:12px;font-weight:700;
+  background:var(--gold-pale);border:1px solid var(--border);
+  border-radius:99px;padding:3px 10px;color:var(--gold);
+  vertical-align:middle;margin-left:6px;
+}
+.g-badges-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;
+}
+.g-badge{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  text-align:center;
+  border:1px solid var(--sand);border-radius:16px;
+  background:var(--white);
+  padding:14px 10px 12px;
+  filter:grayscale(1);opacity:.55;
+  transition:filter .25s,opacity .25s,transform .15s;
+}
+.g-badge.earned{
+  filter:none;opacity:1;
+  border-color:var(--border);
+  background:linear-gradient(180deg,var(--gold-pale),var(--white));
+  box-shadow:0 4px 14px rgba(200,146,42,.14);
+}
+.g-badge.earned:hover{transform:translateY(-3px);}
+.g-badge-icon{font-size:30px;line-height:1;}
+.g-badge b{font-size:12px;color:var(--ink);margin-top:4px;}
+.g-badge-desc{font-size:10px;color:var(--muted);line-height:1.4;}
+.g-badge-date{
+  font-size:9px;font-weight:700;color:var(--teal);
+  margin-top:4px;letter-spacing:.04em;
+}
+
+/* carte d'installation PWA */
+#gInstallCard{
+  align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  border:1px solid var(--border);border-radius:16px;
+  background:var(--gold-pale);
+  padding:14px 18px;margin-top:2rem;
+  box-shadow:0 6px 18px rgba(26,16,8,.06);
+}
+
 /* ------------------------------------------- onboarding / essai gratuit */
 .g-trial-cta{
   display:flex;flex-direction:column;align-items:center;gap:3px;

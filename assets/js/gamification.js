@@ -98,6 +98,10 @@ function load(){
     daily: { day: todayStr(), xp: 0 },
     nodes: {},   // 'boite-0' -> { stars: 1..3, best: score }
     srs: {},     // 'boite:12' -> { box: 0..2, due: 'YYYY-MM-DD' }
+    badges: {},  // 'serie-3' -> 'YYYY-MM-DD' (date d'obtention)
+    graduatedTotal: 0,
+    reviewsDone: 0,
+    perfectLessons: 0,
     sound: true,
     trialUsed: false
   };
@@ -180,6 +184,7 @@ function grantXP(amount, opts){
   save();
   renderHUD();
   if (after > before && !opts.silentLevel) celebrateLevelUp(after);
+  checkBadges(); // paliers XP et série peuvent tomber à tout moment
   return after > before;
 }
 
@@ -223,7 +228,7 @@ function srsRecordRight(q){
   if (!id || !G.srs[id]) return 0;
   var rec = G.srs[id];
   rec.box++;
-  if (rec.box >= SRS_INTERVALS.length) { delete G.srs[id]; save(); return 2; }
+  if (rec.box >= SRS_INTERVALS.length) { delete G.srs[id]; G.graduatedTotal++; save(); return 2; }
   rec.due = dateInDays(SRS_INTERVALS[rec.box]);
   save();
   return 1;
@@ -640,13 +645,14 @@ function finishLesson(){
   var bonus = 0;
   if (passed) {
     bonus += s.exam ? XP_EXAM_DONE : XP_NODE_DONE;
-    if (sc === total) bonus += XP_PERFECT;
+    if (sc === total) { bonus += XP_PERFECT; G.perfectLessons++; }
     var id = nodeId(s.book, s.index);
     var prev = G.nodes[id] || { stars: 0, best: 0 };
     G.nodes[id] = { stars: Math.max(prev.stars, stars), best: Math.max(prev.best, sc) };
     grantXP(bonus, { silentLevel: true });
   }
   save();
+  checkBadges();
 
   document.getElementById('quiz-game-screen').style.display = 'none';
   var totalXP = s.xpBase + s.xpCombo + s.xpCrit + bonus;
@@ -687,8 +693,10 @@ function finishLesson(){
 }
 
 function finishReview(s, sc, total){
+  G.reviewsDone++;
   grantXP(XP_REVIEW_DONE, { silentLevel: true });
   save();
+  checkBadges();
   document.getElementById('quiz-game-screen').style.display = 'none';
 
   var totalXP = s.xpBase + s.xpCombo + s.xpCrit + XP_REVIEW_DONE + s.graduated * XP_GRADUATED;
@@ -789,6 +797,77 @@ window.gCloseRefill = function(){
   var o = document.getElementById('gRefill');
   if (o) o.remove();
 };
+
+/* ---------------------------------------------------------------- badges
+   Collection = moteur de complétion : chaque trophée est un objectif
+   concret et atteignable ; les cases grises créent le manque à combler. */
+var BADGES = [
+  { id: 'premiere-lecon', icon: '🎯', name: 'Premier pas',        desc: 'Réussir ta première leçon',
+    test: function(){ for (var k in G.nodes) if (G.nodes[k].stars > 0) return true; return false; } },
+  { id: 'sans-faute',     icon: '✨', name: 'Perfectionniste',    desc: 'Une leçon sans aucune faute',
+    test: function(){ return G.perfectLessons >= 1; } },
+  { id: 'serie-3',        icon: '🔥', name: 'Régulier',           desc: '3 jours d’affilée',
+    test: function(){ return G.streak.best >= 3; } },
+  { id: 'serie-7',        icon: '🌋', name: 'Inarrêtable',        desc: '7 jours d’affilée',
+    test: function(){ return G.streak.best >= 7; } },
+  { id: 'serie-30',       icon: '👑', name: 'Légende',            desc: '30 jours d’affilée',
+    test: function(){ return G.streak.best >= 30; } },
+  { id: 'xp-100',         icon: '⭐', name: 'Centurion',          desc: 'Atteindre 100 XP',
+    test: function(){ return G.xp >= 100; } },
+  { id: 'xp-500',         icon: '🌟', name: 'Étoile montante',    desc: 'Atteindre 500 XP',
+    test: function(){ return G.xp >= 500; } },
+  { id: 'premiere-revision', icon: '🧠', name: 'Mémoire vive',    desc: 'Terminer ta première révision',
+    test: function(){ return G.reviewsDone >= 1; } },
+  { id: 'maitrise-10',    icon: '🎓', name: 'Savoir ancré',       desc: '10 questions maîtrisées (3 rappels réussis)',
+    test: function(){ return G.graduatedTotal >= 10; } },
+  { id: 'examen-blanc',   icon: '🏆', name: 'Prêt pour le jour J', desc: 'Réussir un examen blanc',
+    test: function(){ for (var b = 0; b < BOOKS.length; b++){ var r = G.nodes[BOOKS[b] + '-6']; if (r && r.stars > 0) return true; } return false; } },
+  { id: 'oeuvre-complete', icon: '📚', name: 'Œuvre conquise',    desc: 'Terminer les 7 leçons d’une œuvre',
+    test: function(){ for (var b = 0; b < BOOKS.length; b++) if (bookProgress(BOOKS[b]) >= NODE_DEFS.length) return true; return false; } },
+  { id: 'parcours-complet', icon: '🎖️', name: 'Lauréat',          desc: 'Terminer les 3 parcours',
+    test: function(){ for (var b = 0; b < BOOKS.length; b++) if (bookProgress(BOOKS[b]) < NODE_DEFS.length) return false; return true; } }
+];
+
+function checkBadges(){
+  var newly = [];
+  BADGES.forEach(function(bd){
+    if (!G.badges[bd.id] && bd.test()) {
+      G.badges[bd.id] = todayStr();
+      newly.push(bd);
+    }
+  });
+  if (newly.length) {
+    save();
+    newly.forEach(function(bd, i){
+      setTimeout(function(){
+        toast('🏅 Trophée débloqué : ' + bd.icon + ' ' + bd.name + ' !');
+        SFX.levelup();
+      }, 400 + i * 2600);
+    });
+    renderBadges();
+  }
+}
+
+function renderBadges(){
+  var wrap = document.getElementById('gBadges');
+  if (!wrap) return;
+  var earned = Object.keys(G.badges).length;
+  var html = '<div class="g-badges-head"><span class="eyebrow">Ta collection</span>' +
+    '<h3>🏅 Trophées <span class="g-badges-count">' + earned + '/' + BADGES.length + '</span></h3></div>' +
+    '<div class="g-badges-grid">';
+  BADGES.forEach(function(bd){
+    var got = G.badges[bd.id];
+    html += '<div class="g-badge' + (got ? ' earned' : '') + '" ' +
+      'aria-label="' + bd.name + ' — ' + bd.desc + (got ? ' (obtenu)' : ' (à débloquer)') + '">' +
+      '<span class="g-badge-icon">' + bd.icon + '</span>' +
+      '<b>' + bd.name + '</b>' +
+      '<span class="g-badge-desc">' + bd.desc + '</span>' +
+      (got ? '<span class="g-badge-date">✓ ' + got.split('-').reverse().join('/') + '</span>' : '') +
+      '</div>';
+  });
+  html += '</div>';
+  wrap.innerHTML = html;
+}
 
 /* ------------------------------------------------ onboarding / essai gratuit
    Pied dans la porte : le visiteur joue la leçon 1 sans inscription et gagne
@@ -897,12 +976,61 @@ function toast(msg){
   setTimeout(function(){ t.remove(); }, 2900);
 }
 
+/* --------------------------------------------------------- PWA / install
+   L'icône sur l'écran d'accueil supprime la friction du retour quotidien :
+   le streak ne survit que si revenir coûte zéro effort. */
+var deferredInstall = null;
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault();
+  deferredInstall = e;
+  renderInstallCard();
+});
+function renderInstallCard(){
+  var card = document.getElementById('gInstallCard');
+  if (!card || !deferredInstall) return;
+  if (localStorage.getItem('pf1bac_install_dismissed')) return;
+  card.style.display = 'flex';
+  card.innerHTML =
+    '<div class="g-cont-txt">' +
+      '<span class="g-cont-eyebrow">Application</span>' +
+      '<b>📲 Ajoute l’app sur ton téléphone</b>' +
+      '<span class="g-cont-book">Un seul geste chaque jour pour garder ta série 🔥</span>' +
+    '</div>' +
+    '<div style="display:flex;gap:8px;align-items:center;">' +
+      '<button class="g-cont-btn" style="background:var(--ink);" onclick="gInstallApp()">INSTALLER</button>' +
+      '<button class="g-btn-ghost" style="width:auto;margin:0;" onclick="gDismissInstall()">Plus tard</button>' +
+    '</div>';
+}
+window.gInstallApp = function(){
+  if (!deferredInstall) return;
+  deferredInstall.prompt();
+  deferredInstall.userChoice.then(function(choice){
+    if (choice && choice.outcome === 'accepted') {
+      toast('📲 App installée — à demain pour ta série 🔥');
+    }
+    deferredInstall = null;
+    var card = document.getElementById('gInstallCard');
+    if (card) card.style.display = 'none';
+  });
+};
+window.gDismissInstall = function(){
+  try { localStorage.setItem('pf1bac_install_dismissed', '1'); } catch(e){}
+  var card = document.getElementById('gInstallCard');
+  if (card) card.style.display = 'none';
+};
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+  });
+}
+
 /* ----------------------------------------------------------------- init */
 document.addEventListener('DOMContentLoaded', function(){
   regenHearts();
   rolloverDaily();
   renderHUD();
   renderPath();
+  renderBadges();
   updateTrialBanner(); // visiteur de retour non premium : montre ses acquis
   setInterval(regenHearts, 60000);
 
