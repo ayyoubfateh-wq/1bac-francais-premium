@@ -492,6 +492,89 @@ button.g-hud-item:hover{background:var(--gold-pale);}
 .g-toast.out{opacity:0;transition:opacity .45s ease;}
 @keyframes gToastIn{from{transform:translate(-50%,18px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
 
+/* ----------------------------------------------------- atelier production */
+.g-prod-intro{
+  border:1px solid var(--border);border-radius:16px;background:var(--gold-pale);
+  padding:14px 18px;margin-bottom:1.4rem;
+}
+.g-prod-intro p{font-size:13px;line-height:1.7;color:rgba(26,16,8,.78);margin:0;}
+.g-prod-book{
+  font-family:'Playfair Display',serif;font-size:16px;color:var(--ink);
+  margin:1.4rem 0 .6rem;
+}
+.g-prod-sujets{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;}
+.g-prod-sujet{
+  display:flex;flex-direction:column;gap:5px;text-align:left;
+  border:1px solid var(--sand);border-radius:14px;background:var(--white);
+  padding:14px;cursor:pointer;
+  transition:transform .12s,border-color .15s,box-shadow .15s;
+}
+.g-prod-sujet:hover{transform:translateY(-2px);border-color:var(--gold);box-shadow:0 8px 20px rgba(26,16,8,.08);}
+.g-prod-sujet b{font-size:14px;color:var(--ink);}
+.g-prod-sujet span{font-size:11px;color:var(--muted);line-height:1.5;}
+.g-prod-hist{border:1px solid var(--sand);border-radius:14px;background:var(--white);padding:6px;}
+.g-prod-hist-row{
+  display:flex;justify-content:space-between;gap:10px;
+  font-size:12px;padding:8px 12px;border-radius:8px;
+}
+.g-prod-hist-row:nth-child(odd){background:var(--gold-pale);}
+.g-prod-hist-row b{color:var(--teal);}
+
+.g-prod-steps{display:flex;align-items:center;gap:0;margin-bottom:14px;}
+.g-prod-step{
+  width:30px;height:30px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:800;
+  background:var(--sand-light);color:var(--muted);flex-shrink:0;
+}
+.g-prod-step.on{background:var(--gold);color:#fff;}
+.g-prod-step.done{background:var(--teal);color:#fff;}
+.g-prod-lien{flex:0 0 26px;height:2px;background:var(--sand);}
+.g-prod-titre{font-family:'Playfair Display',serif;font-size:19px;margin:0 0 10px;}
+.g-prod-sujet-box{
+  border-left:4px solid var(--gold);background:var(--gold-pale);
+  border-radius:0 12px 12px 0;padding:12px 14px;
+  font-size:13px;line-height:1.7;margin-bottom:10px;
+}
+.g-prod-conseil{
+  font-size:12px;color:rgba(26,16,8,.7);line-height:1.6;
+  background:#f0faf5;border:1px solid rgba(26,107,90,.2);
+  border-radius:12px;padding:10px 14px;margin-bottom:14px;
+}
+.g-prod-check{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+.g-prod-checkline{
+  display:flex;align-items:flex-start;gap:9px;
+  font-size:13px;line-height:1.55;color:rgba(26,16,8,.8);
+  border:1px solid var(--sand);border-radius:12px;
+  padding:11px 13px;cursor:pointer;background:var(--white);
+}
+.g-prod-checkline input{width:17px;height:17px;accent-color:var(--teal);flex-shrink:0;margin-top:1px;}
+.g-prod-label{
+  display:block;font-size:11px;font-weight:800;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--gold);margin:12px 0 4px;
+}
+.g-prod-ta{
+  width:100%;border:2px solid var(--sand);border-radius:12px;
+  padding:11px 13px;font-family:'Tajawal',sans-serif;font-size:14px;
+  line-height:1.65;color:var(--ink);background:var(--white);resize:vertical;
+}
+.g-prod-ta:focus{border-color:var(--gold);outline:none;}
+.g-prod-texte{min-height:230px;}
+.g-prod-compteur{font-size:11px;font-weight:700;color:var(--terracotta);margin:6px 0 10px;text-align:right;}
+.g-prod-compteur.ok{color:var(--teal);}
+.g-prod-rappel{
+  font-size:12px;color:rgba(26,16,8,.7);line-height:1.7;
+  background:var(--gold-pale);border:1px dashed var(--border);
+  border-radius:12px;padding:10px 14px;margin-bottom:14px;
+}
+.g-prod-crit{
+  border:1px solid var(--sand);border-radius:14px;background:var(--white);
+  padding:12px 14px;margin-bottom:10px;
+  display:flex;flex-direction:column;gap:8px;
+}
+.g-prod-crit>b{font-size:13px;color:var(--ink);}
+#production .g-btn-primary{margin-top:6px;}
+
 /* ------------------------------------------------------------ responsive */
 @media(max-width:768px){
   #gameHud{padding:8px 1rem;gap:8px;}

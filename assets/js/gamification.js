@@ -1280,6 +1280,29 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+/* ---------------------------------------------- pont atelier production
+   L'atelier d'écriture (production.js) récompense le travail de fond :
+   c'est l'effort le plus proche de l'examen réel, il paie en XP. */
+window.gToast = toast;
+window.gGrantProductionXP = function(xp, note){
+  grantXP(xp, { silentLevel: false });
+  var overlay = document.createElement('div');
+  overlay.className = 'g-overlay';
+  overlay.innerHTML =
+    '<div class="g-card">' +
+      '<canvas class="g-confetti" width="360" height="240"></canvas>' +
+      '<div class="g-levelup-badge">🖊️</div>' +
+      '<h3>Production terminée !</h3>' +
+      '<p class="g-card-sub">Auto-évaluation : <b>' + note + '/8</b> — c’est exactement le travail qui paie le jour du régional.</p>' +
+      '<div class="g-xp-detail"><div class="g-xp-total"><span>Travail de fond</span><b>+' + xp + ' XP</b></div></div>' +
+      (note < 5 ? '<p class="g-fail-hint">Relis les réponses modèles puis retente le même sujet : la progression viendra de la réécriture.</p>' : '') +
+      '<button class="g-btn-primary" style="background:var(--teal);" onclick="this.closest(\'.g-overlay\').remove()">CONTINUER</button>' +
+    '</div>';
+  document.body.appendChild(overlay);
+  SFX.done();
+  confettiOn(overlay.querySelector('.g-confetti'));
+};
+
 /* ----------------------------------------------------------------- init */
 document.addEventListener('DOMContentLoaded', function(){
   regenHearts();

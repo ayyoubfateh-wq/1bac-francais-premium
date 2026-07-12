@@ -248,6 +248,7 @@ E. JS LOGIQUE : navigation, quiz, chat, interactions
 
     <div class="sidebar-group">S'entraîner</div>
     <button onclick="showScreen('quiz',this)">🎯 <span>Quiz libre</span></button>
+    <button onclick="showScreen('production',this)">🖊️ <span>Production écrite</span></button>
     <button onclick="showScreen('regionaux',this)">📝 <span>Sujets régionaux</span></button>
 
     <div class="sidebar-group">Aide</div>
@@ -274,6 +275,14 @@ E. JS LOGIQUE : navigation, quiz, chat, interactions
   </div>
 
   <div id="gPath"></div>
+</div>
+
+
+<!-- SECTION : ATELIER PRODUCTION ÉCRITE -->
+<div id="production" class="screen pad">
+  <div class="eyebrow">Les 8 points décisifs de l'examen</div>
+  <div class="heading">Atelier de production écrite</div>
+  <div id="gProd"></div>
 </div>
 
 
@@ -2859,5 +2868,6 @@ E. JS LOGIQUE : navigation, quiz, chat, interactions
 <script src="assets/js/app.js" defer></script>
 <script src="assets/js/questions-extra.js" defer></script>
 <script src="assets/js/gamification.js" defer></script>
+<script src="assets/js/production.js" defer></script>
 </body>
 </html>
