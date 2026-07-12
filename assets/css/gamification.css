@@ -86,13 +86,17 @@ button.g-hud-item:hover{background:var(--gold-pale);}
 }
 .g-book-tab.active .g-tab-prog{background:var(--gold);color:#fff;}
 
-#gContinueCard{
+#gContinueCard,#gReviewCard{
   display:none;
   align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
   border:1px solid var(--border);border-radius:16px;
   background:var(--gold-pale);
   padding:14px 18px;margin-bottom:1.4rem;
   box-shadow:0 6px 18px rgba(26,16,8,.06);
+}
+#gReviewCard.urgent{
+  border-color:rgba(181,67,42,.35);
+  background:#fdf3f0;
 }
 .g-cont-txt{display:flex;flex-direction:column;gap:2px;}
 .g-cont-eyebrow{

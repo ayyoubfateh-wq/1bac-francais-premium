@@ -21,6 +21,10 @@ var XP_COMBO_BONUS = 5;       // par bonne réponse à partir de 3 d'affilée
 var XP_NODE_DONE = 20;
 var XP_PERFECT = 15;
 var XP_EXAM_DONE = 40;
+var XP_REVIEW_DONE = 15;      // bonus "mémoire consolidée"
+var XP_GRADUATED = 5;         // par question définitivement maîtrisée
+var SRS_INTERVALS = [1, 3, 7]; // jours avant re-présentation (boîtes de Leitner)
+var REVIEW_MAX = 10;          // questions max par session de révision
 var CRIT_CHANCE = 0.12;       // ratio variable — ne pas augmenter (saturation)
 var MAX_HEARTS = 5;
 var HEART_REGEN_MS = 30 * 60 * 1000; // 1 cœur / 30 min
@@ -93,6 +97,7 @@ function load(){
     streak: { count: 0, last: '', best: 0 },
     daily: { day: todayStr(), xp: 0 },
     nodes: {},   // 'boite-0' -> { stars: 1..3, best: score }
+    srs: {},     // 'boite:12' -> { box: 0..2, due: 'YYYY-MM-DD' }
     sound: true
   };
   try {
@@ -183,6 +188,48 @@ function touchStreak(){
   G.streak.count = (G.streak.last === yesterdayStr()) ? G.streak.count + 1 : 1;
   G.streak.last = today;
   if (G.streak.count > G.streak.best) G.streak.best = G.streak.count;
+}
+
+/* ------------------------------------------------- répétition espacée
+   Courbe de l'oubli (Ebbinghaus) : toute question ratée revient à J+1,
+   puis J+3, puis J+7. Trois rappels réussis = question maîtrisée.
+   La révision est sans cœurs : enjeu bas, pur entraînement de rappel. */
+function dateInDays(n){
+  var d = new Date(); d.setDate(d.getDate() + n);
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function qid(q){
+  for (var b = 0; b < BOOKS.length; b++) {
+    var i = QUESTIONS[BOOKS[b]].indexOf(q);
+    if (i > -1) return BOOKS[b] + ':' + i;
+  }
+  return null;
+}
+function qFromId(id){
+  var parts = id.split(':');
+  var pool = QUESTIONS[parts[0]];
+  return pool ? pool[parseInt(parts[1], 10)] : null;
+}
+function srsRecordWrong(q){
+  var id = qid(q);
+  if (!id) return;
+  G.srs[id] = { box: 0, due: dateInDays(SRS_INTERVALS[0]) };
+  save();
+}
+/* retourne 0 = non suivi, 1 = boîte suivante, 2 = maîtrisée (sortie du SRS) */
+function srsRecordRight(q){
+  var id = qid(q);
+  if (!id || !G.srs[id]) return 0;
+  var rec = G.srs[id];
+  rec.box++;
+  if (rec.box >= SRS_INTERVALS.length) { delete G.srs[id]; save(); return 2; }
+  rec.due = dateInDays(SRS_INTERVALS[rec.box]);
+  save();
+  return 1;
+}
+function srsDueIds(maxDate){
+  var lim = maxDate || todayStr();
+  return Object.keys(G.srs).filter(function(id){ return G.srs[id].due <= lim; });
 }
 
 /* ------------------------------------------------------------------- HUD */
@@ -316,6 +363,8 @@ function renderPath(){
   wrap.innerHTML = '<svg class="g-path-line" width="' + W + '" height="' + height + '" viewBox="0 0 ' + W + ' ' + height + '">' +
     '<path d="' + d + '" fill="none" stroke="rgba(200,146,42,.28)" stroke-width="5" stroke-dasharray="1 10" stroke-linecap="round"/></svg>' + html;
 
+  renderReviewCard();
+
   var cont = document.getElementById('gContinueCard');
   if (cont) {
     if (target) {
@@ -336,6 +385,37 @@ function renderPath(){
     if (badge) badge.textContent = bookProgress(bk) + '/' + NODE_DEFS.length;
     b.classList.toggle('active', bk === activeParcoursBook);
   });
+}
+
+function renderReviewCard(){
+  var card = document.getElementById('gReviewCard');
+  if (!card) return;
+  var due = srsDueIds().length;
+  var tracked = Object.keys(G.srs).length;
+  if (due > 0) {
+    card.style.display = 'flex';
+    card.classList.add('urgent');
+    card.innerHTML =
+      '<div class="g-cont-txt">' +
+        '<span class="g-cont-eyebrow" style="color:var(--terracotta);">Répétition espacée</span>' +
+        '<b>📅 ' + due + ' question' + (due > 1 ? 's' : '') + ' à consolider aujourd’hui</b>' +
+        '<span class="g-cont-book">Révise-les maintenant, avant que ta mémoire les efface.</span>' +
+      '</div>' +
+      '<button class="g-cont-btn" style="background:var(--terracotta);" onclick="gStartReview()">RÉVISER (' + Math.min(due, REVIEW_MAX) + ') →</button>';
+  } else if (tracked > 0) {
+    var next = Object.keys(G.srs).map(function(id){ return G.srs[id].due; }).sort()[0];
+    var label = next === dateInDays(1) ? 'demain' : 'le ' + next.split('-').reverse().join('/');
+    card.style.display = 'flex';
+    card.classList.remove('urgent');
+    card.innerHTML =
+      '<div class="g-cont-txt">' +
+        '<span class="g-cont-eyebrow" style="color:var(--teal);">Répétition espacée</span>' +
+        '<b>🧠 Mémoire à jour</b>' +
+        '<span class="g-cont-book">Prochaine révision ' + label + ' — reviens garder ta série 🔥</span>' +
+      '</div>';
+  } else {
+    card.style.display = 'none';
+  }
 }
 
 window.gJumpToTarget = function(){
@@ -386,6 +466,30 @@ window.gStartLesson = function(book, index){
   updateLessonBar();
 };
 
+window.gStartReview = function(){
+  var due = srsDueIds();
+  if (!due.length) return;
+  var qsel = due.map(qFromId).filter(Boolean)
+    .sort(function(){ return Math.random() - .5; })
+    .slice(0, REVIEW_MAX);
+  if (!qsel.length) return;
+
+  session = { review: true, graduated: 0, combo: 0, comboMax: 0, xpBase: 0, xpCombo: 0, xpCrit: 0 };
+
+  currentBookName = 'Révisions du jour';
+  qs = qsel; cur = 0; score = 0; answers = [];
+  var quizBtn = Array.from(document.querySelectorAll('.sidebar-menu button')).find(function(b){
+    var oc = b.getAttribute('onclick'); return oc && oc.indexOf("'quiz'") !== -1;
+  });
+  window.showScreen('quiz', quizBtn || document.querySelector('.sidebar-menu button'));
+  document.getElementById('quiz-select-screen').style.display = 'none';
+  document.getElementById('quiz-results-screen').style.display = 'none';
+  document.getElementById('quiz-game-screen').style.display = 'block';
+  ensureLessonBar();
+  renderQ();
+  updateLessonBar();
+};
+
 function ensureLessonBar(){
   var game = document.getElementById('quiz-game-screen');
   var bar = document.getElementById('gLessonBar');
@@ -399,12 +503,14 @@ function ensureLessonBar(){
 function updateLessonBar(){
   var bar = document.getElementById('gLessonBar');
   if (!bar || !session) return;
-  var def = NODE_DEFS[session.index];
+  var title = session.review
+    ? '📅 Révisions du jour · consolide ta mémoire'
+    : NODE_DEFS[session.index].icon + ' ' + NODE_DEFS[session.index].name;
   bar.innerHTML =
     '<button class="g-lesson-quit" onclick="gQuitLesson()" aria-label="Quitter la leçon">✕</button>' +
-    '<span class="g-lesson-title">' + def.icon + ' ' + def.name + '</span>' +
+    '<span class="g-lesson-title">' + title + '</span>' +
     (session.combo >= 3 ? '<span class="g-combo">🔥 x' + session.combo + '</span>' : '') +
-    '<span class="g-lesson-hearts">' + heartsMarkup(G.hearts) + '</span>';
+    (session.review ? '' : '<span class="g-lesson-hearts">' + heartsMarkup(G.hearts) + '</span>');
 }
 window.gQuitLesson = function(){
   session = null;
@@ -434,6 +540,18 @@ window.answerQ = function(idx, btn){
   var ok = idx === q.ans;
   origAnswerQ.apply(this, arguments);
 
+  // répétition espacée : toute erreur est planifiée à J+1, toute réussite
+  // d'une question suivie avance sa boîte (leçon, révision ou quiz libre)
+  if (ok) {
+    var srsResult = srsRecordRight(q);
+    if (srsResult === 2 && session && session.review) {
+      session.graduated++;
+      grantXP(XP_GRADUATED, { silentLevel: true });
+    }
+  } else {
+    srsRecordWrong(q);
+  }
+
   if (session) {
     if (ok) {
       session.combo++;
@@ -442,18 +560,24 @@ window.answerQ = function(idx, btn){
       session.xpBase += XP_CORRECT;
       if (session.combo >= 3) { xp += XP_COMBO_BONUS; session.xpCombo += XP_COMBO_BONUS; }
       if (isCrit) { session.xpCrit += xp; xp *= 2; }
-      grantXP(isCrit ? xp : xp, { silentLevel: false });
+      grantXP(xp, { silentLevel: false });
       floatXP(btn, (isCrit ? '⚡ CRITIQUE ×2  ' : '') + '+' + xp + ' XP', isCrit ? 'crit' : 'ok');
       if (isCrit) SFX.crit(); else SFX.correct();
     } else {
       session.combo = 0;
-      loseHeart();
-      floatXP(btn, '-1 ❤️', 'ko');
-      SFX.wrong();
-      if (G.hearts <= 0) {
-        var failBook = session.book;
-        setTimeout(function(){ abortLesson(failBook); }, 1200);
-        return;
+      if (session.review) {
+        // révision : enjeu bas, pas de cœurs — l'erreur reste planifiée à J+1
+        floatXP(btn, 'Reprogrammée à demain 📅', 'ko');
+        SFX.wrong();
+      } else {
+        loseHeart();
+        floatXP(btn, '-1 ❤️', 'ko');
+        SFX.wrong();
+        if (G.hearts <= 0) {
+          var failBook = session.book;
+          setTimeout(function(){ abortLesson(failBook); }, 1200);
+          return;
+        }
       }
     }
     updateLessonBar();
@@ -501,6 +625,7 @@ function finishLesson(){
   ensureLessonBar();
   var total = qs.length;
   var sc = score;
+  if (s.review) { finishReview(s, sc, total); return; }
   var def = NODE_DEFS[s.index];
   var stars = starsForScore(sc, total, s.exam);
   var passed = stars > 0;
@@ -550,6 +675,52 @@ function finishLesson(){
 
   function row(l, v){ return '<div class="g-xp-row"><span>' + l + '</span><b>' + v + ' XP</b></div>'; }
 }
+
+function finishReview(s, sc, total){
+  grantXP(XP_REVIEW_DONE, { silentLevel: true });
+  save();
+  document.getElementById('quiz-game-screen').style.display = 'none';
+
+  var totalXP = s.xpBase + s.xpCombo + s.xpCrit + XP_REVIEW_DONE + s.graduated * XP_GRADUATED;
+  var remaining = srsDueIds().length;
+  var dueTomorrow = srsDueIds(dateInDays(1)).length;
+
+  function row(l, v){ return '<div class="g-xp-row"><span>' + l + '</span><b>' + v + ' XP</b></div>'; }
+  var overlay = document.createElement('div');
+  overlay.className = 'g-overlay';
+  overlay.id = 'gLessonResult';
+  overlay.innerHTML =
+    '<div class="g-card">' +
+      '<canvas class="g-confetti" width="360" height="240"></canvas>' +
+      '<div class="g-levelup-badge">🧠</div>' +
+      '<h3>Mémoire consolidée !</h3>' +
+      '<p class="g-card-sub">Révision espacée — les notions reviennent juste avant que tu les oublies.</p>' +
+      '<div class="g-card-score">' + sc + '/' + total + ' bonnes réponses</div>' +
+      '<div class="g-xp-detail">' +
+        row('Réponses', '+' + s.xpBase) +
+        (s.xpCombo ? row('Combo 🔥 (max x' + s.comboMax + ')', '+' + s.xpCombo) : '') +
+        (s.xpCrit ? row('Critiques ⚡', '+' + s.xpCrit) : '') +
+        (s.graduated ? row('🎓 ' + s.graduated + ' question(s) maîtrisée(s)', '+' + (s.graduated * XP_GRADUATED)) : '') +
+        row('Consolidation 🧠', '+' + XP_REVIEW_DONE) +
+        '<div class="g-xp-total"><span>Total</span><b>+' + totalXP + ' XP</b></div>' +
+      '</div>' +
+      (remaining > 0
+        ? '<p class="g-fail-hint">📅 Encore ' + remaining + ' question(s) à réviser aujourd’hui.</p>' +
+          '<button class="g-btn-primary" onclick="gRetryReview()">CONTINUER LES RÉVISIONS →</button>' +
+          '<button class="g-btn-ghost" onclick="gCloseResult(true)">Retour au parcours</button>'
+        : '<p class="g-card-sub">' + (dueTomorrow > 0 ? '📅 ' + dueTomorrow + ' question(s) reviendront demain — ta série t’attend !' : 'Plus rien à réviser — tout est frais dans ta mémoire ✨') + '</p>' +
+          '<button class="g-btn-primary" style="background:var(--teal)" onclick="gCloseResult(true)">RETOUR AU PARCOURS →</button>') +
+    '</div>';
+  document.body.appendChild(overlay);
+  SFX.done();
+  confettiOn(overlay.querySelector('.g-confetti'));
+}
+window.gRetryReview = function(){
+  var o = document.getElementById('gLessonResult');
+  if (o) o.remove();
+  if (typeof window.resetQuiz === 'function') window.resetQuiz();
+  window.gStartReview();
+};
 
 window.gCloseResult = function(toParcours){
   var o = document.getElementById('gLessonResult');
@@ -669,8 +840,11 @@ document.addEventListener('DOMContentLoaded', function(){
   renderPath();
   setInterval(regenHearts, 60000);
 
-  // rappel de série en péril — aversion à la perte, une seule fois par session
-  if (G.streak.count > 0 && G.streak.last === yesterdayStr()) {
+  // rappels au chargement — un seul toast à la fois, priorité aux révisions
+  var due = srsDueIds().length;
+  if (due > 0) {
+    setTimeout(function(){ toast('📅 ' + due + ' question' + (due > 1 ? 's' : '') + ' à réviser aujourd’hui — consolide ta mémoire !'); }, 1500);
+  } else if (G.streak.count > 0 && G.streak.last === yesterdayStr()) {
     setTimeout(function(){ toast('🔥 Ta série de ' + G.streak.count + ' jour(s) t’attend — une leçon suffit !'); }, 1500);
   }
 });
