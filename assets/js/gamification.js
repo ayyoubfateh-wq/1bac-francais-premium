@@ -61,8 +61,78 @@ var NODE_DEFS = [
   { cat: 'Réaction / opinion', name: 'Réaction & opinion',   icon: '💬' },
   { mix: true,                 name: 'Révision générale',    icon: '📚' },
   { mix: true,                 name: 'Consolidation',        icon: '🧩' },
+  { etude: true,               name: 'Étude de texte',       icon: '📜' },
   { exam: true,                name: 'Examen blanc',         icon: '🏆' }
 ];
+
+/* Étude de texte guidée : le format réel de l'épreuve — un support de scène
+   lu attentivement, puis des questions de compréhension, d'analyse et de
+   langue qui s'y rapportent. Le support reste affiché pendant la leçon. */
+var ETUDES = {
+  boite: {
+    titre: 'La mort du coiffeur',
+    support: 'Un drame frappe le quartier : Sidi Mohammed ben Tahar, le coiffeur, vient de mourir. La maison du défunt s’emplit de lamentations ; les femmes pleurent et se frappent les joues, les voisines accourent, le deuil devient l’affaire de tous. Témoin de ces scènes, l’enfant est bouleversé : c’est sa première rencontre avec la mort. La nuit venue, il tombe malade, hanté par ce qu’il a vu — et même les trésors de sa boîte semblent, pour un temps, avoir perdu leur pouvoir de consolation.',
+    questions: [
+      { cat: 'Analyse', q: '[Étude de texte] Que découvre l’enfant à travers la mort du coiffeur ?',
+        opts: ['La réalité de la mort, qui le bouleverse durablement', 'Le métier qu’il veut exercer plus tard', 'L’existence d’un trésor caché', 'La joie des fêtes de quartier'], ans: 0,
+        exp: 'C’est sa première confrontation avec la mort : l’événement le rend malade et assombrit son regard sur le monde.' },
+      { cat: 'Analyse', q: '[Étude de texte] Comment le quartier réagit-il à ce deuil ?',
+        opts: ['Collectivement : lamentations, visites, solidarité des voisines', 'Avec indifférence totale', 'En organisant une fête', 'En quittant définitivement la maison'], ans: 0,
+        exp: 'Le deuil est vécu en communauté : pleureuses, voisines, rites — la douleur d’une famille devient celle de tout le quartier.' },
+      { cat: 'Analyse', q: '[Étude de texte] Pourquoi la boîte semble-t-elle perdre son pouvoir après ce drame ?',
+        opts: ['Le choc du réel dépasse, un temps, les ressources de l’imaginaire', 'La boîte a été volée pendant les funérailles', 'L’enfant l’a offerte au défunt', 'Le père l’a confisquée'], ans: 0,
+        exp: 'Face à la mort, l’imaginaire montre ses limites : le refuge magique ne suffit plus — moment clé de la maturation de l’enfant.' },
+      { cat: 'Fait de langue', q: '[Étude de texte] Les lamentations et les pleurs qui emplissent la scène relèvent de quel registre ?',
+        opts: ['Du registre pathétique', 'Du registre comique', 'Du registre épique', 'Du registre merveilleux'], ans: 0,
+        exp: 'La scène cherche à émouvoir en montrant la douleur : c’est la définition du registre pathétique.' },
+      { cat: 'Réaction / opinion', q: '[Étude de texte] Quelle lecture personnelle de cette scène est la mieux formulée ?',
+        opts: ['« Cette scène montre que la découverte de la mort fait grandir : l’enfant y perd une part d’insouciance. »', '« Cette scène est inutile dans le roman. »', '« Cette scène prouve que le coiffeur était méchant. »', '« Cette scène parle surtout du métier de coiffeur. »'], ans: 0,
+        exp: 'La meilleure lecture relie l’événement à son effet sur le personnage : le passage de l’insouciance à la conscience.' }
+    ]
+  },
+  antigone: {
+    titre: 'Le face-à-face Créon / Antigone',
+    support: 'Seul avec sa nièce arrêtée par les gardes, Créon tente de la sauver. Il propose d’étouffer l’affaire, se moque du rituel funèbre, puis abat sa dernière carte : Polynice et Étéocle n’étaient que deux voyous, et les corps étaient si abîmés qu’on ne sait même pas lequel a été enterré. Ébranlée, Antigone semble prête à céder et à rentrer dans sa chambre. Mais lorsque Créon évoque le « bonheur » qui l’attend — le mariage, les enfants, la vie raisonnable —, elle se redresse et refuse tout : « Moi, je veux tout, tout de suite. » La rupture est définitive ; Créon devra la livrer.',
+    questions: [
+      { cat: 'Analyse', q: '[Étude de texte] Quelle est d’abord l’intention de Créon dans cette scène ?',
+        opts: ['Sauver Antigone en étouffant l’affaire', 'La condamner immédiatement', 'La marier de force à un garde', 'L’exiler loin de Thèbes'], ans: 0,
+        exp: 'Créon commence en oncle, pas en juge : il veut faire taire les témoins et ramener Antigone à la raison.' },
+      { cat: 'Analyse', q: '[Étude de texte] Quel argument de Créon ébranle réellement Antigone ?',
+        opts: ['La révélation que ses frères étaient des voyous aux corps méconnaissables', 'La menace de la torture', 'La promesse d’une récompense', 'Le rappel de la loi divine'], ans: 0,
+        exp: 'En salissant la mémoire des frères, Créon vide le sacrifice de son sens : Antigone vacille — instant décisif de la scène.' },
+      { cat: 'Analyse', q: '[Étude de texte] Pourquoi le mot « bonheur » provoque-t-il le sursaut final d’Antigone ?',
+        opts: ['Ce bonheur raisonnable lui paraît un renoncement : elle exige l’absolu', 'Elle ne comprend pas ce mot', 'Elle déteste Hémon', 'Elle veut devenir reine à la place de Créon'], ans: 0,
+        exp: 'Le « bonheur » selon Créon suppose des compromis ; Antigone refuse cette vie au rabais — son « tout, tout de suite » est un cri d’absolu.' },
+      { cat: 'Fait de langue', q: '[Étude de texte] Dans « Moi, je veux tout, tout de suite », la mise en relief du pronom (« Moi, je… ») exprime…',
+        opts: ['L’affirmation intransigeante du moi face à autrui', 'La politesse et la retenue', 'Le doute et l’hésitation', 'La soumission au roi'], ans: 0,
+        exp: 'La tournure emphatique redouble le sujet pour l’imposer : toute la personnalité d’Antigone tient dans cette grammaire du refus.' },
+      { cat: 'Réaction / opinion', q: '[Étude de texte] Que révèle cette scène sur la nature de la tragédie ?',
+        opts: ['Deux logiques défendables s’affrontent sans issue possible — c’est ce qui la rend tragique', 'Le bien triomphe toujours du mal', 'Les personnages peuvent tout éviter à la fin', 'Le hasard décide de tout'], ans: 0,
+        exp: 'Ni Créon ni Antigone n’est simplement « le méchant » : la tragédie naît du choc de deux exigences légitimes et irréconciliables.' }
+    ]
+  },
+  condamne: {
+    titre: 'La visite de Marie',
+    support: 'Dans la salle du parloir, on amène au condamné sa fille Marie, trois ans. Il espérait puiser dans cette visite la force d’affronter sa dernière heure ; c’est le contraire qui se produit. L’enfant ne le reconnaît pas : pour elle, son papa est mort. Elle l’appelle poliment « monsieur », et lorsqu’il l’interroge, elle récite, sans en comprendre un mot, la prière qu’on lui a apprise pour son père disparu. L’homme comprend alors qu’il est déjà effacé du monde des vivants : la société l’a tué dans le cœur de sa fille avant de le tuer sur l’échafaud.',
+    questions: [
+      { cat: 'Analyse', q: '[Étude de texte] Pourquoi cette visite, tant espérée, devient-elle la pire des épreuves ?',
+        opts: ['Marie ne le reconnaît pas : il découvre qu’il est déjà mort pour elle', 'Marie refuse d’entrer dans le parloir', 'Les gardiens interrompent la visite', 'Marie lui annonce une mauvaise nouvelle'], ans: 0,
+        exp: 'Le condamné attendait une consolation ; il reçoit la preuve de son effacement : sa propre fille le croit mort.' },
+      { cat: 'Analyse', q: '[Étude de texte] Que symbolise le mot « monsieur » dans la bouche de Marie ?',
+        opts: ['La mort sociale du condamné, effacé avant même l’exécution', 'Le respect dû aux visiteurs du parloir', 'Un jeu entre le père et la fille', 'Une erreur de politesse sans importance'], ans: 0,
+        exp: '« Monsieur » installe une distance d’étranger là où devrait vivre le lien père-fille : la peine a déjà tué l’homme social.' },
+      { cat: 'Analyse', q: '[Étude de texte] Quel rôle cette scène joue-t-elle dans l’argumentation du roman ?',
+        opts: ['Elle montre que la peine de mort frappe aussi des innocents, comme Marie', 'Elle prouve la culpabilité du condamné', 'Elle défend le travail des gardiens', 'Elle décrit le fonctionnement du parloir'], ans: 0,
+        exp: 'Hugo élargit le cercle des victimes : l’orpheline paie une faute qu’elle n’a pas commise — argument décisif contre la peine capitale.' },
+      { cat: 'Fait de langue', q: '[Étude de texte] La prière récitée « sans en comprendre un mot » par l’enfant produit quel effet ?',
+        opts: ['Un contraste poignant entre l’innocence de l’enfant et l’horreur de la situation', 'Un effet comique de répétition', 'Une explication religieuse rassurante', 'Un simple détail réaliste sans portée'], ans: 0,
+        exp: 'L’innocence mécanique de la récitation heurte la gravité du moment : ce contraste est le sommet du registre pathétique.' },
+      { cat: 'Réaction / opinion', q: '[Étude de texte] Quelle réaction à cette scène est la mieux argumentée ?',
+        opts: ['« Cette scène m’a marqué : en montrant un père déjà oublié, Hugo prouve que la peine de mort détruit bien plus qu’une vie. »', '« Cette scène est triste, donc réussie. »', '« Marie aurait dû reconnaître son père, c’est illogique. »', '« Cette scène montre que les enfants oublient vite, c’est tout. »'], ans: 0,
+        exp: 'La réaction efficace nomme l’effet ressenti PUIS l’explique par le projet de l’auteur — émotion mise au service de l’argumentation.' }
+    ]
+  }
+};
 
 /* Copie d'une question avec réponses mélangées. __src pointe vers l'objet
    d'origine pour que la répétition espacée (qid par identité) continue de
@@ -133,6 +203,17 @@ function load(){
     var raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
     if (raw && typeof raw === 'object') {
       for (var k in base) if (!(k in raw)) raw[k] = base[k];
+      /* migration : l'examen blanc passe de l'index 6 à 7
+         (insertion du nœud Étude de texte) — on préserve les étoiles */
+      if (!raw.migrEtude) {
+        ['boite', 'antigone', 'condamne'].forEach(function(b){
+          if (raw.nodes[b + '-6'] && !raw.nodes[b + '-7']) {
+            raw.nodes[b + '-7'] = raw.nodes[b + '-6'];
+            delete raw.nodes[b + '-6'];
+          }
+        });
+        raw.migrEtude = true;
+      }
       return raw;
     }
   } catch(e){}
@@ -516,9 +597,16 @@ window.gLaunchLesson = function(book, index, timed){
   var pool = (typeof QUESTIONS !== 'undefined') && QUESTIONS[book];
   if (!pool) return;
 
-  var qsel;
+  var qsel, support = null;
   if (def.exam) {
     qsel = samplePool(pool, 10);
+  } else if (def.etude) {
+    var et = ETUDES[book];
+    if (!et) return;
+    /* questions fixes liées au support, dans l'ordre pédagogique ;
+       seules les positions des réponses sont mélangées */
+    qsel = et.questions.map(shuffleQuestion);
+    support = et;
   } else if (def.cat) {
     var themed = pool.filter(function(q){ return q.cat === def.cat; });
     qsel = samplePool(themed.length >= 5 ? themed : pool, 5);
@@ -526,7 +614,7 @@ window.gLaunchLesson = function(book, index, timed){
     qsel = samplePool(pool, 5);
   }
 
-  session = { book: book, index: index, exam: !!def.exam, timed: !!timed, timerText: '', combo: 0, comboMax: 0, xpBase: 0, xpCombo: 0, xpCrit: 0 };
+  session = { book: book, index: index, exam: !!def.exam, support: support, timed: !!timed, timerText: '', combo: 0, comboMax: 0, xpBase: 0, xpCombo: 0, xpCrit: 0 };
 
   // réutilise le moteur de quiz existant
   currentBookName = BOOK_META[book].name;
@@ -596,6 +684,22 @@ function ensureLessonBar(){
     game.insertBefore(bar, game.firstChild);
   }
   bar.style.display = session ? 'flex' : 'none';
+
+  /* support de l'étude de texte : affiché en permanence pendant la leçon */
+  var sup = document.getElementById('gSupport');
+  if (session && session.support) {
+    if (!sup) {
+      sup = document.createElement('div');
+      sup.id = 'gSupport';
+      game.insertBefore(sup, bar.nextSibling);
+    }
+    sup.style.display = 'block';
+    sup.innerHTML = '<div class="g-support-titre">📜 Support — ' + session.support.titre + '</div>' +
+      '<p>' + session.support.support + '</p>' +
+      '<div class="g-support-consigne">Lis attentivement, puis réponds aux questions ci-dessous en t’appuyant sur ce passage.</div>';
+  } else if (sup) {
+    sup.style.display = 'none';
+  }
 }
 function updateLessonBar(){
   var bar = document.getElementById('gLessonBar');
@@ -1284,7 +1388,7 @@ if ('serviceWorker' in navigator) {
    L'atelier d'écriture (production.js) récompense le travail de fond :
    c'est l'effort le plus proche de l'examen réel, il paie en XP. */
 window.gToast = toast;
-window.gGrantProductionXP = function(xp, note){
+window.gGrantProductionXP = function(xp, note, sujetIndex){
   grantXP(xp, { silentLevel: false });
   var overlay = document.createElement('div');
   overlay.className = 'g-overlay';
@@ -1295,8 +1399,9 @@ window.gGrantProductionXP = function(xp, note){
       '<h3>Production terminée !</h3>' +
       '<p class="g-card-sub">Auto-évaluation : <b>' + note + '/8</b> — c’est exactement le travail qui paie le jour du régional.</p>' +
       '<div class="g-xp-detail"><div class="g-xp-total"><span>Travail de fond</span><b>+' + xp + ' XP</b></div></div>' +
-      (note < 5 ? '<p class="g-fail-hint">Relis les réponses modèles puis retente le même sujet : la progression viendra de la réécriture.</p>' : '') +
-      '<button class="g-btn-primary" style="background:var(--teal);" onclick="this.closest(\'.g-overlay\').remove()">CONTINUER</button>' +
+      (note < 5 ? '<p class="g-fail-hint">Compare avec la réponse modèle puis retente le même sujet : la progression viendra de la réécriture.</p>' : '') +
+      '<button class="g-btn-primary" onclick="this.closest(\'.g-overlay\').remove(); gProdShowModel(' + sujetIndex + ');">📖 COMPARER AVEC LA RÉPONSE MODÈLE</button>' +
+      '<button class="g-btn-ghost" onclick="this.closest(\'.g-overlay\').remove()">Plus tard</button>' +
     '</div>';
   document.body.appendChild(overlay);
   SFX.done();
