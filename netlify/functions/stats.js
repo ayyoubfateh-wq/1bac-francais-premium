@@ -1,7 +1,10 @@
 /* Statistiques d'usage — compteurs quotidiens 100 % anonymes.
-   POST { event }                          → +1 sur le compteur du jour
+   POST { event }                          → enregistre l'événement du jour
    POST { adminKey, action:'report' }      → rapport des 14 derniers jours
-   Aucune donnée personnelle : des nombres par jour, rien d'autre. */
+   Stockage append-only (un blob minuscule par événement) : aucune
+   écriture concurrente ne peut écraser une autre — les comptes sont
+   exacts. Aucune donnée personnelle : des horodatages, rien d'autre. */
+const crypto = require('crypto');
 const { connectLambda, getStore } = require('@netlify/blobs');
 
 const VALID_EVENTS = [
@@ -20,6 +23,21 @@ function dayStr(offset) {
   const d = new Date();
   d.setUTCDate(d.getUTCDate() - (offset || 0));
   return d.toISOString().slice(0, 10);
+}
+
+async function countDay(store, day) {
+  const counts = {};
+  let cursor;
+  /* pagination : chaque page apporte jusqu'à 1000 clés */
+  do {
+    const page = await store.list({ prefix: day + '/', cursor });
+    for (const b of page.blobs) {
+      const ev = b.key.split('/')[1];
+      counts[ev] = (counts[ev] || 0) + 1;
+    }
+    cursor = page.cursor;
+  } while (cursor);
+  return counts;
 }
 
 exports.handler = async (event) => {
@@ -43,7 +61,7 @@ exports.handler = async (event) => {
   let store;
   try {
     connectLambda(event);
-    store = getStore('stats');
+    store = getStore('stats-events');
   } catch (_) {
     return { statusCode: 200, headers, body: JSON.stringify({ ok: false, error: 'storage_unavailable' }) };
   }
@@ -54,12 +72,11 @@ exports.handler = async (event) => {
     if (!expected || String(body.adminKey || '') !== expected) {
       return { statusCode: 403, headers, body: JSON.stringify({ ok: false, error: 'forbidden' }) };
     }
-    const days = [];
     try {
+      const days = [];
       for (let i = 0; i < 14; i++) {
         const day = dayStr(i);
-        const rec = (await store.get(day, { type: 'json' })) || {};
-        days.push({ day, counts: rec });
+        days.push({ day, counts: await countDay(store, day) });
       }
       return { statusCode: 200, headers, body: JSON.stringify({ ok: true, days }) };
     } catch (_) {
@@ -67,16 +84,14 @@ exports.handler = async (event) => {
     }
   }
 
-  /* comptage d'un événement (public, anonyme) */
+  /* comptage d'un événement (public, anonyme, sans écrasement possible) */
   const ev = String(body.event || '');
   if (VALID_EVENTS.indexOf(ev) === -1) {
     return { statusCode: 200, headers, body: JSON.stringify({ ok: false, error: 'invalid_event' }) };
   }
   try {
-    const day = dayStr(0);
-    const rec = (await store.get(day, { type: 'json' })) || {};
-    rec[ev] = (rec[ev] || 0) + 1;
-    await store.setJSON(day, rec);
+    const key = dayStr(0) + '/' + ev + '/' + Date.now().toString(36) + '-' + crypto.randomBytes(4).toString('hex');
+    await store.set(key, '1');
     return { statusCode: 200, headers, body: JSON.stringify({ ok: true }) };
   } catch (_) {
     return { statusCode: 200, headers, body: JSON.stringify({ ok: false, error: 'write_failed' }) };
