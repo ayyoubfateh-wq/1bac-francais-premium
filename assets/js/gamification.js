@@ -132,6 +132,27 @@ var ETUDES = {
         opts: ['La sécurité d’une famille est fragile, et l’épreuve révèle le courage de chacun', 'Il ne faut jamais acheter de bijoux', 'Les courtiers ont toujours raison', 'Le travail des champs est une punition'], ans: 0,
         exp: 'La bonne leçon dépasse l’anecdote : l’épisode parle de la fragilité du bonheur et de la dignité dans l’épreuve.' }
     ]
+  },
+  {
+    titre: 'La fête de l’Achoura',
+    support: 'Les jours qui précèdent l’Achoura transforment le quartier. Au msid, le fqih met ses écoliers au travail : on lave, on chaule, on décore la salle, et les enfants découvrent leur maître sous un jour nouveau, presque bienveillant. Les mères s’affairent : habits neufs, achats au souk, préparatifs sans fin. Le jour venu, l’enfant étrenne fièrement ses vêtements ; le msid résonne de chants et de lumière, la ville entière est en fête. Pour l’écolier craintif, c’est un miracle : le lieu de la peur est devenu, l’espace de quelques jours, le lieu de la joie.',
+    questions: [
+      { cat: 'Analyse', q: '[Étude de texte] Quelle métamorphose l’Achoura opère-t-elle sur le msid ?',
+        opts: ['Le lieu de la peur devient un lieu de joie et de lumière', 'Le msid ferme définitivement ses portes', 'Le msid devient un marché', 'Rien ne change au msid'], ans: 0,
+        exp: 'Nettoyé, décoré, chantant : le msid transfiguré prouve que la fête peut renverser, un temps, l’ordre quotidien de la contrainte.' },
+      { cat: 'Analyse', q: '[Étude de texte] Comment le fqih apparaît-il pendant les préparatifs ?',
+        opts: ['Sous un jour plus humain, presque bienveillant', 'Plus sévère que jamais', 'Absent de la fête', 'Hostile aux traditions'], ans: 0,
+        exp: 'Le maître redouté se fait organisateur de la joie : ce changement de visage étonne l’enfant et adoucit la figure du fqih.' },
+      { cat: 'Analyse', q: '[Étude de texte] Que représentent les habits neufs pour l’enfant ?',
+        opts: ['Une fierté et un rite de passage qui l’intègrent à la fête collective', 'Une punition inconfortable', 'Un cadeau de la chouafa', 'Un simple détail sans importance'], ans: 0,
+        exp: 'S’habiller de neuf, c’est participer pleinement au rite : l’enfant existe dans le regard de la communauté en fête.' },
+      { cat: 'Fait de langue', q: '[Étude de texte] Chants, lumière, habits neufs, souk animé : ce relevé forme un champ lexical de…',
+        opts: ['La fête et de la joie collective', 'Du deuil et de la tristesse', 'De l’école et de la discipline', 'Du commerce et de l’argent'], ans: 0,
+        exp: 'Le champ lexical de la fête irrigue tout le passage — en contraste avec le champ lexical de la peur associé d’ordinaire au msid.' },
+      { cat: 'Réaction / opinion', q: '[Étude de texte] Quelle réflexion cette scène inspire-t-elle le plus justement ?',
+        opts: ['« Les fêtes traditionnelles soudent une communauté et offrent aux enfants des souvenirs fondateurs. »', '« Les fêtes sont une perte de temps et d’argent. »', '« L’école ne devrait jamais être joyeuse. »', '« Cette scène montre que l’enfant déteste l’Achoura. »'], ans: 0,
+        exp: 'La scène illustre la fonction sociale et affective du rite : cohésion du groupe, joie de l’enfant, mémoire heureuse.' }
+    ]
   }
   ],
   antigone: [
@@ -197,6 +218,27 @@ var ETUDES = {
         opts: ['« Même les plus grands engagements traversent le doute ; le courage, c’est de tenir quand même. »', '« Il ne faut jamais écrire de lettres. »', '« Les gardes sont les vrais héros de la pièce. »', '« Antigone regrette d’avoir enterré son frère et renonce à ses idées. »'], ans: 0,
         exp: 'La scène ne renie pas l’engagement d’Antigone : elle montre son prix humain — douter n’est pas renoncer.' }
     ]
+  },
+  {
+    titre: 'Antigone et Ismène',
+    support: 'À l’aube, Ismène rejoint sa sœur : elle a réfléchi toute la nuit et vient la raisonner. Enterrer Polynice ? C’est impossible : Créon est le roi, il les fera mourir ; la foule les huera et les tirera par les cheveux ; et puis elle veut vivre, elle est belle, la vie est là. Ismène « comprend » leur oncle : il faut bien que ceux qui gouvernent donnent l’exemple. Antigone écoute à peine. Elle ne veut pas « comprendre » — comprendre, c’est le mot des adultes, le premier pas vers tous les renoncements. À chacun son rôle, dit-elle : lui, Créon, doit les faire mourir ; elle, Antigone, doit enterrer son frère. Ismène repart, impuissante ; le destin, lui, est déjà en marche.',
+    questions: [
+      { cat: 'Analyse', q: '[Étude de texte] Sur quoi reposent les arguments d’Ismène ?',
+        opts: ['La peur des conséquences, la force du pouvoir et l’amour de la vie', 'La certitude que Polynice était innocent', 'L’ordre des dieux', 'La promesse d’un mariage avec Hémon'], ans: 0,
+        exp: 'Ismène raisonne en adulte : rapport de forces, réalisme, désir de vivre. Rien d’ignoble — c’est la voix de la prudence.' },
+      { cat: 'Analyse', q: '[Étude de texte] Pourquoi Antigone refuse-t-elle de « comprendre » ?',
+        opts: ['Comprendre, c’est déjà accepter : elle refuse la logique des renoncements adultes', 'Elle est trop jeune pour raisonner', 'Elle n’a pas écouté les explications', 'Elle fait semblant pour gagner du temps'], ans: 0,
+        exp: 'Le refus de « comprendre » est un choix : ne pas entrer dans l’engrenage des bonnes raisons qui font tout accepter.' },
+      { cat: 'Analyse', q: '[Étude de texte] Que signifie la formule d’Antigone : « à chacun son rôle » ?',
+        opts: ['Elle accepte la logique tragique : chacun accomplira ce qu’il doit, jusqu’au bout', 'Elle propose de se partager le travail d’enterrement', 'Elle veut jouer une pièce de théâtre', 'Elle demande à Ismène de la remplacer'], ans: 0,
+        exp: 'Antigone parle déjà en héroïne tragique : les rôles sont écrits, le sien est d’enterrer — celui de Créon, de punir.' },
+      { cat: 'Fait de langue', q: '[Étude de texte] Ismène évoque la foule qui les « huera » et les « tirera par les cheveux » : cette évocation concrète vise à…',
+        opts: ['Persuader par la peur, en rendant le supplice physiquement imaginable', 'Faire rire Antigone', 'Décrire un souvenir réel', 'Flatter la vanité de sa sœur'], ans: 0,
+        exp: 'Ismène ne discute pas d’idées : elle fait VOIR l’horreur pour dissuader — persuasion par l’image et l’émotion.' },
+      { cat: 'Réaction / opinion', q: '[Étude de texte] Entre Ismène et Antigone, quelle lecture est la plus juste ?',
+        opts: ['Aucune n’est méprisable : la prudence et l’absolu sont deux réponses humaines au même dilemme', 'Ismène est simplement lâche et égoïste', 'Antigone est simplement folle', 'Les deux sœurs sont d’accord au fond'], ans: 0,
+        exp: 'La force de la scène est là : deux sincérités s’affrontent — juger l’une sans entendre l’autre, c’est manquer la pièce.' }
+    ]
   }
   ],
   condamne: [
@@ -261,6 +303,27 @@ var ETUDES = {
       { cat: 'Réaction / opinion', q: '[Étude de texte] Quel jugement porter sur la foule de la Grève ?',
         opts: ['Elle nous ressemble plus qu’on ne veut l’admettre : le goût du spectacle peut étouffer la compassion', 'Elle est composée uniquement de criminels', 'Elle est venue soutenir le condamné', 'Elle n’a aucune importance dans le roman'], ans: 0,
         exp: 'Hugo ne condamne pas des « méchants » : il tend un miroir au lecteur — c’est ce qui rend la scène universelle.' }
+    ]
+  },
+  {
+    titre: 'Le prêtre',
+    support: 'Aux dernières heures, on envoie au condamné l’aumônier des prisons. C’est un vieil homme doux, au visage bon — et pourtant sa visite ne console pas. Ses paroles tombent, régulières et usées : ce discours, il l’a récité à cent condamnés avant celui-ci, il le récitera à cent autres. Pas un mot qui s’adresse à CET homme, à SA peur, à SA vie. Le condamné l’écoute poliment, n’éprouve rien, et finit par demander qu’on le laisse seul. Il songe qu’un mot vrai, un seul — venu d’un être qui l’aurait regardé comme un homme et non comme un mourant de série — aurait peut-être trouvé le chemin de son cœur.',
+    questions: [
+      { cat: 'Analyse', q: '[Étude de texte] Pourquoi la visite du prêtre échoue-t-elle à consoler le condamné ?',
+        opts: ['Son discours mécanique, récité à tous, ne s’adresse à personne en particulier', 'Le prêtre refuse de le bénir', 'Le prêtre se moque ouvertement de lui', 'Le condamné ne comprend pas sa langue'], ans: 0,
+        exp: 'Ce n’est pas la foi qui échoue, c’est la routine : des paroles usées « à la centaine » ne peuvent toucher un homme singulier.' },
+      { cat: 'Analyse', q: '[Étude de texte] Que critique Hugo à travers ce personnage pourtant « bon » ?',
+        opts: ['Une institution qui traite les condamnés en série, jusque dans la consolation', 'La religion elle-même, qu’il juge inutile', 'La méchanceté des prêtres', 'Le manque de moyens des prisons'], ans: 0,
+        exp: 'Le prêtre n’est pas méchant — c’est pire : même la compassion est devenue une procédure. La critique vise le système, pas la foi.' },
+      { cat: 'Analyse', q: '[Étude de texte] Que nous apprend cette scène sur la solitude du condamné ?',
+        opts: ['Elle est absolue : même l’homme chargé de le consoler ne le voit pas vraiment', 'Elle prend fin grâce à cette visite', 'Elle n’existe que dans son imagination', 'Elle est adoucie par les gardiens'], ans: 0,
+        exp: 'Entouré de gardiens, de juges, d’un prêtre — et pourtant seul : personne ne le regarde comme un homme. C’est la mort sociale, encore.' },
+      { cat: 'Fait de langue', q: '[Étude de texte] L’opposition entre le « visage bon » du prêtre et l’inefficacité de ses paroles crée…',
+        opts: ['Un contraste qui rend la critique plus subtile qu’une caricature', 'Un portrait entièrement négatif', 'Un éloge de l’Église', 'Un effet comique'], ans: 0,
+        exp: 'En rendant le prêtre sympathique, Hugo interdit la lecture facile : le problème n’est pas l’homme, c’est la mécanique.' },
+      { cat: 'Réaction / opinion', q: '[Étude de texte] Quelle leçon universelle tirer de cette scène ?',
+        opts: ['Consoler vraiment exige de voir la personne, pas de réciter des formules', 'Il ne faut jamais recevoir de visites en prison', 'Les mots ne servent à rien face à la mort', 'Seuls les proches ont le droit de parler aux mourants'], ans: 0,
+        exp: 'La scène dépasse la prison : toute parole de réconfort — d’un soignant, d’un ami — ne vaut que si elle s’adresse à QUELQU’UN.' }
     ]
   }
   ]
