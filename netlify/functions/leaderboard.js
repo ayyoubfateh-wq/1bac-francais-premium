@@ -14,11 +14,26 @@ function isoWeek(d) {
   return date.getUTCFullYear() + '-W' + String(week).padStart(2, '0');
 }
 
+const PSEUDO_INTERDITS = ['merde','putain','pute','connard','connasse','salope','encul','nique','ntm','fdp','batard','zamel','zamle','7mar','hmar','9a7ba','kahba','qa7ba','zebi','zbi','zeb','couille','bite','penis','nazi','hitler','haine','tue-toi'];
+function pseudoInterdit(p) {
+  const n = String(p).toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/0/g, 'o').replace(/1/g, 'i').replace(/3/g, 'e').replace(/4/g, 'a').replace(/5/g, 's')
+    .replace(/[\s_.-]/g, '');
+  const brut = String(p).toLowerCase().replace(/[\s_.-]/g, '');
+  return PSEUDO_INTERDITS.some((m) => {
+    const mm = m.replace(/[\s_.-]/g, '');
+    return n.includes(mm) || brut.includes(mm);
+  });
+}
+
 function sanitizePseudo(raw) {
-  return String(raw || '')
+  const p = String(raw || '')
     .replace(/[<>"'&\\/]/g, '')
     .trim()
     .slice(0, 15) || 'Anonyme';
+  // autorité serveur : un pseudo interdit devient neutre, quoi que fasse le client
+  return pseudoInterdit(p) ? 'Élève' : p;
 }
 
 exports.handler = async (event) => {

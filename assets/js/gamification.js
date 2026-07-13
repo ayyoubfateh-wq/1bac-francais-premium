@@ -1316,8 +1316,12 @@ function renderLeaderboard(){
     fetch('/api/leaderboard').then(function(r){ return r.json(); }).then(function(data){
       var list = document.getElementById('gLeagueList');
       if (!list) return;
-      if (!data.ok || !data.top || !data.top.length) {
-        list.innerHTML = '<p class="g-league-empty">Sois le premier de la semaine — chaque XP compte ! 🚀</p>';
+      /* Moins de 3 inscrits : ne jamais montrer un classement vide (signal
+         « personne n'utilise ») — on cadre en « ligue en formation ». */
+      if (!data.ok || !data.top || data.top.length < 3) {
+        var n = (data.ok && data.top) ? data.top.length : 0;
+        list.innerHTML = '<p class="g-league-empty">🏗️ <b>Ligue en formation : ' + n + '/3 élèves</b> cette semaine.<br>' +
+          'Le classement s’ouvre dès 3 inscrits — gagne des XP dès maintenant pour partir en tête ! 🚀</p>';
         return;
       }
       var myId = window.pf1bacDeviceId ? window.pf1bacDeviceId() : '';
@@ -1344,10 +1348,30 @@ function renderLeaderboard(){
   } catch(e){}
 }
 
+/* modération des pseudos : filtre partagé avec le serveur (qui reste
+   l'autorité) — ici uniquement pour un retour immédiat à l'élève */
+var PSEUDO_INTERDITS = ['merde','putain','pute','connard','connasse','salope','encul','nique','ntm','fdp','batard','zamel','zamle','7mar','hmar','9a7ba','kahba','qa7ba','zebi','zbi','zeb','couille','bite','penis','nazi','hitler','haine','tue-toi'];
+function pseudoInterdit(p){
+  var n = String(p).toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/0/g, 'o').replace(/1/g, 'i').replace(/3/g, 'e').replace(/4/g, 'a').replace(/5/g, 's')
+    .replace(/[\s_.-]/g, '');
+  var brut = String(p).toLowerCase().replace(/[\s_.-]/g, '');
+  return PSEUDO_INTERDITS.some(function(m){
+    var mm = m.replace(/[\s_.-]/g, '');
+    return n.indexOf(mm) !== -1 || brut.indexOf(mm) !== -1;
+  });
+}
+
 window.gJoinLeague = function(){
   var inp = document.getElementById('gPseudoInput');
   var pseudo = (inp && inp.value || '').replace(/[<>"'&\\/]/g, '').trim().slice(0, 15);
   if (!pseudo) { if (inp) inp.focus(); return; }
+  if (pseudoInterdit(pseudo)) {
+    toast('🚫 Ce pseudo n’est pas autorisé — choisis-en un autre.');
+    if (inp) { inp.value = ''; inp.focus(); }
+    return;
+  }
   G.pseudo = pseudo;
   save();
   toast('🏆 Bienvenue dans la ligue, ' + pseudo + ' !');
