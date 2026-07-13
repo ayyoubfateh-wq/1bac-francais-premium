@@ -49,6 +49,18 @@
     <b>Libérer</b> : détacher le code de tous ses appareils — utile quand un client change de téléphone.
     Sa progression (XP, parcours) est conservée : elle est liée au code, pas à l'appareil.
   </p>
+
+  <hr style="border:none;border-top:1px solid #e0d0b0;margin:22px 0;">
+
+  <h1 style="font-size:17px;">📊 Statistiques (14 derniers jours)</h1>
+  <p class="sub">Compteurs anonymes : personne n'est identifié.</p>
+  <div class="row" style="margin-top:10px;">
+    <button class="verifier" onclick="charger()">VOIR LES STATISTIQUES</button>
+  </div>
+  <div id="statsResume" style="display:none;margin-top:14px;border-radius:12px;padding:14px;background:#eef8f2;border:1px solid #bfe3d0;font-size:13px;line-height:1.8;"></div>
+  <div style="overflow-x:auto;margin-top:12px;">
+    <table id="statsTable" style="display:none;width:100%;border-collapse:collapse;font-size:11px;white-space:nowrap;"></table>
+  </div>
 </div>
 <script>
   var cle = document.getElementById('cle');
@@ -84,6 +96,58 @@
     });
   }
   function montrer(type, html){ res.className = type; res.innerHTML = html; }
+
+  /* ------- statistiques ------- */
+  var LIBELLES = {
+    visit: 'Visites', trial_start: 'Essais lancés', trial_done: 'Essais réussis',
+    paywall_view: 'Paywall vus', code_ok: 'Codes activés', lesson_done: 'Leçons finies',
+    review_done: 'Révisions', exam_done: 'Examens blancs', prod_done: 'Productions'
+  };
+  function charger(){
+    var k = cle.value.trim();
+    if (!k) { montrer('err', 'Entrez votre clé d\'administration.'); cle.focus(); return; }
+    try { localStorage.setItem('pb_admin_key', k); } catch(e){}
+    document.querySelectorAll('button').forEach(function(b){ b.disabled = true; });
+    fetch('/api/stats', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ adminKey: k, action: 'report' })
+    }).then(function(r){ return r.json(); }).then(function(d){
+      if (!d.ok) { montrer('err', d.error === 'forbidden' ? '❌ Clé incorrecte.' : '❌ Erreur : ' + d.error); return; }
+      afficher(d.days);
+    }).catch(function(){ montrer('err', '❌ Serveur injoignable.'); })
+      .finally(function(){ document.querySelectorAll('button').forEach(function(b){ b.disabled = false; }); });
+  }
+  function afficher(days){
+    var evts = Object.keys(LIBELLES);
+    var tot = {};
+    evts.forEach(function(e){ tot[e] = 0; });
+    days.forEach(function(d){ evts.forEach(function(e){ tot[e] += d.counts[e] || 0; }); });
+
+    var conv = tot.trial_start > 0 ? Math.round(100 * tot.code_ok / tot.trial_start) : null;
+    var resume = document.getElementById('statsResume');
+    resume.style.display = 'block';
+    resume.innerHTML =
+      '<b>Sur 14 jours :</b> ' + tot.visit + ' visites · ' + tot.trial_start + ' essais gratuits · ' +
+      tot.code_ok + ' codes activés' +
+      (conv !== null ? ' · <b>conversion essai → activation : ' + conv + '%</b>' : '') +
+      '<br>Activité des élèves : ' + tot.lesson_done + ' leçons · ' + tot.review_done + ' révisions · ' +
+      tot.exam_done + ' examens blancs · ' + tot.prod_done + ' productions écrites';
+
+    var t = document.getElementById('statsTable');
+    t.style.display = 'table';
+    var html = '<tr style="background:#f7f2e8;"><th style="text-align:left;padding:6px 8px;">Jour</th>' +
+      evts.map(function(e){ return '<th style="padding:6px 8px;">' + LIBELLES[e] + '</th>'; }).join('') + '</tr>';
+    days.forEach(function(d, i){
+      html += '<tr style="background:' + (i % 2 ? '#faf6ee' : '#fff') + ';">' +
+        '<td style="padding:5px 8px;font-weight:700;">' + d.day.slice(5).split('-').reverse().join('/') + '</td>' +
+        evts.map(function(e){
+          var v = d.counts[e] || 0;
+          return '<td style="padding:5px 8px;text-align:center;' + (v ? 'font-weight:700;' : 'color:#bbb;') + '">' + (v || '·') + '</td>';
+        }).join('') + '</tr>';
+    });
+    t.innerHTML = html;
+  }
 </script>
 </body>
 </html>

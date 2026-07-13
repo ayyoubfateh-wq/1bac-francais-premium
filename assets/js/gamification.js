@@ -982,6 +982,7 @@ function finishLesson(){
 
   var bonus = 0;
   if (passed) {
+    track(s.exam ? 'exam_done' : (isPremium() ? 'lesson_done' : 'trial_done'));
     bonus += s.exam ? XP_EXAM_DONE : XP_NODE_DONE;
     if (s.timed) bonus += XP_TIMED;
     if (sc === total) { bonus += XP_PERFECT; G.perfectLessons++; }
@@ -1033,6 +1034,7 @@ function finishLesson(){
 }
 
 function finishReview(s, sc, total){
+  track('review_done');
   G.reviewsDone++;
   grantXP(XP_REVIEW_DONE, { silentLevel: true });
   save();
@@ -1372,11 +1374,13 @@ function isPremium(){
 window.gStartTrial = function(){
   var lock = document.getElementById('premiumLockScreen');
   if (lock) lock.style.display = 'none';
+  track('trial_start');
   G.trialUsed = true; save();
   window.showScreen('parcours', window.gGetParcoursBtn());
   setTimeout(function(){ window.gStartLesson('boite', 0); }, 350);
 };
 window.gShowPaywall = function(){
+  track('paywall_view');
   updateTrialBanner();
   var lock = document.getElementById('premiumLockScreen');
   if (lock) { lock.style.display = 'flex'; lock.scrollTop = 0; }
@@ -1522,6 +1526,20 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+/* ------------------------------------------------- statistiques d'usage
+   Compteurs anonymes (des nombres par jour, rien d'autre) pour que le
+   vendeur voie enfin : visites, essais, conversions, activité. */
+function track(ev){
+  try {
+    fetch('/api/stats', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event: ev })
+    }).catch(function(){});
+  } catch(e){}
+}
+window.gTrack = track;
+
 /* --------------------------------------------------- sauvegarde nuage
    La progression suit le CODE (clé = son SHA-256), pas l'appareil :
    changer de téléphone ou vider le navigateur ne fait plus rien perdre. */
@@ -1565,6 +1583,7 @@ window.gCloudSync = function(pullFirst){
    c'est l'effort le plus proche de l'examen réel, il paie en XP. */
 window.gToast = toast;
 window.gGrantProductionXP = function(xp, note, sujetIndex){
+  track('prod_done');
   grantXP(xp, { silentLevel: false });
   var overlay = document.createElement('div');
   overlay.className = 'g-overlay';
@@ -1596,6 +1615,13 @@ document.addEventListener('DOMContentLoaded', function(){
   syncLeaderboard();
   updateTrialBanner(); // visiteur de retour non premium : montre ses acquis
   setInterval(regenHearts, 60000);
+  // visite : 1 max par jour et par appareil
+  try {
+    if (localStorage.getItem('pf1bac_ping') !== todayStr()) {
+      localStorage.setItem('pf1bac_ping', todayStr());
+      track('visit');
+    }
+  } catch(e){}
   window.gCloudSync(); // restaure du nuage si un autre appareil est en avance
   setInterval(function(){ if (syncDirty) window.gCloudSync(false); }, 120000);
   window.addEventListener('beforeunload', function(){ if (syncDirty) pushProgress(); });

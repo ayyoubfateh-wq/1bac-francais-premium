@@ -1663,6 +1663,7 @@ const OPTIMIZED_IMAGE_ASSETS = {
     if(_lockUntil>now){ setError('Acces bloque. Reessayez dans '+Math.ceil((_lockUntil-now)/1000)+'s.'); return; }
     clearError(); if(btn){ btn.textContent='Verification...'; btn.disabled=true; }
     try{ var data=await validateOnServer(code); if(data&&data.ok){ _attempts=0; doUnlock(data.expiresIn||28800);
+      if(typeof window.gTrack==='function') window.gTrack('code_ok');
       /* clé de sauvegarde nuage = SHA-256 du code (jamais le code en clair) */
       try{ crypto.subtle.digest('SHA-256', new TextEncoder().encode(code.toUpperCase())).then(function(buf){
         var hex=Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
