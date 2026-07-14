@@ -2865,8 +2865,12 @@ E. JS LOGIQUE : navigation, quiz, chat, interactions
 
 
 
+<!-- Couche de données (source unique du contenu) — chargée avant les moteurs -->
+<script src="assets/data/questions.js" defer></script>
+<script src="assets/data/etudes.js" defer></script>
+<script src="assets/data/sujets.js" defer></script>
+<!-- Moteurs (lisent le contenu depuis window.PF_DATA) -->
 <script src="assets/js/app.js" defer></script>
-<script src="assets/js/questions-extra.js" defer></script>
 <script src="assets/js/gamification.js" defer></script>
 <script src="assets/js/production.js" defer></script>
 </body>
