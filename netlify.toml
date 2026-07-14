@@ -1,9 +1,11 @@
 [build]
-  publish = "."
+  # Seul dist/ est publié : le contenu premium (private/content.json)
+  # n'existe QUE dans le bundle de la fonction /api/content.
+  publish = "dist"
   functions = "netlify/functions"
-  # Build : valide tout le contenu PUIS assemble index.html depuis les
-  # fragments src/html/. Si quoi que ce soit est cassé (contenu ou
-  # assemblage), le déploiement échoue et le site en ligne reste intact.
+  # Build : valide tout le contenu PUIS assemble le site public dans dist/
+  # (garde anti-fuite incluse). Si quoi que ce soit est cassé, le
+  # déploiement échoue et le site en ligne reste intact.
   command = "npm run build"
 
 [functions]
@@ -39,4 +41,9 @@
 [[redirects]]
   from = "/api/stats"
   to = "/.netlify/functions/stats"
+  status = 200
+
+[[redirects]]
+  from = "/api/content"
+  to = "/.netlify/functions/content"
   status = 200

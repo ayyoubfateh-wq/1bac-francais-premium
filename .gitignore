@@ -7,3 +7,7 @@ generated-codes/
 
 # Artefact généré par npm run build (source : src/html/)
 /index.html
+
+# Artefacts du build v2 (générés par npm run build)
+/dist/
+/private/

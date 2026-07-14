@@ -275,6 +275,10 @@ function qFromId(id){
 function srsRecordWrong(q){
   var id = qid(q);
   if (!id) return;
+  /* trace la banque d'origine des indices : ceux de la banque d'essai
+     (sous-ensemble public) ne correspondent pas à ceux de la banque
+     complète — voir gContentRefresh */
+  G.bankMode = window.PF_FULL_BANK ? 'full' : 'trial';
   G.srs[id] = { box: 0, due: dateInDays(SRS_INTERVALS[0]) };
   save();
 }
@@ -1404,6 +1408,28 @@ window.gCloudSync = function(pullFirst){
       }
     }).catch(function(){});
   } catch(e){}
+};
+
+/* --------------------------------------- pont chargeur de contenu premium
+   Appelé par content-loader.js après l'injection de la banque complète :
+   rafraîchit tous les rendus qui dépendent du contenu, et purge les
+   entrées SRS créées pendant l'essai (leurs indices pointaient sur le
+   sous-ensemble public, pas sur la banque complète). */
+window.gContentRefresh = function(){
+  window.PF_FULL_BANK = true;
+  if (G.bankMode === 'trial') {
+    G.srs = {};
+    G.bankMode = 'full';
+    save();
+  } else if (G.bankMode !== 'full') {
+    G.bankMode = 'full';
+    save();
+  }
+  renderHUD();
+  renderPath();
+  renderBilan();
+  renderBadges();
+  renderLeaderboard();
 };
 
 /* ---------------------------------------------- pont atelier production

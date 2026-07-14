@@ -228,5 +228,8 @@ window.gProdShowModel = function(i, texteEleve){
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
+/* re-rendu après l'injection du contenu premium (content-loader.js) */
+window.gProdRefresh = function(){ if (!P.draft) render(); };
+
 document.addEventListener('DOMContentLoaded', render);
 })();
