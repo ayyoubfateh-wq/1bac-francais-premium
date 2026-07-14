@@ -1,0 +1,24 @@
+{
+  "note": "Ordre d'assemblage de index.html — géré par tools/build-html.mjs. Ne pas réordonner sans raison.",
+  "fragments": [
+    "00-tete.html",
+    "10-verrou-premium.html",
+    "20-coque-haut.html",
+    "ecrans/01-parcours.html",
+    "ecrans/02-production.html",
+    "ecrans/03-espace.html",
+    "ecrans/04-home.html",
+    "ecrans/05-auteurs.html",
+    "ecrans/06-resumes.html",
+    "ecrans/07-fiches.html",
+    "ecrans/08-methode.html",
+    "ecrans/09-modeles.html",
+    "ecrans/10-quiz.html",
+    "ecrans/11-vocabulaire.html",
+    "ecrans/12-bareme.html",
+    "ecrans/13-regionaux.html",
+    "ecrans/14-cadre.html",
+    "ecrans/15-chat.html",
+    "90-coque-bas.html"
+  ]
+}

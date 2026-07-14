@@ -1,0 +1,120 @@
+<!-- update -->
+<!DOCTYPE html> 
+<html lang="fr">
+<!--
+===============================================================================
+PROJET : Assistant pédagogique Français — 1BAC Maroc
+VERSION : HTML UNIQUE RESTRUCTURÉE
+OBJECTIF : Garder un seul fichier téléchargeable, mais plus facile à modifier.
+
+MODE D’EMPLOI POUR LES FUTURES MODIFICATIONS AVEC CHATGPT :
+1) Demander une modification par section, jamais "change tout".
+   Exemple : "Modifie uniquement la section CSS — QUIZ".
+2) Ne pas mélanger contenu pédagogique et logique JS quand ce n’est pas nécessaire.
+3) Garder les grands marqueurs de sections ci-dessous pour faciliter la maintenance.
+4) Pour améliorer la performance plus tard : sortir les images base64 vers des fichiers WebP.
+5) Pour une vraie IA en production : ne jamais mettre une clé API directement dans ce HTML.
+
+SOMMAIRE DU FICHIER :
+A. HEAD : SEO, partage social, polices, favicon
+B. CSS : design, layout, responsive
+C. HTML : écrans de l’application
+D. JS DATA : questions, réponses, contenus interactifs
+E. JS LOGIQUE : navigation, quiz, chat, interactions
+===============================================================================
+-->
+
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="x-dns-prefetch-control" content="on">
+<link rel="dns-prefetch" href="https://fonts.googleapis.com">
+<link rel="dns-prefetch" href="https://fonts.gstatic.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<title>Assistant pédagogique Français — 1BAC Maroc | La Boîte à Merveilles · Antigone · Le Dernier Jour</title>
+<meta name="description" content="Révisez le français 1BAC Maroc avec le Assistant pédagogique : résumés, plans de dissertation, fiches vocabulaire, quiz, sujets régionaux et barème de référence pour La Boîte à Merveilles, Antigone et Le Dernier Jour d'un Condamné.">
+<meta name="keywords" content="1BAC Maroc, français, La Boîte à Merveilles, Antigone, Le Dernier Jour d'un Condamné, Sefrioui, Anouilh, Hugo, bac marocain, dissertation, révision, quiz, sujets régionaux, CNEE">
+<meta name="author" content="Assistant pédagogique Français — 1BAC Maroc">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#1a1008">
+<meta name="application-name" content="Assistant pédagogique Français 1BAC Maroc">
+<meta name="educationalUse" content="Révision, entraînement, préparation à l’épreuve régionale">
+
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Assistant pédagogique Français — 1BAC Maroc 📚">
+<meta property="og:description" content="Pack freemium/premium pour réussir l'épreuve de français au 1BAC Maroc : résumés complets, plans rédigés, 90 questions quiz, sujets régionaux avec corrigés guidés. La Boîte à Merveilles · Antigone · Le Dernier Jour.">
+<meta property="og:image" content="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%221200%22%20height%3D%22630%22%20viewBox%3D%220%200%201200%20630%22%3E%3Crect%20width%3D%221200%22%20height%3D%22630%22%20fill%3D%22%231a1008%22%2F%3E%3Crect%20x%3D%2255%22%20y%3D%2255%22%20width%3D%221090%22%20height%3D%22520%22%20rx%3D%2236%22%20fill%3D%22none%22%20stroke%3D%22%23c8922a%22%20stroke-width%3D%226%22%2F%3E%3Ctext%20x%3D%22600%22%20y%3D%22220%22%20text-anchor%3D%22middle%22%20font-family%3D%22Georgia%2C%20serif%22%20font-size%3D%2266%22%20font-weight%3D%22700%22%20fill%3D%22%23fefcf8%22%3EFran%C3%A7ais%201BAC%20Maroc%3C%2Ftext%3E%3Ctext%20x%3D%22600%22%20y%3D%22305%22%20text-anchor%3D%22middle%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-size%3D%2232%22%20fill%3D%22%23e8c97a%22%3ELa%20Bo%C3%AEte%20%C3%A0%20Merveilles%20%C2%B7%20Antigone%20%C2%B7%20Le%20Dernier%20Jour%3C%2Ftext%3E%3Ctext%20x%3D%22600%22%20y%3D%22392%22%20text-anchor%3D%22middle%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-size%3D%2228%22%20fill%3D%22%23f7f2e8%22%3ER%C3%A9sum%C3%A9s%20%C2%B7%20M%C3%A9thode%20Bac%20%C2%B7%20Quiz%20%C2%B7%20Sujets%20r%C3%A9gionaux%3C%2Ftext%3E%3Ctext%20x%3D%22600%22%20y%3D%22475%22%20text-anchor%3D%22middle%22%20font-family%3D%22Georgia%2C%20serif%22%20font-size%3D%2230%22%20font-style%3D%22italic%22%20fill%3D%22%23c8922a%22%3EOutil%20p%C3%A9dagogique%20freemium%20de%20r%C3%A9vision%3C%2Ftext%3E%3C%2Fsvg%3E">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Assistant pédagogique Français — 1BAC Maroc : révisions complètes pour La Boîte à Merveilles, Antigone et Le Dernier Jour d'un Condamné">
+<meta property="og:locale" content="fr_MA">
+<meta property="og:site_name" content="Assistant pédagogique Français 1BAC">
+
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Assistant pédagogique Français — 1BAC Maroc 📚">
+<meta name="twitter:description" content="Résumés, plans rédigés, quiz 90 questions, sujets régionaux et corrigés guidés. La Boîte à Merveilles · Antigone · Le Dernier Jour.">
+<meta name="twitter:image" content="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%221200%22%20height%3D%22630%22%20viewBox%3D%220%200%201200%20630%22%3E%3Crect%20width%3D%221200%22%20height%3D%22630%22%20fill%3D%22%231a1008%22%2F%3E%3Crect%20x%3D%2255%22%20y%3D%2255%22%20width%3D%221090%22%20height%3D%22520%22%20rx%3D%2236%22%20fill%3D%22none%22%20stroke%3D%22%23c8922a%22%20stroke-width%3D%226%22%2F%3E%3Ctext%20x%3D%22600%22%20y%3D%22220%22%20text-anchor%3D%22middle%22%20font-family%3D%22Georgia%2C%20serif%22%20font-size%3D%2266%22%20font-weight%3D%22700%22%20fill%3D%22%23fefcf8%22%3EFran%C3%A7ais%201BAC%20Maroc%3C%2Ftext%3E%3Ctext%20x%3D%22600%22%20y%3D%22305%22%20text-anchor%3D%22middle%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-size%3D%2232%22%20fill%3D%22%23e8c97a%22%3ELa%20Bo%C3%AEte%20%C3%A0%20Merveilles%20%C2%B7%20Antigone%20%C2%B7%20Le%20Dernier%20Jour%3C%2Ftext%3E%3Ctext%20x%3D%22600%22%20y%3D%22392%22%20text-anchor%3D%22middle%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-size%3D%2228%22%20fill%3D%22%23f7f2e8%22%3ER%C3%A9sum%C3%A9s%20%C2%B7%20M%C3%A9thode%20Bac%20%C2%B7%20Quiz%20%C2%B7%20Sujets%20r%C3%A9gionaux%3C%2Ftext%3E%3Ctext%20x%3D%22600%22%20y%3D%22475%22%20text-anchor%3D%22middle%22%20font-family%3D%22Georgia%2C%20serif%22%20font-size%3D%2230%22%20font-style%3D%22italic%22%20fill%3D%22%23c8922a%22%3EOutil%20p%C3%A9dagogique%20freemium%20de%20r%C3%A9vision%3C%2Ftext%3E%3C%2Fsvg%3E">
+<meta name="twitter:image:alt" content="Assistant pédagogique Français 1BAC Maroc">
+
+
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231a1008'/%3E%3Ctext x='16' y='22' font-family='serif' font-size='18' font-weight='bold' text-anchor='middle' fill='%23c8922a'%3EF%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%231a1008'/%3E%3Ctext x='90' y='130' font-family='serif' font-size='110' font-weight='bold' text-anchor='middle' fill='%23c8922a'%3EF%3C/text%3E%3C/svg%3E">
+
+
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Tajawal:wght@300;400;500;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet"></noscript>
+
+
+
+
+
+
+
+<meta name="color-scheme" content="light">
+<meta name="format-detection" content="telephone=no">
+<meta name="application-name" content="1BAC Français Maroc">
+<meta name="apple-mobile-web-app-title" content="1BAC Français">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=()">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "EducationalApplication",
+  "name": "Assistant pédagogique Français — 1BAC Maroc",
+  "applicationCategory": "EducationalApplication",
+  "operatingSystem": "Web",
+  "inLanguage": "fr-MA",
+  "educationalLevel": "1BAC Maroc",
+  "learningResourceType": ["résumés", "fiches", "quiz", "méthode", "sujets d'examen"],
+  "teaches": ["La Boîte à Merveilles", "Antigone", "Le Dernier Jour d'un Condamné", "français 1BAC"],
+  "audience": {
+    "@type": "EducationalAudience",
+    "educationalRole": "student"
+  },
+  "isAccessibleForFree": false,
+  "description": "Plateforme freemium de révision du français 1BAC Maroc : aperçu gratuit, fiches, méthode Bac, vocabulaire, quiz et accès premium aux ressources complètes."
+}
+</script>
+
+<!-- Version pédagogique finale : formulation institutionnelle prudente + critères de relecture renforcés -->
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/gamification.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1a1008">
+<link rel="apple-touch-icon" href="assets/img/icon-192.png">
+</head>
+<body>
+<!-- Acces premium: configurer window.PF1BAC_ACCESS_API si votre endpoint n est pas /api/validate-access. Exemple fourni dans server-example/server.js. -->
+<!-- Indicateur de performance : barre de progression chargement -->
+<div id="perf-progress" style="position:fixed;top:0;left:0;width:0%;height:3px;background:linear-gradient(90deg,#c8922a,#e8c97a);z-index:99999;transition:width 0.3s ease;pointer-events:none;" aria-hidden="true"></div>
+
+

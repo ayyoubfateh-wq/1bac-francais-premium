@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "validate": "node tools/validate-content.mjs",
+    "build": "node tools/validate-content.mjs && node tools/build-html.mjs",
     "generate-codes": "node tools/generate-codes.mjs 20 BAC",
     "generate-codes:50": "node tools/generate-codes.mjs 50 BAC"
   },

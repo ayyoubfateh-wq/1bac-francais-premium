@@ -1,0 +1,100 @@
+<!-- SECTION : ACCUEIL -->
+<div id="home" class="screen pad">
+  <div class="eyebrow">Programme 1BAC Maroc</div>
+  <div class="heading">Les trois œuvres au programme</div>
+
+  <div id="gContinueCardHome" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border:1px solid var(--border);border-radius:16px;background:var(--gold-pale);padding:14px 18px;margin-bottom:1.4rem;">
+    <div class="g-cont-txt">
+      <span class="g-cont-eyebrow">Révision gamifiée</span>
+      <b>🗺️ Ton parcours t'attend</b>
+      <span class="g-cont-book">Leçons de 5 questions · gagne des XP · garde ta série 🔥</span>
+    </div>
+    <button class="g-cont-btn" style="background:var(--teal);" onclick="showScreen('parcours', gGetParcoursBtn())">JOUER →</button>
+  </div>
+  
+  <div class="home-intro-pro">
+    <h2>Plateforme complète de préparation au régional de Français</h2>
+    <p style="font-weight:600;color:#1a1a1a;">
+      Une plateforme conçue pour guider l’élève du cours jusqu’à la réussite au régional.
+    </p>
+    <h2></h2>
+    <p>
+      Un espace pédagogique clair pour accompagner l’élève de 1BAC : comprendre les œuvres,
+      réviser les notions essentielles, s’entraîner avec des quiz, consulter les sujets régionaux
+      et progresser étape par étape vers une réponse structurée pour l’examen régional.
+    </p>
+    <div class="home-badges-pro">
+      <span>Programme 1BAC Maroc</span>
+      <span>Résumés détaillés</span>
+      <span>Méthode régional</span>
+      <span>Sujets régionaux</span>
+      <span>Entraînement guidé</span>
+    </div>
+  </div>
+  <div class="eyebrow">Parcours conseillé</div>
+  <div class="parcours-eleve">
+    <div class="parcours-step">
+      <strong>1. Comprendre</strong>
+      <p>Commence par les résumés et les personnages pour maîtriser chaque œuvre.</p>
+    </div>
+    <div class="parcours-step">
+      <strong>2. Retenir</strong>
+      <p>Utilise les fiches, le vocabulaire et les méthodes pour organiser tes idées.</p>
+    </div>
+    <div class="parcours-step">
+      <strong>3. S’entraîner</strong>
+      <p>Teste-toi avec les quiz, les réponses modèles et les sujets régionaux.</p>
+    </div>
+    <div class="parcours-step">
+      <strong>4. Réussir</strong>
+      <p>Applique le barème de référence pour améliorer tes réponses comme à l’examen.</p>
+    </div>
+  </div>
+
+<div class="books-grid">
+    <button class="book-card" onclick="goBook('boite')">
+      <div class="book-spine" style="background:linear-gradient(90deg,#1a6b5a,#2e9c7a)"></div>
+      <div class="book-body">
+        <span class="icon">📦</span>
+        <h3>La Boîte à Merveilles</h3>
+        <p class="auth">Ahmed Sefrioui · 1954</p>
+        <img data-img-key="img_1" loading="lazy" decoding="async" class="author-photo" src="assets/img/placeholder.gif" alt="Portrait d\'Ahmed Sefrioui">
+        <span class="tag" style="background:#E1F5EE;color:#0F6E56;">Autobiographie</span>
+        <span class="book-arrow" style="background:#1a6b5a;color:#fff;">→</span>
+      </div>
+    </button>
+    <button class="book-card" onclick="goBook('antigone')">
+      <div class="book-spine" style="background:linear-gradient(90deg,#4a3070,#7a5ab0)"></div>
+      <div class="book-body">
+        <span class="icon">🏛️</span>
+        <h3>Antigone</h3>
+        <p class="auth">Jean Anouilh · 1944</p>
+        <img data-img-key="img_2" loading="lazy" decoding="async" class="author-photo" src="assets/img/placeholder.gif" alt="Portrait de Jean Anouilh">
+        <span class="tag" style="background:#EEEDFE;color:#534AB7;">Tragédie</span>
+        <span class="book-arrow" style="background:#4a3070;color:#fff;">→</span>
+      </div>
+    </button>
+    <button class="book-card" onclick="goBook('condamne')">
+      <div class="book-spine" style="background:linear-gradient(90deg,#b5432a,#e06040)"></div>
+      <div class="book-body">
+        <span class="icon">⛓️</span>
+        <h3>Le Dernier Jour d'un Condamné</h3>
+        <p class="auth">Victor Hugo · 1829</p>
+        <img data-img-key="img_3" loading="lazy" decoding="async" class="author-photo" src="assets/img/placeholder.gif" alt="Portrait de Victor Hugo">
+        <span class="tag" style="background:#FAECE7;color:#993C1D;">Roman engagé</span>
+        <span class="book-arrow" style="background:#b5432a;color:#fff;">→</span>
+      </div>
+    </button>
+  </div>
+  <div class="features-strip">
+    <div class="feat"><div class="fi">📖</div><h4>Résumés</h4><p>Détaillés chapitre par chapitre</p></div>
+    <div class="feat"><div class="fi">👥</div><h4>Personnages</h4><p>Analyses exhaustives</p></div>
+    <div class="feat"><div class="fi">📋</div><h4>Fiches Bac</h4><p>Thèmes, axes, citations</p></div>
+    <div class="feat"><div class="fi">✏️</div><h4>Méthode régional</h4><p>Dissertation & commentaire</p></div>
+    <div class="feat"><div class="fi">📑</div><h4>Cadre Réf.</h4><p>Référentiel 1BAC</p></div>
+    <div class="feat"><div class="fi">🎯</div><h4>Quiz</h4><p>Plus de 300 questions corrigées : contexte, analyse, langue, réaction</p></div>
+    <div class="feat"><div class="fi">🤖</div><h4>Assistant pédagogique</h4><p>Réponses guidées incluses</p></div>
+  </div>
+</div>
+
+

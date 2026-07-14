@@ -1,10 +1,10 @@
 [build]
   publish = "."
   functions = "netlify/functions"
-  # Filet de sécurité : valide tout le contenu avant chaque déploiement.
-  # Si une question/étude/sujet est cassé, le déploiement échoue et le site
-  # en ligne reste intact.
-  command = "npm run validate"
+  # Build : valide tout le contenu PUIS assemble index.html depuis les
+  # fragments src/html/. Si quoi que ce soit est cassé (contenu ou
+  # assemblage), le déploiement échoue et le site en ligne reste intact.
+  command = "npm run build"
 
 [functions]
   node_bundler = "esbuild"

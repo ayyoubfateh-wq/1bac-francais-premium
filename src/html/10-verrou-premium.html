@@ -1,0 +1,84 @@
+<div id="premiumLockScreen" role="dialog" aria-modal="true" aria-labelledby="premiumLockTitle" style="position:fixed;inset:0;width:100%;min-height:100vh;background:radial-gradient(circle at top,#2a1a0d 0%,#1a1008 55%,#0f0904 100%);color:#fefcf8;display:flex;align-items:center;justify-content:center;z-index:999999;padding:17px;font-family:'Tajawal',Arial,sans-serif;overflow:auto;">
+  <div class="premium-lock-panel optimized-final">
+
+    <section class="premium-card-final premium-main-final" aria-label="Aperçu et valeur de la plateforme">
+      <span class="premium-badge-final">🎁 Aperçu gratuit</span>
+
+      <h1>Réviser le Français pour le régional devient simple, clair et guidé.</h1>
+      <p class="premium-subtitle-final">
+        Une plateforme Premium conçue pour les élèves de 1BAC Maroc : comprendre les œuvres,
+        retenir l’essentiel, s’entraîner avec méthode et répondre comme à l’examen.
+      </p>
+
+      <button type="button" id="trialStartBtn" class="g-trial-cta" onclick="gStartTrial()">
+        🎮 Essayer gratuitement — 1 leçon offerte
+        <span>Sans inscription · 5 questions · 2 minutes</span>
+      </button>
+
+      <div class="premium-benefits-final" aria-label="Bénéfices principaux">
+        <div class="premium-benefit-final">
+          <strong>Moins de confusion</strong>
+          <span>Les trois œuvres sont organisées dans un parcours clair.</span>
+        </div>
+        <div class="premium-benefit-final">
+          <strong>Révision plus rapide</strong>
+          <span>Résumés, fiches, vocabulaire et quiz au même endroit.</span>
+        </div>
+        <div class="premium-benefit-final">
+          <strong>Réponses type régional</strong>
+          <span>Méthode, exemples corrigés et réponses modèles.</span>
+        </div>
+      </div>
+
+      <div class="premium-proof-final">
+        <div class="premium-sample-final">
+          <h3>📖 Aperçu concret — Antigone</h3>
+          <p><strong>Idée essentielle :</strong> Antigone refuse l’ordre de Créon parce qu’elle place la conscience morale au-dessus de la loi politique.</p>
+          <p><strong>Réponse type Bac :</strong> Antigone incarne la résistance intérieure : elle préfère mourir plutôt que trahir ses valeurs et accepter une injustice.</p>
+        </div>
+
+        <div class="premium-sample-final">
+          <h3>🎯 Ce que l’élève reçoit</h3>
+          <ul>
+            <li>Résumés détaillés des trois œuvres</li>
+            <li>Fiches personnages, thèmes et vocabulaire</li>
+            <li>Quiz corrigés pour vérifier les acquis</li>
+            <li>Méthode régional + réponses modèles</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <aside class="premium-card-final premium-action-final" aria-label="Accès Premium et achat">
+      <span class="premium-badge-final" style="margin-left:auto;margin-right:auto;">🔒 Accès Premium</span>
+      <h2 id="premiumLockTitle">Pack complet 1BAC Français</h2>
+
+      <div id="trialProgressBanner" class="g-trial-banner" style="display:none;"></div>
+
+      <div class="premium-price-final">
+        <strong>100 DH</strong><span>/ accès complet</span>
+      </div>
+
+      <a href="https://wa.me/212767484041?text=Bonjour%2C%20je%20veux%20acc%C3%A9der%20%C3%A0%20la%20plateforme%20Premium%201BAC%20Fran%C3%A7ais%20%C3%A0%20100%20DH.%20Merci%20de%20m%E2%80%99envoyer%20les%20instructions%20de%20paiement." target="_blank" rel="noopener" aria-label="Acheter l’accès Premium 1BAC Français via WhatsApp" class="premium-primary-cta-final">
+        💬 Acheter l’accès Premium sur WhatsApp
+      </a>
+
+      <div class="premium-reassurance-final" aria-label="Éléments de confiance">
+        <span>✅ Programme 1BAC Maroc</span>
+        <span>✅ Paiement guidé</span>
+        <span>✅ Code après validation</span>
+        <span>✅ Support WhatsApp</span>
+      </div>
+
+      <div class="premium-login-final">
+        <p>Déjà acheté ? Entrez votre code d’accès.</p>
+        <input id="premiumAccessCode" type="password" autocomplete="off" placeholder="Code d’accès" aria-label="Code d’accès premium">
+        <button type="button" onclick="premiumCheckAccess()">Accéder maintenant</button>
+        <p id="premiumAccessError" role="alert" aria-live="polite" style="display:none;margin:10px 0 0;color:#ffb4a8;font-size:13px;">Code incorrect. Vérifiez votre code puis réessayez.</p>
+      </div>
+
+      <span class="premium-small-note-final">Aucune coordonnée bancaire n’est stockée dans ce fichier. Les instructions sont envoyées en privé via WhatsApp.</span>
+    </aside>
+
+  </div>
+</div>

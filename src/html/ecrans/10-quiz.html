@@ -1,0 +1,60 @@
+<!-- SECTION : QUIZ -->
+<div id="quiz" class="screen pad">
+  <div id="quiz-select-screen">
+    <div class="eyebrow">Testez vos connaissances</div>
+    <div class="heading">Quiz interactif</div>
+    <div class="quiz-select">
+      <button class="quiz-btn" onclick="startQuiz('boite')">
+        <div class="quiz-btn-top" style="background:linear-gradient(90deg,#1a6b5a,#2e9c7a);"></div>
+        <div class="quiz-btn-body"><h3>La Boîte à Merveilles</h3><p>Ahmed Sefrioui</p><div class="qcount">30 questions · contexte/analyse/langue/réaction</div></div>
+      </button>
+      <button class="quiz-btn" onclick="startQuiz('antigone')">
+        <div class="quiz-btn-top" style="background:linear-gradient(90deg,#4a3070,#7a5ab0);"></div>
+        <div class="quiz-btn-body"><h3>Antigone</h3><p>Jean Anouilh</p><div class="qcount">30 questions · contexte/analyse/langue/réaction</div></div>
+      </button>
+      <button class="quiz-btn" onclick="startQuiz('condamne')">
+        <div class="quiz-btn-top" style="background:linear-gradient(90deg,#b5432a,#e06040);"></div>
+        <div class="quiz-btn-body"><h3>Le Dernier Jour d'un Condamné</h3><p>Victor Hugo</p><div class="qcount">30 questions · contexte/analyse/langue/réaction</div></div>
+      </button>
+      <button class="quiz-btn" onclick="startQuiz('mix')">
+        <div class="quiz-btn-top" style="background:linear-gradient(90deg,#c8922a,#e8c97a);"></div>
+        <div class="quiz-btn-body"><h3>Quiz Mixte</h3><p>Les 3 œuvres</p><div class="qcount">30 questions · 10 par œuvre</div></div>
+      </button>
+    </div>
+  </div>
+  <div id="quiz-game-screen" style="display:none;">
+    <div class="qprogress-bar"><div class="qprogress-fill" id="qpfill" style="width:0;background:var(--gold);"></div></div>
+    <div class="qmeta"><span id="qnum">Q1/30</span><span class="qbadge" id="qcat">QCM</span></div>
+    <div class="question-text" id="qtext"></div>
+    <div class="options" id="qopts"></div>
+    <div id="qfeedback" style="display:none;"></div>
+    <div id="qaiblock" style="display:none;">
+      <div class="ai-exp-label">✦ Explication du Assistant pédagogique</div>
+      <div class="ai-exp" id="qaicontent"></div>
+    </div>
+    <div id="qbtns"></div>
+  </div>
+  <div id="quiz-results-screen" style="display:none;">
+    <div class="results-box">
+      <div class="score-ring" id="sring"><span class="sn" id="snum"></span><span class="sd" id="sden"></span></div>
+      <h2 id="rtitle"></h2>
+      <p id="rmsg"></p>
+      <div class="stats-row">
+        <div class="stat"><div class="val" id="stok" style="color:#2e7d32;"></div><div class="lbl">Correctes</div></div>
+        <div class="stat"><div class="val" id="stko" style="color:#c62828;"></div><div class="lbl">Incorrectes</div></div>
+        <div class="stat"><div class="val" id="stpct"></div><div class="lbl">Score</div></div>
+      </div>
+      <div class="review-list" id="revlist"></div>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+        <button class="btn-gold" onclick="resetQuiz()">Nouveau quiz</button>
+        <button class="btn-dark" onclick="askProf('Je viens de terminer un quiz sur ' + currentBookName + '. Donne-moi des conseils de révision personnalisés et les points clés à retenir pour le Bac.')">Conseils du Assistant pédagogique →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+

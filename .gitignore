@@ -4,3 +4,6 @@ generated-codes/
 # Local Netlify folder
 .netlify
 .env
+
+# Artefact généré par npm run build (source : src/html/)
+/index.html

@@ -1,0 +1,26 @@
+<!-- SECTION : PROF IA / CHAT -->
+<div id="chat" class="screen">
+  <div class="chat-book-bar">
+    <div class="chat-accent" id="chat-accent" style="background:var(--gold);"></div>
+    <div>
+      <h3 id="chat-title">Assistant pédagogique Français</h3>
+      <p id="chat-sub">Choisissez une œuvre depuis l'accueil</p>
+    </div>
+    <div class="chat-avatar" onclick="resetChat()" title="Nouvelle conversation" style="cursor:pointer;">↺</div>
+  </div>
+  <div class="messages" id="msgs">
+    <div class="msg ai">Marhaba ! Je suis votre professeur de français IA pour le 1BAC. Sélectionnez une œuvre depuis l'accueil, ou posez-moi directement votre question sur La Boîte à Merveilles, Antigone ou Le Dernier Jour d'un Condamné. Je suis là pour vous aider à réussir votre Bac ! 📚</div>
+  </div>
+  <div class="pills">
+    <button class="pill" onclick="qpill('Explique-moi la différence entre les trois œuvres du programme')">Comparer les 3 œuvres</button>
+    <button class="pill" onclick="qpill('Quels sont les thèmes communs aux trois œuvres du 1BAC ?')">Thèmes communs</button>
+    <button class="pill" onclick="qpill('Comment rédiger une bonne introduction de dissertation pour le Bac ?')">Méthode dissertation</button>
+    <button class="pill" onclick="qpill('Comment faire un bon commentaire composé ?')">Commentaire composé</button>
+    <button class="pill" onclick="qpill('Quelles sont les figures de style les plus importantes à connaître pour le Bac ?')">Figures de style</button>
+  </div>
+  <div class="input-row">
+    <input type="text" id="chatinput" placeholder="Posez votre question..." onkeydown="if(event.key==='Enter')sendChat()"/>
+    <button onclick="sendChat()">Envoyer</button>
+  </div>
+</div>
+
