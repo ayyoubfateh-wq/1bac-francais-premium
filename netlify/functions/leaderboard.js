@@ -4,6 +4,7 @@
    Clé par appareil (semaine/deviceId) : pas de course en écriture.
    Aucune donnée personnelle : pseudo choisi + XP, c'est tout. */
 const { connectLambda, getStore } = require('@netlify/blobs');
+const { isValidPremiumKey } = require('./lib/premium-auth.js');
 
 function isoWeek(d) {
   const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
@@ -60,6 +61,11 @@ exports.handler = async (event) => {
     let body = {};
     try { body = JSON.parse(event.body || '{}'); } catch (_) {
       return { statusCode: 400, headers, body: JSON.stringify({ ok: false, error: 'invalid_json' }) };
+    }
+    /* la ligue est réservée aux membres : preuve d'un code vendu exigée
+       (empreinte SHA-256, la même que pour le contenu premium) */
+    if (!isValidPremiumKey(body.key)) {
+      return { statusCode: 403, headers, body: JSON.stringify({ ok: false, error: 'forbidden' }) };
     }
     const deviceId = String(body.deviceId || '').trim();
     if (!/^[a-z0-9-]{10,64}$/i.test(deviceId)) {

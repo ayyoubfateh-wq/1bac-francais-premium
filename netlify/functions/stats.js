@@ -6,6 +6,7 @@
    exacts. Aucune donnée personnelle : des horodatages, rien d'autre. */
 const crypto = require('crypto');
 const { connectLambda, getStore } = require('@netlify/blobs');
+const { fromOurSite } = require('./lib/premium-auth.js');
 
 const VALID_EVENTS = [
   'visit',        // visite (1 max/jour/appareil, dédupliquée côté client)
@@ -84,7 +85,12 @@ exports.handler = async (event) => {
     }
   }
 
-  /* comptage d'un événement (public, anonyme, sans écrasement possible) */
+  /* comptage d'un événement (anonyme, sans écrasement possible).
+     Ouvert aux visiteurs non payants (visites, essais…) mais filtré par
+     origine : les requêtes qui ne viennent pas du site sont rejetées. */
+  if (!fromOurSite(event)) {
+    return { statusCode: 403, headers, body: JSON.stringify({ ok: false, error: 'forbidden_origin' }) };
+  }
   const ev = String(body.event || '');
   if (VALID_EVENTS.indexOf(ev) === -1) {
     return { statusCode: 200, headers, body: JSON.stringify({ ok: false, error: 'invalid_event' }) };

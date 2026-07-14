@@ -6,25 +6,8 @@
    private/content.json est généré par `npm run build` et incorporé au
    bundle de cette fonction par esbuild — il n'existe nulle part sur le
    site public. */
-const crypto = require('crypto');
+const { isValidPremiumKey, parseHashes } = require('./lib/premium-auth.js');
 const CONTENT = require('../../private/content.json');
-
-function parseHashes() {
-  const raw = process.env.PREMIUM_CODE_HASHES || '';
-  return raw
-    .split(/[\n,; ]+/)
-    .map((x) => x.trim().toLowerCase())
-    .filter((x) => /^[a-f0-9]{64}$/.test(x));
-}
-
-function safeEqualHex(a, b) {
-  if (!a || !b || a.length !== b.length) return false;
-  try {
-    return crypto.timingSafeEqual(Buffer.from(a, 'hex'), Buffer.from(b, 'hex'));
-  } catch (_) {
-    return false;
-  }
-}
 
 exports.handler = async (event) => {
   const headers = {
@@ -44,17 +27,10 @@ exports.handler = async (event) => {
     return { statusCode: 400, headers, body: JSON.stringify({ ok: false, error: 'invalid_json' }) };
   }
 
-  const key = String(body.key || '').trim().toLowerCase();
-  if (!/^[a-f0-9]{64}$/.test(key)) {
-    return { statusCode: 403, headers, body: JSON.stringify({ ok: false, error: 'invalid_key' }) };
-  }
-
-  const hashes = parseHashes();
-  if (!hashes.length) {
+  if (!parseHashes().length) {
     return { statusCode: 500, headers, body: JSON.stringify({ ok: false, error: 'codes_not_configured' }) };
   }
-  const valid = hashes.some((h) => safeEqualHex(key, h));
-  if (!valid) {
+  if (!isValidPremiumKey(body.key)) {
     return { statusCode: 403, headers, body: JSON.stringify({ ok: false, error: 'invalid_key' }) };
   }
 

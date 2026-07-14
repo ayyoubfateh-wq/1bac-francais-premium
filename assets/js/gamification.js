@@ -1024,11 +1024,13 @@ function renderBilan(){
    ados. Pseudo librement choisi, XP de la semaine, zéro donnée perso. */
 function syncLeaderboard(){
   if (!isPremium() || !G.pseudo || !G.week.xp) return;
+  var k = getSyncKey();
+  if (!k) return; // la ligue exige la preuve du code (vérifiée côté serveur)
   try {
     fetch('/api/leaderboard', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ deviceId: window.pf1bacDeviceId ? window.pf1bacDeviceId() : '', pseudo: G.pseudo, xp: G.week.xp })
+      body: JSON.stringify({ key: k, deviceId: window.pf1bacDeviceId ? window.pf1bacDeviceId() : '', pseudo: G.pseudo, xp: G.week.xp })
     }).then(function(){ renderLeaderboard(); }).catch(function(){});
   } catch(e){}
 }
