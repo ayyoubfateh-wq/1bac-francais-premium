@@ -17,6 +17,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
+import esbuild from 'esbuild';
 import { loadContent } from './load-content.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -144,8 +145,51 @@ for (const f of ['sw.js', 'manifest.webmanifest', 'gestion-codes.html']) {
 }
 fs.writeFileSync(path.join(PRIVATE, 'content.json'), JSON.stringify(contenu), 'utf8');
 
+/* ---------------------------------------------------------- minification
+   JS et CSS publics uniquement. IMPORTANT : minifyIdentifiers = false —
+   on ne renomme AUCUN identifiant. L'architecture repose sur des globaux
+   partagés entre fichiers (window.fn, const de portée script comme qs/cur,
+   PF_DATA) : les renommer casserait tout. On ne gagne « que » les espaces
+   et la syntaxe, ce qui suffit largement sur ces fichiers verbeux.
+   Le HTML (déjà léger) et la page admin (avec JS/CSS inline) ne sont pas
+   touchés — sécurité avant grammes. */
+let avant = 0, apres = 0;
+function minify(rel, loader) {
+  const p = path.join(DIST, rel);
+  const src = fs.readFileSync(p, 'utf8');
+  avant += Buffer.byteLength(src);
+  let outCode = src;
+  try {
+    const r = esbuild.transformSync(src, {
+      loader,
+      minifyWhitespace: true,
+      minifySyntax: true,
+      minifyIdentifiers: false,
+      legalComments: 'none',
+      charset: 'utf8',
+    });
+    outCode = r.code;
+  } catch (e) {
+    err(`minification échouée (${rel}) : ${e.message}`);
+  }
+  fs.writeFileSync(p, outCode, 'utf8');
+  apres += Buffer.byteLength(outCode);
+}
+for (const f of ['assets/js/app.js', 'assets/js/gamification.js', 'assets/js/production.js', 'assets/js/content-loader.js', 'assets/data/trial.js', 'sw.js']) {
+  minify(f, 'js');
+}
+for (const f of ['assets/css/style.css', 'assets/css/gamification.css']) {
+  minify(f, 'css');
+}
+if (errors.length) {
+  console.error('❌ Build refusé (minification) :');
+  for (const e of errors) console.error('   - ' + e);
+  process.exit(1);
+}
+
 /* ------------------------------------------------- garde anti-fuite
-   Aucune chaîne du contenu protégé ne doit exister dans dist/. */
+   Scanne le dist/ FINAL (après minification) : aucune chaîne du contenu
+   protégé ne doit y apparaître. */
 const sonde = [
   '"ans":',                                  // réponses de la banque complète
   screensPrives.resumes.slice(200, 260),     // extrait d'un écran protégé
@@ -171,3 +215,4 @@ console.log(`✅ Site public assemblé : dist/ (${out.length} caractères, ${man
 console.log(`✅ Contenu premium : private/content.json (version ${contenu.version}) — ${ECRANS_PROTEGES.length} écrans protégés + banque complète`);
 console.log(`✅ Essai public limité à ${trial.questions.boite.length} questions (Contexte & auteur, La Boîte à Merveilles)`);
 console.log('✅ Garde anti-fuite : aucun contenu premium dans dist/');
+console.log(`✅ Minifié JS+CSS : ${(avant / 1024).toFixed(0)} Ko → ${(apres / 1024).toFixed(0)} Ko (−${Math.round(100 * (1 - apres / avant))} %)`);

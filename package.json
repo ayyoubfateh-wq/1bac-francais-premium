@@ -5,11 +5,15 @@
   "scripts": {
     "validate": "node tools/validate-content.mjs",
     "build": "node tools/validate-content.mjs && node tools/build-html.mjs",
+    "backup": "node tools/backup-blobs.mjs",
     "generate-codes": "node tools/generate-codes.mjs 20 BAC",
     "generate-codes:50": "node tools/generate-codes.mjs 50 BAC"
   },
   "dependencies": {
     "@netlify/blobs": "^10.7.9",
     "@supabase/supabase-js": "^2.105.1"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.1"
   }
 }

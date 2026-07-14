@@ -11,3 +11,6 @@ generated-codes/
 # Artefacts du build v2 (générés par npm run build)
 /dist/
 /private/
+
+# Sauvegardes des données serveur (données clients — privé)
+/backups/
