@@ -46,6 +46,16 @@ function render(){
   var wrap = el('gProd');
   if (!wrap) return;
   var d = P.draft;
+  /* GARDE : un brouillon peut référencer un sujet pas encore chargé
+     (les sujets arrivent avec le contenu membre, APRÈS le premier rendu).
+     Sans cette garde, l'accès SUJETS[d.sujet].sujet plantait et laissait
+     la page définitivement vide. On affiche un état d'attente ;
+     gProdRefresh() relancera le rendu dès l'injection du contenu. */
+  if (d && !SUJETS[d.sujet]) {
+    wrap.innerHTML = '<div class="g-prod-intro"><p><b>⏳ Ton brouillon arrive…</b> ' +
+      'Le contenu membre se charge. Si ce message reste affiché, vérifie ta connexion puis recharge la page.</p></div>';
+    return;
+  }
   if (!d) renderChoix(wrap);
   else if (d.step === 1) renderComprendre(wrap, d);
   else if (d.step === 2) renderPlan(wrap, d);
@@ -229,7 +239,10 @@ window.gProdShowModel = function(i, texteEleve){
 };
 
 /* re-rendu après l'injection du contenu premium (content-loader.js) */
-window.gProdRefresh = function(){ if (!P.draft) render(); };
+/* Toujours re-rendre : au chargement, un brouillon existant a pu être
+   affiché en état d'attente (sujets pas encore injectés) — c'est
+   précisément ce rendu-là qu'il faut rejouer une fois le contenu là. */
+window.gProdRefresh = function(){ render(); };
 
 document.addEventListener('DOMContentLoaded', render);
 })();

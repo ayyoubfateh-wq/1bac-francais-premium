@@ -17,7 +17,7 @@ const CONTENT = JSON.parse(fs.readFileSync(path.join(ROOT, 'private', 'content.j
 const SCREEN_IDS = ['home', 'parcours', 'espace', 'production', 'auteurs', 'resumes', 'fiches',
   'methode', 'modeles', 'quiz', 'vocabulaire', 'bareme', 'regionaux', 'cadre', 'chat'];
 
-function bootstrap({ premium = false } = {}) {
+function bootstrap({ premium = false, preSeed = null } = {}) {
   const fb = createFakeBrowser();
   const { document: doc, body } = fb;
 
@@ -54,6 +54,7 @@ function bootstrap({ premium = false } = {}) {
     sujets: [],
   };
 
+  if (preSeed) preSeed(fb);
   fb.loadEngines(ASSETS, ['app.js', 'gamification.js', 'production.js', 'content-loader.js']);
   fb.fireDOMContentLoaded();
   fb.runTimers();
@@ -182,5 +183,19 @@ export async function run() {
     win.gProdFinish(); fb.runTimers();
     assert(granted && granted.note === 8, 'note 8/8 attendue, obtenu : ' + (granted && granted.note));
     assert(granted.xp > 0, 'XP de production attendus');
+  });
+
+  await test('régression : brouillon en cours + sujets pas encore chargés → jamais de page vide', () => {
+    /* Bug réel (15/07/2026) : un membre avec un brouillon de production
+       rouvrait le site → render() plantait sur SUJETS[draft.sujet] avant
+       l'injection du contenu → page définitivement vide. */
+    const fb = bootstrap({ premium: true, preSeed: (f) => {
+      f.window.localStorage.setItem('pf1bac_prod_v1', JSON.stringify({ draft: { sujet: 3, step: 2, these: 'Ma thèse' }, history: [] }));
+    } });
+    const gp = fb.document.getElementById('gProd');
+    assert(gp.innerHTML.trim().length > 0, 'gProd ne doit pas être vide avant injection (état d attente attendu)');
+    assert(/brouillon|charge/i.test(gp.innerHTML), 'message d attente attendu avant injection');
+    injectFull(fb);
+    assert(/Bâtir le plan|Étape 2/i.test(gp.innerHTML), 'après injection le brouillon doit se rouvrir à l étape 2, obtenu : ' + gp.innerHTML.slice(0, 90));
   });
 }

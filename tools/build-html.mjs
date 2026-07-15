@@ -132,7 +132,42 @@ function copyDir(from, to) {
   }
 }
 
-fs.writeFileSync(path.join(DIST, 'index.html'), out, 'utf8');
+/* ------------------------------------------------ empreinte du build
+   Identifie CE build : sert à versionner les URLs d'assets (?v=…) et le
+   cache du service worker. Deux builds différents ⇒ deux empreintes ⇒
+   plus jamais de mélange ancien/nouveau dans les navigateurs. */
+const FICHIERS_VERSIONNES = [
+  'assets/css/style.css',
+  'assets/css/gamification.css',
+  'assets/data/trial.js',
+  'assets/js/app.js',
+  'assets/js/gamification.js',
+  'assets/js/production.js',
+  'assets/js/content-loader.js',
+];
+const hBuild = crypto.createHash('sha256').update(out).update(trialJs);
+for (const f of FICHIERS_VERSIONNES) {
+  const src = path.join(ROOT, f);
+  if (fs.existsSync(src)) hBuild.update(fs.readFileSync(src));
+}
+hBuild.update(fs.readFileSync(path.join(ROOT, 'sw.js')));
+const BUILD = hBuild.digest('hex').slice(0, 10);
+
+/* tamponne ?v=BUILD sur chaque référence d'asset du HTML public */
+let outStamped = out;
+for (const f of FICHIERS_VERSIONNES) {
+  outStamped = outStamped.split(`"${f}"`).join(`"${f}?v=${BUILD}"`);
+}
+for (const f of FICHIERS_VERSIONNES) {
+  if (!outStamped.includes(`"${f}?v=${BUILD}"`)) err(`tamponnage de version raté pour ${f}`);
+}
+if (errors.length) {
+  console.error('❌ Build refusé (versionnage) :');
+  for (const e of errors) console.error('   - ' + e);
+  process.exit(1);
+}
+
+fs.writeFileSync(path.join(DIST, 'index.html'), outStamped, 'utf8');
 fs.writeFileSync(path.join(DIST, 'assets', 'data', 'trial.js'), trialJs, 'utf8');
 copyDir(path.join(ROOT, 'assets', 'css'), path.join(DIST, 'assets', 'css'));
 copyDir(path.join(ROOT, 'assets', 'img'), path.join(DIST, 'assets', 'img'));
@@ -140,7 +175,11 @@ fs.mkdirSync(path.join(DIST, 'assets', 'js'), { recursive: true });
 for (const f of ['app.js', 'gamification.js', 'production.js', 'content-loader.js']) {
   fs.copyFileSync(path.join(ROOT, 'assets', 'js', f), path.join(DIST, 'assets', 'js', f));
 }
-for (const f of ['sw.js', 'manifest.webmanifest', 'gestion-codes.html']) {
+/* le service worker reçoit l'empreinte du build (cache dédié + shell versionné) */
+const swSrc = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
+if (!swSrc.includes('__PF_BUILD__')) { console.error('❌ sw.js sans marqueur __PF_BUILD__'); process.exit(1); }
+fs.writeFileSync(path.join(DIST, 'sw.js'), swSrc.split('__PF_BUILD__').join(BUILD), 'utf8');
+for (const f of ['manifest.webmanifest', 'gestion-codes.html']) {
   fs.copyFileSync(path.join(ROOT, f), path.join(DIST, f));
 }
 fs.writeFileSync(path.join(PRIVATE, 'content.json'), JSON.stringify(contenu), 'utf8');
@@ -216,3 +255,4 @@ console.log(`✅ Contenu premium : private/content.json (version ${contenu.versi
 console.log(`✅ Essai public limité à ${trial.questions.boite.length} questions (Contexte & auteur, La Boîte à Merveilles)`);
 console.log('✅ Garde anti-fuite : aucun contenu premium dans dist/');
 console.log(`✅ Minifié JS+CSS : ${(avant / 1024).toFixed(0)} Ko → ${(apres / 1024).toFixed(0)} Ko (−${Math.round(100 * (1 - apres / avant))} %)`);
+console.log(`✅ Version du build : ${BUILD} (assets tamponnés + cache SW dédié — fini les versions mélangées)`);
