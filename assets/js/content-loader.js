@@ -48,6 +48,11 @@
         Array.prototype.push.apply(D.etudes[b], data.etudes[b]);
       }
     });
+    if (data.annales) {
+      if (!D.annales) D.annales = [];
+      D.annales.length = 0;
+      Array.prototype.push.apply(D.annales, data.annales);
+    }
     if (data.sujets) {
       D.sujets.length = 0;
       Array.prototype.push.apply(D.sujets, data.sujets);
@@ -79,6 +84,8 @@
     });
     if (typeof window.gContentRefresh === 'function') window.gContentRefresh();
     if (typeof window.gProdRefresh === 'function') window.gProdRefresh();
+    if (typeof window.gAnnalesRefresh === 'function') window.gAnnalesRefresh();
+    if (typeof window.pfObserveImages === 'function') window.pfObserveImages();
   }
 
   /* ---------------- cache local ---------------- */

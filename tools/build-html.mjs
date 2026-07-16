@@ -81,6 +81,17 @@ if (iEngine === -1) err('moteur absent (assets/js/app.js)');
 if (iData !== -1 && iEngine !== -1 && iData > iEngine) err('les données d\'essai doivent être chargées AVANT les moteurs');
 if (out.includes('assets/data/questions.js')) err('le HTML public référence la banque complète (interdit)');
 
+/* garde-fou : chaque onclick du site (public + écrans protégés) doit être
+   du JavaScript valide — une apostrophe mal échappée = bouton mort. */
+function verifieOnclicks(html, origine) {
+  let m; const re = /onclick="([^"]*)"/g;
+  while ((m = re.exec(html))) {
+    try { new Function(m[1]); } catch (e) { err('ONCLICK INVALIDE (' + origine + ') : ' + m[1].slice(0, 70) + '…'); }
+  }
+}
+verifieOnclicks(out, 'page publique');
+for (const id of Object.keys(screensPrives)) verifieOnclicks(screensPrives[id], 'écran ' + id);
+
 /* --------------------------------------------------- contenu premium */
 const { questions, etudes, sujets, annales } = loadContent();
 const contenu = {

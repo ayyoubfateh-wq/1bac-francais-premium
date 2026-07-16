@@ -202,6 +202,20 @@ export async function run() {
     assert(gA.innerHTML.includes('an-carte'), 'retour à la liste attendu');
   });
 
+  await test('régression : images des écrans injectés remplacées après injection', () => {
+    /* Bug réel (16/07/2026) : le lazy-load n'observait qu'au chargement
+       initial — les photos arrivées avec le contenu membre restaient sur
+       placeholder.gif pour toujours. */
+    const fb = bootstrap({ premium: true });
+    const img = fb.document.createElement('img');
+    img.setAttribute('data-img-key', 'img_1');
+    img.setAttribute('src', 'assets/img/placeholder.gif');
+    fb.document.getElementById('auteurs').appendChild(img);
+    injectFull(fb);
+    if (typeof fb.window.pfObserveImages === 'function') { fb.window.pfObserveImages(); fb.runTimers(); }
+    assert(String(img.src).includes('image_1.webp'), 'photo attendue après injection, src = ' + img.src);
+  });
+
   await test('régression : brouillon en cours + sujets pas encore chargés → jamais de page vide', () => {
     /* Bug réel (15/07/2026) : un membre avec un brouillon de production
        rouvrait le site → render() plantait sur SUJETS[draft.sujet] avant

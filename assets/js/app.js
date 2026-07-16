@@ -338,6 +338,10 @@ const OPTIMIZED_IMAGE_ASSETS = {
       imgs.forEach(loadImg);
     }
   }
+  /* ré-observation après l'injection du contenu membre : les images des
+     écrans protégés arrivent APRÈS le chargement initial et doivent être
+     observées à leur tour (appelé par content-loader.js) */
+  window.pfObserveImages = initLazyImages;
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initLazyImages);
   } else {
