@@ -15,7 +15,7 @@ export function loadContent() {
   const ctx = { window: {} };
   ctx.globalThis = ctx;
   vm.createContext(ctx);
-  for (const f of ['questions.js', 'etudes.js', 'sujets.js']) {
+  for (const f of ['questions.js', 'etudes.js', 'sujets.js', 'annales.js']) {
     let src;
     try {
       src = fs.readFileSync(DATA(f), 'utf8');
@@ -32,5 +32,5 @@ export function loadContent() {
   if (!D.questions) throw new Error('assets/data/questions.js n\'a pas défini window.PF_DATA.questions');
   if (!D.etudes) throw new Error('assets/data/etudes.js n\'a pas défini window.PF_DATA.etudes');
   if (!D.sujets) throw new Error('assets/data/sujets.js n\'a pas défini window.PF_DATA.sujets');
-  return { questions: D.questions, etudes: D.etudes, sujets: D.sujets, errors: {} };
+  return { questions: D.questions, etudes: D.etudes, sujets: D.sujets, annales: D.annales, errors: {} };
 }

@@ -605,6 +605,89 @@ button.g-hud-item:hover{background:var(--gold-pale);}
   margin-bottom:14px;
 }
 
+/* -------------------------------------------------------- annales corrigées */
+.an-filtres{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0;}
+.an-chip{
+  font-family:'Tajawal',sans-serif;font-size:12px;font-weight:700;
+  padding:9px 14px;border-radius:99px;cursor:pointer;
+  border:2px solid var(--sand);background:var(--white);color:var(--ink);
+  min-height:40px;transition:border-color .15s,background .15s;
+}
+.an-chip.actif{border-color:var(--gold);background:var(--gold-pale);color:var(--gold);}
+.an-grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;}
+.an-carte{
+  display:flex;flex-direction:column;gap:6px;text-align:left;cursor:pointer;
+  border:1px solid var(--sand);border-left:5px solid var(--an-c,var(--gold));
+  border-radius:14px;background:var(--white);padding:16px;
+  transition:transform .12s,box-shadow .15s;
+}
+.an-carte:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(26,16,8,.1);}
+.an-carte b{font-size:15px;color:var(--ink);line-height:1.35;}
+.an-oeuvre{font-size:11px;color:var(--muted);font-style:italic;}
+.an-meta{font-size:11px;color:rgba(26,16,8,.6);}
+.an-cta{
+  font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--an-c,var(--gold));
+  margin-top:4px;
+}
+.an-badge{
+  align-self:flex-start;font-size:9px;font-weight:800;letter-spacing:.06em;
+  text-transform:uppercase;border-radius:99px;padding:3px 9px;
+}
+.an-ent{background:var(--gold-pale);color:var(--gold);border:1px solid var(--border);}
+.an-reel{background:#e8f5ee;color:#1a6b5a;border:1px solid rgba(26,107,90,.3);}
+.an-vide{font-size:13px;color:var(--muted);padding:14px 0;line-height:1.6;}
+.an-retour{
+  border:none;background:var(--sand-light);color:var(--ink);cursor:pointer;
+  font-family:'Tajawal',sans-serif;font-size:12px;font-weight:700;
+  border-radius:99px;padding:9px 16px;margin:10px 0 14px;min-height:40px;
+}
+.an-sujet-tete{
+  border-left:5px solid var(--an-c,var(--gold));border-radius:0 14px 14px 0;
+  background:var(--ink);color:var(--white);padding:16px 18px;margin-bottom:14px;
+}
+.an-sujet-tete h3{font-family:'Playfair Display',serif;font-size:20px;margin:6px 0 3px;color:var(--gold-light);}
+.an-sujet-tete p{font-size:12px;color:rgba(255,255,255,.75);margin:0;}
+.an-support{
+  border:1px solid var(--border);border-radius:14px;background:var(--gold-pale);
+  padding:14px 16px;margin-bottom:16px;
+}
+.an-support-titre{font-family:'Playfair Display',serif;font-size:15px;color:var(--gold);margin-bottom:6px;}
+.an-ref{font-size:11px;font-weight:700;color:var(--muted);margin:0 0 6px;}
+.an-support p{font-size:13px;line-height:1.8;color:rgba(26,16,8,.82);margin:0 0 6px;}
+.an-citation{
+  border-left:3px solid var(--gold);padding:8px 12px;margin:8px 0 0;
+  font-style:italic;font-size:13px;line-height:1.7;color:var(--ink);
+  background:var(--white);border-radius:0 10px 10px 0;
+}
+.an-section{
+  font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--terracotta);
+  border-bottom:2px solid var(--terracotta);padding-bottom:5px;margin:22px 0 12px;
+}
+.an-q{
+  border:1px solid var(--sand);border-radius:14px;background:var(--white);
+  padding:14px 16px;margin-bottom:12px;
+}
+.an-q-tete{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.an-q-num{font-size:11px;font-weight:800;letter-spacing:.06em;color:var(--gold);text-transform:uppercase;}
+.an-q-pts{font-size:11px;font-weight:800;color:var(--terracotta);}
+.an-q-enonce{font-size:14px;line-height:1.65;color:var(--ink);margin:0 0 10px;}
+.an-volet{
+  border:1px solid var(--border);background:var(--gold-pale);color:var(--gold);
+  font-family:'Tajawal',sans-serif;font-size:12px;font-weight:800;
+  border-radius:10px;padding:10px 14px;cursor:pointer;min-height:40px;
+}
+.an-volet:hover{background:var(--gold);color:#fff;}
+.an-correction{
+  border-left:3px solid #1a6b5a;background:#f0faf5;border-radius:0 10px 10px 0;
+  padding:12px 14px;margin-top:10px;
+}
+.an-correction p{font-size:13px;line-height:1.75;color:rgba(26,16,8,.82);margin:0 0 7px;}
+.an-correction p:last-child{margin-bottom:0;}
+.an-conseils{
+  border:1px dashed var(--border);border-radius:14px;background:var(--gold-pale);
+  padding:12px 16px;margin-top:16px;font-size:13px;line-height:1.7;color:rgba(26,16,8,.78);
+}
+
 /* ------------------------------------------------------------ responsive */
 @media(max-width:768px){
   #gameHud{padding:8px 1rem;gap:8px;}

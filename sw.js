@@ -16,6 +16,7 @@ var SHELL = [
   './assets/js/app.js?v=__PF_BUILD__',
   './assets/js/gamification.js?v=__PF_BUILD__',
   './assets/js/production.js?v=__PF_BUILD__',
+  './assets/js/annales.js?v=__PF_BUILD__',
   './assets/js/content-loader.js?v=__PF_BUILD__',
   './manifest.webmanifest'
 ];

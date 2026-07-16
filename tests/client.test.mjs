@@ -33,7 +33,7 @@ function bootstrap({ premium = false, preSeed = null } = {}) {
   }
   for (const s of SCREEN_IDS) el('div', s, 'screen' + (s === 'parcours' ? ' active' : ''));
   ['gameHud', 'gReviewCard', 'gContinueCard', 'gPath', 'gBilan', 'gLeague', 'gBadges',
-    'gInstallCard', 'gProd', 'trialProgressBanner', 'trialStartBtn'].forEach((id) => el('div', id));
+    'gInstallCard', 'gProd', 'gAnnales', 'trialProgressBanner', 'trialStartBtn'].forEach((id) => el('div', id));
   ['boite', 'antigone', 'condamne'].forEach((bk) => {
     const t = doc.createElement('button');
     t.setAttribute('class', 'g-book-tab'); t.setAttribute('data-book', bk);
@@ -52,10 +52,11 @@ function bootstrap({ premium = false, preSeed = null } = {}) {
     questions: { boite: CONTENT.data.questions.boite.filter((q) => q.cat === 'Contextualisation'), antigone: [], condamne: [] },
     etudes: { boite: [], antigone: [], condamne: [] },
     sujets: [],
+    annales: [],
   };
 
   if (preSeed) preSeed(fb);
-  fb.loadEngines(ASSETS, ['app.js', 'gamification.js', 'production.js', 'content-loader.js']);
+  fb.loadEngines(ASSETS, ['app.js', 'gamification.js', 'production.js', 'annales.js', 'content-loader.js']);
   fb.fireDOMContentLoaded();
   fb.runTimers();
   return fb;
@@ -84,8 +85,11 @@ function injectFull(fb) {
     D.etudes[b].length = 0; Array.prototype.push.apply(D.etudes[b], data.etudes[b]);
   });
   D.sujets.length = 0; Array.prototype.push.apply(D.sujets, data.sujets);
+  if (!D.annales) D.annales = [];
+  D.annales.length = 0; Array.prototype.push.apply(D.annales, data.annales || []);
   if (typeof fb.window.gContentRefresh === 'function') { fb.window.gContentRefresh(); fb.runTimers(); }
   if (typeof fb.window.gProdRefresh === 'function') { fb.window.gProdRefresh(); fb.runTimers(); }
+  if (typeof fb.window.gAnnalesRefresh === 'function') { fb.window.gAnnalesRefresh(); fb.runTimers(); }
 }
 
 export async function run() {
@@ -183,6 +187,19 @@ export async function run() {
     win.gProdFinish(); fb.runTimers();
     assert(granted && granted.note === 8, 'note 8/8 attendue, obtenu : ' + (granted && granted.note));
     assert(granted.xp > 0, 'XP de production attendus');
+  });
+
+  await test('annales : liste rendue, sujet ouvrable, correction dépliable', () => {
+    const fb = bootstrap({ premium: true }); injectFull(fb);
+    const gA = fb.document.getElementById('gAnnales');
+    assert((CONTENT.data.annales || []).length >= 6, '6 annales attendues dans le contenu');
+    assert(gA.innerHTML.includes('an-carte'), 'cartes de sujets attendues');
+    fb.window.gAnnalesOuvre(CONTENT.data.annales[0].id); fb.runTimers();
+    assert(gA.innerHTML.includes('ÉTUDE DE TEXTE'), 'vue sujet attendue (étude de texte)');
+    assert(gA.innerHTML.includes('PRODUCTION ÉCRITE'), 'section production attendue');
+    assert(gA.innerHTML.includes('an-correction'), 'corrections présentes');
+    fb.window.gAnnalesOuvre(null); fb.runTimers();
+    assert(gA.innerHTML.includes('an-carte'), 'retour à la liste attendu');
   });
 
   await test('régression : brouillon en cours + sujets pas encore chargés → jamais de page vide', () => {

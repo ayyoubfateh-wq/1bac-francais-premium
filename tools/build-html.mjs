@@ -82,9 +82,9 @@ if (iData !== -1 && iEngine !== -1 && iData > iEngine) err('les données d\'essa
 if (out.includes('assets/data/questions.js')) err('le HTML public référence la banque complète (interdit)');
 
 /* --------------------------------------------------- contenu premium */
-const { questions, etudes, sujets } = loadContent();
+const { questions, etudes, sujets, annales } = loadContent();
 const contenu = {
-  data: { questions, etudes, sujets, screens: screensPrives },
+  data: { questions, etudes, sujets, annales, screens: screensPrives },
 };
 const contenuJson = JSON.stringify(contenu.data);
 contenu.version = crypto.createHash('sha256').update(contenuJson).digest('hex').slice(0, 12);
@@ -109,7 +109,8 @@ const trialJs =
   'window.PF_DATA = window.PF_DATA || {};\n' +
   'window.PF_DATA.questions = ' + JSON.stringify(trial.questions) + ';\n' +
   'window.PF_DATA.etudes = ' + JSON.stringify(trial.etudes) + ';\n' +
-  'window.PF_DATA.sujets = ' + JSON.stringify(trial.sujets) + ';\n';
+  'window.PF_DATA.sujets = ' + JSON.stringify(trial.sujets) + ';\n' +
+  'window.PF_DATA.annales = [];\n';
 
 if (errors.length) {
   console.error('❌ Build refusé :');
@@ -143,6 +144,7 @@ const FICHIERS_VERSIONNES = [
   'assets/js/app.js',
   'assets/js/gamification.js',
   'assets/js/production.js',
+  'assets/js/annales.js',
   'assets/js/content-loader.js',
 ];
 const hBuild = crypto.createHash('sha256').update(out).update(trialJs);
@@ -172,7 +174,7 @@ fs.writeFileSync(path.join(DIST, 'assets', 'data', 'trial.js'), trialJs, 'utf8')
 copyDir(path.join(ROOT, 'assets', 'css'), path.join(DIST, 'assets', 'css'));
 copyDir(path.join(ROOT, 'assets', 'img'), path.join(DIST, 'assets', 'img'));
 fs.mkdirSync(path.join(DIST, 'assets', 'js'), { recursive: true });
-for (const f of ['app.js', 'gamification.js', 'production.js', 'content-loader.js']) {
+for (const f of ['app.js', 'gamification.js', 'production.js', 'annales.js', 'content-loader.js']) {
   fs.copyFileSync(path.join(ROOT, 'assets', 'js', f), path.join(DIST, 'assets', 'js', f));
 }
 /* le service worker reçoit l'empreinte du build (cache dédié + shell versionné) */
@@ -214,7 +216,7 @@ function minify(rel, loader) {
   fs.writeFileSync(p, outCode, 'utf8');
   apres += Buffer.byteLength(outCode);
 }
-for (const f of ['assets/js/app.js', 'assets/js/gamification.js', 'assets/js/production.js', 'assets/js/content-loader.js', 'assets/data/trial.js', 'sw.js']) {
+for (const f of ['assets/js/app.js', 'assets/js/gamification.js', 'assets/js/production.js', 'assets/js/annales.js', 'assets/js/content-loader.js', 'assets/data/trial.js', 'sw.js']) {
   minify(f, 'js');
 }
 for (const f of ['assets/css/style.css', 'assets/css/gamification.css']) {

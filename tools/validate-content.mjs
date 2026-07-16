@@ -35,7 +35,7 @@ function main() {
     console.error('❌ Impossible de charger le contenu : ' + e.message);
     process.exit(1);
   }
-  const { questions, etudes, sujets } = data;
+  const { questions, etudes, sujets, annales } = data;
 
   /* ---- QCM ---- */
   let totalQ = 0;
@@ -85,12 +85,38 @@ function main() {
     else PARTS.forEach((p) => { if (typeof s.modele[p] !== 'string' || s.modele[p].trim().length < 20) err(`${where} : partie « ${p} » du modèle absente ou trop courte`); });
   });
 
+
+  /* ---- Annales (sujets d'examen complets) ---- */
+  const TYPES_ANNALE = ['entrainement', 'reel'];
+  const idsAnnales = new Set();
+  annales.forEach((a, i) => {
+    const where = 'annales[' + i + '] (' + (a.id || 'sans id') + ')';
+    if (!a.id || idsAnnales.has(a.id)) err(where + ' : id manquant ou dupliqué');
+    idsAnnales.add(a.id);
+    if (!TYPES_ANNALE.includes(a.type)) err(where + ' : type invalide (attendu entrainement|reel)');
+    if (!BOOKS.includes(a.book)) err(where + ' : œuvre inconnue « ' + a.book + ' »');
+    if (!a.academieStyle || !a.titre || !a.oeuvre) err(where + ' : académie, titre ou œuvre manquants');
+    if (!a.situation || a.situation.length < 80) err(where + ' : situation absente ou trop courte (support de l’élève)');
+    if (!Array.isArray(a.etude) || a.etude.length < 5) err(where + ' : étude de texte incomplète (min. 5 questions)');
+    let pts = 0;
+    (a.etude || []).forEach((q, j) => {
+      pts += q.pts || 0;
+      if (!q.q || q.q.length < 10) err(where + ' Q' + (j + 1) + ' : énoncé manquant');
+      if (!q.correction || q.correction.length < 60) err(where + ' Q' + (j + 1) + ' : correction absente ou indigente (< 60 car.) — la correction détaillée est notre valeur ajoutée');
+    });
+    if (pts !== 10) err(where + ' : étude de texte = ' + pts + ' pts (10 attendus, format officiel)');
+    if (!a.production || a.production.pts !== 10) err(where + ' : production écrite absente ou ≠ 10 pts');
+    else if (!a.production.correction || a.production.correction.length < 200) err(where + ' : corrigé de production trop court (plan détaillé attendu)');
+    if (a.type === 'reel' && !a.annee) err(where + ' : une annale réelle exige son année');
+  });
+
   /* ---- Rapport ---- */
   console.log('');
   console.log('  Contenu chargé :');
   console.log('  • QCM              : ' + totalQ + '  (' + BOOKS.map((b) => questions[b].length).join(' / ') + ')');
   console.log('  • Questions études : ' + totalE + '  (' + BOOKS.map((b) => (etudes[b] ? etudes[b].length : 0) + ' études').join(' / ') + ')');
   console.log('  • Sujets écrits    : ' + sujets.length);
+  console.log('  • Annales corrigées: ' + annales.length + ' (' + annales.reduce((s,a)=>s+a.etude.length,0) + ' questions corrigées)');
   console.log('  • TOTAL banque     : ' + (totalQ + totalE) + ' questions');
   console.log('');
 
