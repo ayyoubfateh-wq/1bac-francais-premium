@@ -739,3 +739,214 @@ button.g-hud-item:hover{background:var(--gold-pale);}
   .g-card-stars .g-star.on,.g-levelup-badge,.g-combo{animation:none!important;}
   .g-float{opacity:1;}
 }
+
+/* ============================================================================
+   IDENTITÉ VISUELLE DU JEU
+   Les écrans où l'élève JOUE (leçon, parcours, HUD) ne s'habillent plus comme
+   les écrans où il LIT (résumés, fiches, méthode). Ces derniers gardent leur
+   allure de livre — c'est juste pour eux. Ici, tout doit dire « appuie ».
+
+   Trois partis pris :
+   - Des fonds clairs et nets au lieu du crème : le crème apaise, or on ne
+     cherche pas à apaiser, on cherche à donner envie de recommencer.
+   - Des objets épais qui s'enfoncent quand on appuie. Un bouton qui répond
+     physiquement au doigt est la plus petite récompense possible, et elle est
+     rendue cinq fois par leçon.
+   - Une couleur saturée par œuvre, portée du parcours jusque dans la leçon :
+     l'élève sait toujours dans quel monde il se trouve.
+============================================================================ */
+:root{
+  --g-bg:#f3f6f4;
+  --g-surface:#ffffff;
+  --g-ink:#16211d;
+  --g-muted:#66736e;
+  --g-line:#dde4e0;
+  --g-line-fort:#c6d1cb;
+
+  --g-juste:#17a06a;          /* la couleur de « c'est bon » */
+  --g-juste-fond:#e6f7ef;
+  --g-juste-ombre:#0d7c50;
+  --g-faux:#dd4436;
+  --g-faux-fond:#fdeceb;
+  --g-faux-ombre:#b32d21;
+  --g-or:#f0b429;
+  --g-or-ombre:#c1870d;
+
+  --g-police:'Nunito','Tajawal',system-ui,-apple-system,Segoe UI,sans-serif;
+  --g-profondeur:4px;         /* l'épaisseur qui donne le relief aux boutons */
+}
+
+/* -------------------------------------------------------- écran de leçon */
+html.g-en-lecon #quiz-game-screen{
+  display:flex;flex-direction:column;
+  background:var(--g-surface);
+  font-family:var(--g-police);
+}
+html.g-en-lecon body::before{display:none;} /* le motif de fond sort du champ */
+
+/* barre de progression : épaisse, arrondie, lisible d'un coup d'œil */
+html.g-en-lecon .qprogress-bar{background:var(--g-line)!important;height:14px!important;border-radius:999px!important;overflow:hidden;border:none!important;}
+html.g-en-lecon #qpfill{
+  background:linear-gradient(90deg,var(--g-juste),#3ecf95)!important;
+  height:100%!important;border-radius:999px!important;
+  transition:width .45s cubic-bezier(.22,1,.36,1);
+}
+
+/* en-tête de question */
+html.g-en-lecon #qnum{
+  font-family:var(--g-police);font-size:12px;font-weight:800;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--g-muted);
+}
+html.g-en-lecon #qcat{
+  font-family:var(--g-police);font-size:11px;font-weight:800;
+  letter-spacing:.06em;text-transform:uppercase;
+  background:var(--g-bg);color:var(--g-muted);
+  border:1.5px solid var(--g-line);border-radius:999px;padding:4px 11px;
+}
+html.g-en-lecon #qtext{
+  font-family:var(--g-police)!important;
+  font-size:clamp(20px,4.4vw,26px)!important;
+  font-weight:800!important;font-style:normal!important;
+  line-height:1.28!important;color:var(--g-ink)!important;
+  text-wrap:balance;margin:14px 0 22px!important;
+}
+
+/* --------------------------------------------------------------- réponses
+   Le bord bas plus épais et plus sombre fait exister le bouton dans
+   l'espace ; il disparaît à l'appui, et le doigt « sent » le clic. */
+.options{gap:12px!important;}
+.opt{
+  font-family:var(--g-police)!important;
+  font-size:16.5px!important;font-weight:700!important;
+  color:var(--g-ink)!important;
+  background:var(--g-surface)!important;
+  border:2px solid var(--g-line-fort)!important;
+  border-bottom-width:var(--g-profondeur)!important;
+  border-radius:16px!important;
+  padding:16px 18px!important;
+  min-height:62px;
+  gap:14px!important;
+  align-items:center;
+  transition:transform .06s ease,background .12s ease,border-color .12s ease;
+}
+.opt:hover:not(:disabled){background:var(--g-bg)!important;}
+.opt:active:not(:disabled){transform:translateY(2px);border-bottom-width:2px!important;}
+.opt-letter{
+  width:30px!important;height:30px!important;flex:none;
+  border:2px solid var(--g-line-fort)!important;border-radius:9px!important;
+  font-family:var(--g-police)!important;font-size:13px!important;font-weight:900!important;
+  color:var(--g-muted)!important;background:var(--g-surface)!important;
+}
+.opt.correct{
+  background:var(--g-juste-fond)!important;color:#0b5c3c!important;
+  border-color:var(--g-juste)!important;border-bottom-color:var(--g-juste-ombre)!important;
+}
+.opt.correct .opt-letter{background:var(--g-juste)!important;border-color:var(--g-juste)!important;color:#fff!important;}
+.opt.wrong{
+  background:var(--g-faux-fond)!important;color:#8f2318!important;
+  border-color:var(--g-faux)!important;border-bottom-color:var(--g-faux-ombre)!important;
+}
+.opt.wrong .opt-letter{background:var(--g-faux)!important;border-color:var(--g-faux)!important;color:#fff!important;}
+.opt.reveal{
+  background:var(--g-surface)!important;color:#0b5c3c!important;opacity:1!important;
+  border-color:var(--g-juste)!important;border-bottom-color:var(--g-juste-ombre)!important;
+  border-style:dashed!important;border-bottom-style:solid!important;
+}
+.opt.reveal .opt-letter{background:var(--g-juste)!important;border-color:var(--g-juste)!important;color:#fff!important;}
+.opt:disabled{cursor:default;}
+
+/* ------------------------------------------------------------- verdict */
+html.g-en-lecon #qfeedback{margin-top:18px;}
+.feedback{
+  font-family:var(--g-police);font-size:17px;font-weight:800;line-height:1.4;
+  border-radius:16px;padding:15px 17px;
+}
+.feedback.ok{background:var(--g-juste-fond);color:#0b5c3c;border:2px solid var(--g-juste);}
+.feedback.ko{background:var(--g-faux-fond);color:#8f2318;border:2px solid var(--g-faux);}
+
+/* ------------------------------------------------ bouton d'action, en bas
+   Sur un téléphone tenu à une main, le bas de l'écran est la seule zone
+   confortable. Le bouton y reste, toujours au même endroit. */
+html.g-en-lecon #qbtns:not(:empty){
+  margin-top:auto;position:sticky;bottom:0;z-index:5;
+  background:var(--g-surface);
+  padding:14px 0 calc(6px + env(safe-area-inset-bottom,0px));
+  border-top:2px solid var(--g-line);
+}
+html.g-en-lecon #qbtns button{
+  display:block;width:100%;
+  font-family:var(--g-police);font-size:16px;font-weight:900;
+  letter-spacing:.06em;text-transform:uppercase;
+  color:#fff;background:var(--g-juste);
+  border:none;border-bottom:var(--g-profondeur) solid var(--g-juste-ombre);
+  border-radius:16px;padding:17px 20px;min-height:60px;cursor:pointer;
+  transition:transform .06s ease;
+}
+html.g-en-lecon #qbtns button:active{transform:translateY(2px);border-bottom-width:2px;}
+
+/* ------------------------------------------------------------------ HUD
+   Une barre d'état assumée : la série, le niveau et les cœurs sont ce que
+   l'élève vient vérifier en ouvrant l'application. */
+#gameHud{
+  font-family:var(--g-police);
+  background:var(--g-surface);
+  border-bottom:2px solid var(--g-line);
+  padding:12px 1.25rem;
+  gap:12px;
+}
+.g-hud-item{font-family:var(--g-police);font-weight:800;}
+.g-streak b{font-size:17px;font-weight:900;}
+.g-level-name{font-size:11px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--g-muted);}
+.g-xpbar{background:var(--g-line)!important;height:9px!important;border-radius:999px!important;overflow:hidden;}
+.g-xpfill{background:linear-gradient(90deg,var(--g-or),#ffd166)!important;border-radius:999px!important;}
+.g-xp-count{font-size:12px;font-weight:900;color:var(--g-ink);font-variant-numeric:tabular-nums;}
+
+/* -------------------------------------------------------------- parcours
+   Les étapes deviennent des objets qu'on a envie de toucher : plus grandes,
+   saturées, avec le même relief que les boutons de réponse. */
+#gPath .g-node{
+  border-bottom:5px solid rgba(0,0,0,.22);
+  box-shadow:0 10px 22px rgba(22,33,29,.16);
+  transition:transform .1s ease,box-shadow .15s ease;
+}
+#gPath .g-node:not(.locked):not(.premium):active{transform:translateY(3px);border-bottom-width:2px;}
+#gPath .g-node.locked{border-bottom-color:rgba(0,0,0,.10);box-shadow:none;}
+#gPath .g-node-icon{font-size:30px;}
+#gPath .g-node.exam .g-node-icon{font-size:36px;}
+#gPath .g-node-label span:first-child{
+  font-family:var(--g-police);font-size:12px;font-weight:800;color:var(--g-ink);
+}
+#gPath .g-node-cta{
+  font-family:var(--g-police);font-size:10px;font-weight:900;letter-spacing:.1em;
+}
+
+@media (prefers-reduced-motion:reduce){
+  .opt,#gPath .g-node,html.g-en-lecon #qbtns button{transition:none!important;}
+}
+
+/* barre de leçon : quitter, où on est, ce qu'il reste de cœurs */
+html.g-en-lecon #gLessonBar{margin-bottom:16px;padding:2px 0 12px;gap:14px;}
+html.g-en-lecon .g-lesson-quit{
+  width:40px;height:40px;min-height:40px;border-radius:12px;
+  background:var(--g-bg);color:var(--g-muted);
+  border:2px solid var(--g-line);font-size:17px;font-weight:900;
+}
+html.g-en-lecon .g-lesson-title{
+  font-family:var(--g-police);font-size:13px;font-weight:800;color:var(--g-ink);
+}
+html.g-en-lecon .g-heart{font-size:19px;}
+html.g-en-lecon .g-hearts{gap:3px;}
+html.g-en-lecon .g-combo{font-family:var(--g-police);font-size:14px;font-weight:900;}
+
+/* l'explication qui suit la réponse : même famille visuelle que le reste */
+html.g-en-lecon #qaiblock{margin-top:14px;}
+html.g-en-lecon .ai-exp-label{
+  font-family:var(--g-police);font-size:11px;font-weight:900;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--g-muted);
+  margin-bottom:7px;
+}
+html.g-en-lecon .ai-exp{
+  font-family:var(--g-police);font-size:15.5px;font-weight:600;line-height:1.6;
+  color:var(--g-ink);background:var(--g-bg);
+  border:2px solid var(--g-line);border-radius:16px;padding:14px 16px;
+}
