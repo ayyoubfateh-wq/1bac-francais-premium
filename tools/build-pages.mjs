@@ -204,10 +204,12 @@ export function genererPagesPubliques(DIST) {
     process.exit(1);
   }
 
+  /* Un fichier <slug>.html à la racine, PAS <slug>/index.html : Netlify sert
+     alors /antigone directement (URL propre), alors qu'un dossier provoque
+     une redirection 301 vers /antigone/ — l'adresse servie ne correspondrait
+     plus au canonical ni au sitemap. */
   for (const p of PAGES) {
-    const dossier = path.join(DIST, p.slug);
-    fs.mkdirSync(dossier, { recursive: true });
-    fs.writeFileSync(path.join(dossier, 'index.html'), rendrePage(p), 'utf8');
+    fs.writeFileSync(path.join(DIST, p.slug + '.html'), rendrePage(p), 'utf8');
   }
 
   const aujourdhui = new Date().toISOString().slice(0, 10);

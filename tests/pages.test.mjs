@@ -17,7 +17,7 @@ export async function run() {
 
   await test('une page générée par entrée, avec ses balises essentielles', () => {
     for (const p of PAGES) {
-      const html = lire(path.join(p.slug, 'index.html'));
+      const html = lire(p.slug + '.html');
       assert(html.includes(`<title>`), `${p.slug} : titre manquant`);
       assert(html.includes(`rel="canonical" href="https://play-bac.com/${p.slug}"`), `${p.slug} : canonical manquant ou faux`);
       assert(html.includes('name="description"'), `${p.slug} : meta description manquante`);
@@ -29,7 +29,7 @@ export async function run() {
 
   await test('chaque page renvoie vers l’essai gratuit et vers les autres fiches', () => {
     for (const p of PAGES) {
-      const html = lire(path.join(p.slug, 'index.html'));
+      const html = lire(p.slug + '.html');
       assert(html.includes('leçons gratuites'), `${p.slug} : aucun appel à l’essai`);
       for (const autre of PAGES) {
         if (autre.slug === p.slug) continue;
@@ -66,7 +66,7 @@ export async function run() {
       contenu.data.screens.resumes.slice(200, 260),
     ];
     for (const p of PAGES) {
-      const html = lire(path.join(p.slug, 'index.html'));
+      const html = lire(p.slug + '.html');
       assert(!html.includes('"ans":'), `${p.slug} : réponses de la banque exposées`);
       for (const s of sondes) {
         assert(!html.includes(s), `${p.slug} : fuite de contenu premium`);
