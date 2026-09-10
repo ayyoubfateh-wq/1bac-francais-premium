@@ -210,6 +210,11 @@ fs.writeFileSync(path.join(DIST, 'sw.js'), swSrc.split('__PF_BUILD__').join(BUIL
 for (const f of ['manifest.webmanifest', 'gestion-codes.html']) {
   fs.copyFileSync(path.join(ROOT, f), path.join(DIST, f));
 }
+/* static/ : fichiers copiés tels quels à la racine du site (fichier de
+   validation Google Search Console, etc.). Rien à déclarer ailleurs —
+   déposer un fichier ici suffit. */
+const STATIC = path.join(ROOT, 'static');
+if (fs.existsSync(STATIC)) copyDir(STATIC, DIST);
 fs.writeFileSync(path.join(PRIVATE, 'content.json'), JSON.stringify(contenu), 'utf8');
 
 /* ---------------------------------------------------------- minification
