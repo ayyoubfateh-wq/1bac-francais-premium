@@ -450,6 +450,7 @@ function renderPath(){
   wrap.innerHTML = '<svg class="g-path-line" width="' + W + '" height="' + height + '" viewBox="0 0 ' + W + ' ' + height + '">' +
     '<path d="' + d + '" fill="none" stroke="rgba(200,146,42,.28)" stroke-width="5" stroke-dasharray="1 10" stroke-linecap="round"/></svg>' + html;
 
+  if (window.gRenderMascotte) window.gRenderMascotte(); // le chemin a bougé : Zaâtar aussi
   renderReviewCard();
 
   var cont = document.getElementById('gContinueCard');
@@ -771,6 +772,8 @@ window.answerQ = function(idx, btn){
     // quiz libre : feedback sonore léger, pas de cœurs
     if (ok) SFX.correct(); else SFX.wrong();
   }
+  /* en dernier : le combo vient d'être mis à jour, Zaâtar peut le citer */
+  mascotteReaction(ok);
 };
 
 function loseHeart(){
@@ -1540,6 +1543,7 @@ window.gContentRefresh = function(){
   }
   renderHUD();
   renderPath();
+  window.gRenderMascotte();
   renderBilan();
   renderBadges();
   renderLeaderboard();
@@ -1576,12 +1580,14 @@ document.addEventListener('DOMContentLoaded', function(){
   rolloverDaily();
   renderHUD();
   renderPath();
+  window.gRenderMascotte();
   renderBilan();
   renderBadges();
   renderLeaderboard();
   syncLeaderboard();
   updateTrialBanner(); // visiteur de retour non premium : montre ses acquis
   renderAvis();        // page de vente : avis réels, ou section masquée
+  window.gRenderMascotte();
   setInterval(regenHearts, 60000);
   // visite : 1 max par jour et par appareil
   try {
@@ -1602,5 +1608,141 @@ document.addEventListener('DOMContentLoaded', function(){
     setTimeout(function(){ toast('🔥 Ta série de ' + G.streak.count + ' jour(s) t’attend — une leçon suffit !'); }, 1500);
   }
 });
+
+
+/* ============================================================================
+   ZAÂTAR — la mascotte
+
+   Pourquoi un personnage : jusqu'ici, rien à l'écran ne se souciait de
+   savoir si l'élève réussissait. Or ce qui fait revenir, ce n'est pas la
+   note, c'est quelqu'un qui remarque. Zaâtar remarque : il félicite, il
+   dédramatise l'erreur, il rappelle la série qui va tomber ce soir.
+
+   Un chat, parce que c'est l'animal des rues et des terrasses marocaines,
+   et parce qu'un chat peut être fier ou boudeur sans jamais faire l'adulte
+   qui gronde. Il est dessiné en SVG (aucune image à charger) et ses
+   humeurs ne changent que trois détails : les yeux, la bouche, les joues.
+============================================================================ */
+var HUMEURS = ['normal', 'content', 'inquiet', 'fier', 'dodo'];
+
+function mascotteSVG(humeur, taille){
+  if (HUMEURS.indexOf(humeur) === -1) humeur = 'normal';
+  taille = taille || 74;
+  return '<svg class="pf-chat ' + humeur + '" viewBox="0 0 100 100" width="' + taille + '" height="' + taille + '" role="img" aria-label="Zaâtar">' +
+    '<path class="pf-queue" d="M76 78 q18 -3 14 -21 q-3 -13 -14 -11" fill="none" stroke="#dc9a1f" stroke-width="8" stroke-linecap="round"/>' +
+    '<ellipse cx="50" cy="78" rx="26" ry="19" fill="#eeaf28"/>' +
+    '<path d="M24 34 L19 7 L45 22 Z" fill="#eeaf28"/>' +
+    '<path d="M76 34 L81 7 L55 22 Z" fill="#eeaf28"/>' +
+    '<path d="M27 30 L25 15 L38 23 Z" fill="#e08d78"/>' +
+    '<path d="M73 30 L75 15 L62 23 Z" fill="#e08d78"/>' +
+    '<circle cx="50" cy="45" r="30" fill="#f6c552"/>' +
+    '<circle class="pf-joue" cx="27" cy="53" r="7" fill="#ef8a70"/>' +
+    '<circle class="pf-joue" cx="73" cy="53" r="7" fill="#ef8a70"/>' +
+    '<g class="pf-yeux-ouverts">' +
+      '<circle cx="39" cy="42" r="6.2" fill="#2b1c09"/>' +
+      '<circle cx="61" cy="42" r="6.2" fill="#2b1c09"/>' +
+      '<circle cx="41" cy="39.5" r="2.1" fill="#fff"/>' +
+      '<circle cx="63" cy="39.5" r="2.1" fill="#fff"/>' +
+    '</g>' +
+    '<g class="pf-yeux-joie">' +
+      '<path d="M33 44 q6 -8 12 0" fill="none" stroke="#2b1c09" stroke-width="3.6" stroke-linecap="round"/>' +
+      '<path d="M55 44 q6 -8 12 0" fill="none" stroke="#2b1c09" stroke-width="3.6" stroke-linecap="round"/>' +
+    '</g>' +
+    '<path d="M50 53 l-4.5 -4.5 h9 Z" fill="#c85f4c"/>' +
+    '<path class="pf-bouche-sourire" d="M42 59 q8 7 16 0" fill="none" stroke="#2b1c09" stroke-width="3" stroke-linecap="round"/>' +
+    '<ellipse class="pf-bouche-o" cx="50" cy="61" rx="4" ry="4.6" fill="#2b1c09"/>' +
+    '<g stroke="#2b1c09" stroke-width="2" stroke-linecap="round" opacity=".5">' +
+      '<line x1="18" y1="51" x2="33" y2="53"/><line x1="18" y1="60" x2="33" y2="58"/>' +
+      '<line x1="82" y1="51" x2="67" y2="53"/><line x1="82" y1="60" x2="67" y2="58"/>' +
+    '</g>' +
+    /* les « z » n'existent QUE quand il dort : masqués en CSS, ils
+       restaient lus par les lecteurs d'écran et polluaient le texte */
+    (humeur === 'dodo'
+      ? '<g class="pf-zzz" aria-hidden="true"><text x="76" y="24" font-size="15" font-weight="800" fill="#8a6a2a">z</text>' +
+        '<text x="86" y="14" font-size="11" font-weight="800" fill="#8a6a2a">z</text></g>'
+      : '') +
+  '</svg>';
+}
+
+/* ------------------------------------------------- ce que Zaâtar raconte
+   Un seul message à la fois, choisi par urgence. Le premier cas qui
+   s'applique gagne : on ne noie jamais l'élève sous trois conseils. */
+function mascotteEtat(){
+  var due = srsDueIds().length;
+  var serieVivante = G.streak.last === todayStr();
+  var serieEnSursis = G.streak.count > 0 && G.streak.last === yesterdayStr();
+  var objectifAtteint = G.daily.xp >= DAILY_GOAL;
+
+  if (G.hearts <= 0) {
+    return { humeur: 'inquiet',
+      texte: 'Tu n’as plus de cœurs. Une fiche éclair et on repart — ça prend une minute.' };
+  }
+  if (serieEnSursis) {
+    return { humeur: 'inquiet',
+      texte: 'Ta série de ' + G.streak.count + ' jour' + (G.streak.count > 1 ? 's' : '') +
+             ' tombe ce soir. Une seule leçon suffit à la sauver.' };
+  }
+  if (due > 0) {
+    return { humeur: 'normal',
+      texte: due + ' question' + (due > 1 ? 's' : '') + ' à revoir aujourd’hui. Ce sont tes anciennes erreurs : c’est là que tu gagnes le plus de points.' };
+  }
+  if (G.xp === 0) {
+    return { humeur: 'content',
+      texte: 'Salut, moi c’est Zaâtar. Commence par la première étape du chemin — cinq questions, deux minutes.' };
+  }
+  if (G.hearts <= 2) {
+    return { humeur: 'inquiet',
+      texte: 'Attention, il ne te reste que ' + G.hearts + ' cœur' + (G.hearts > 1 ? 's' : '') + '. Prends ton temps sur les prochaines.' };
+  }
+  if (objectifAtteint) {
+    return { humeur: 'fier',
+      texte: 'Objectif du jour atteint. Tout ce que tu fais maintenant, c’est de l’avance sur le régional.' };
+  }
+  if (serieVivante) {
+    return { humeur: 'content',
+      texte: G.streak.count + ' jour' + (G.streak.count > 1 ? 's' : '') + ' d’affilée. Ne casse pas la chaîne aujourd’hui.' };
+  }
+  var cible = nextTarget();
+  if (cible) {
+    var m = BOOK_META[cible.book], def = NODE_DEFS[cible.index];
+    return { humeur: 'normal',
+      texte: 'Prochaine étape : ' + def.name + ', dans ' + m.name + '. Il te manque ' +
+             Math.max(0, DAILY_GOAL - G.daily.xp) + ' XP pour l’objectif du jour.' };
+  }
+  return { humeur: 'fier',
+    texte: 'Tu as terminé tout le parcours. Reviens réviser : c’est la répétition qui fait tenir jusqu’au jour J.' };
+}
+
+window.gRenderMascotte = function(){
+  var el = document.getElementById('gMascotte');
+  if (!el) return;
+  var e = mascotteEtat();
+  el.className = 'pf-mascotte ' + e.humeur;
+  el.innerHTML =
+    '<div class="pf-mascotte-perso">' + mascotteSVG(e.humeur, 78) + '</div>' +
+    '<div class="pf-bulle"><b>Zaâtar</b><p>' + e.texte + '</p></div>';
+};
+
+/* --------------------------------------------- réaction pendant la leçon
+   Varier les formules compte plus qu'on ne croit : une phrase identique
+   cinq fois de suite cesse d'être une récompense et devient un décor. */
+var PHRASES_JUSTE = ['Exactement.', 'C’est ça !', 'Tu l’as eu.', 'Impeccable.', 'Bien vu.', 'Sans hésiter.'];
+var PHRASES_COMBO = ['Trois de suite !', 'Tu enchaînes !', 'Rien ne t’arrête.', 'En feu.'];
+var PHRASES_FAUX  = ['Pas grave — tu la reverras demain.', 'Celle-là revient bientôt, tu l’auras.',
+                     'On la note. La prochaine fois elle sera à toi.', 'Retiens bien la bonne réponse.'];
+function auHasard(liste){ return liste[Math.floor(Math.random() * liste.length)]; }
+
+function mascotteReaction(ok){
+  var box = document.querySelector('#qfeedback .feedback');
+  if (!box) return;
+  var phrase = ok
+    ? ((session && session.combo >= 3) ? auHasard(PHRASES_COMBO) : auHasard(PHRASES_JUSTE))
+    : auHasard(PHRASES_FAUX);
+  var verdict = box.innerHTML;
+  box.classList.add('avec-chat');
+  box.innerHTML = mascotteSVG(ok ? 'content' : 'inquiet', 44) +
+    '<span class="pf-verdict">' + verdict + '<em>' + phrase + '</em></span>';
+}
+window.gMascotteReaction = mascotteReaction;
 
 })();
