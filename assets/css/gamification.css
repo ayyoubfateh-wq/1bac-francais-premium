@@ -4,6 +4,26 @@
    animée à la fois, contrastes élevés, cibles tactiles ≥ 44px.
 ============================================================================ */
 
+/* ------------------------------------------------------------ mode leçon
+   Posé sur <html> par gamification.js pendant qu'une leçon est en cours.
+   Une leçon dure deux minutes : pendant ces deux minutes, l'écran ne montre
+   que la question. Le reste (barre latérale, HUD, pied de page) sort du
+   champ — c'est ce qui sépare une page web d'une application. */
+html.g-en-lecon .sidebar-nav,
+html.g-en-lecon #gameHud,
+html.g-en-lecon .site-footer{display:none!important;}
+html.g-en-lecon .app{padding-left:0!important;}
+html.g-en-lecon #quiz{padding:0!important;}
+html.g-en-lecon #quiz-game-screen{
+  position:fixed;inset:0;z-index:900;
+  background:var(--white);
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:14px 16px calc(24px + env(safe-area-inset-bottom,0px));
+}
+@media(min-width:900px){
+  html.g-en-lecon #quiz-game-screen{padding:24px calc(50vw - 330px) 40px;}
+}
+
 /* ------------------------------------------------------------------- HUD */
 #gameHud{
   display:flex;

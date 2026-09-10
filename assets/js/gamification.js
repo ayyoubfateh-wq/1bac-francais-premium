@@ -642,8 +642,17 @@ window.gStartReview = function(){
   updateLessonBar();
 };
 
+/* Mode leçon : pendant qu'on répond, l'écran ne contient QUE la leçon.
+   La barre latérale, le HUD et le reste de l'habillage disparaissent — sur un
+   téléphone, ils mangeaient la moitié de la hauteur utile, et chaque élément
+   qui reste visible est une invitation à partir ailleurs. */
+function entrerModeLecon(){ document.documentElement.classList.add('g-en-lecon'); }
+function quitterModeLecon(){ document.documentElement.classList.remove('g-en-lecon'); }
+window.gQuitterModeLecon = quitterModeLecon;
+
 function ensureLessonBar(){
   var game = document.getElementById('quiz-game-screen');
+  if (session) entrerModeLecon(); else quitterModeLecon();
   var bar = document.getElementById('gLessonBar');
   if (!bar) {
     bar = document.createElement('div');
@@ -824,6 +833,7 @@ function finishLesson(){
   checkBadges();
 
   document.getElementById('quiz-game-screen').style.display = 'none';
+  quitterModeLecon();
   var totalXP = s.xpBase + s.xpCombo + s.xpCrit + bonus;
 
   var m = BOOK_META[s.book];
@@ -888,6 +898,7 @@ function finishReview(s, sc, total){
   save();
   checkBadges();
   document.getElementById('quiz-game-screen').style.display = 'none';
+  quitterModeLecon();
 
   var totalXP = s.xpBase + s.xpCombo + s.xpCrit + XP_REVIEW_DONE + s.graduated * XP_GRADUATED;
   var remaining = srsDueIds().length;
@@ -1346,6 +1357,7 @@ window.showScreen = function(id, btn){
     window.gShowPaywall();
     return;
   }
+  quitterModeLecon(); // quitter une leçon par la navigation rend l'habillage
   return origShowScreenG.apply(this, arguments);
 };
 var origStartQuiz = window.startQuiz;
