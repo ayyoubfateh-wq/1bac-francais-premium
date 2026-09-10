@@ -65,6 +65,19 @@ var NODE_DEFS = [
   { exam: true,                name: 'Examen blanc',         icon: '🏆' }
 ];
 
+/* Leçons offertes sans code : les 3 premiers nœuds de La Boîte à Merveilles.
+   Doit rester aligné sur CATS_ESSAI dans tools/build-html.mjs — un nœud
+   ouvert dont le pool n'est pas publié donnerait une leçon vide. */
+var FREE_TRIAL_NODES = { boite: 3 };
+function isFreeNode(book, index){
+  return index < (FREE_TRIAL_NODES[book] || 0);
+}
+window.gFreeLessonCount = function(){
+  var n = 0;
+  for (var b in FREE_TRIAL_NODES) n += FREE_TRIAL_NODES[b];
+  return n;
+};
+
 /* Étude de texte guidée : le format réel de l'épreuve — un support de scène
    lu attentivement, puis des questions de compréhension, d'analyse et de
    langue qui s'y rapportent. Le support reste affiché pendant la leçon. */
@@ -404,18 +417,26 @@ function renderPath(){
     var x = cx + offsetFor(i), y = i * SP + 60;
     pts.push([x, y]);
     var isCurrent = target && target.book === book && target.index === i;
+    /* Visiteur sans code : au-delà des leçons offertes, le nœud n'est pas
+       « verrouillé » mais explicitement Premium — il reste cliquable et mène
+       au paywall. Montrer la suite du chemin vaut mieux que la cacher :
+       l'élève voit ce qu'il gagne, pas ce qu'on lui refuse. */
+    var teaser = !isPremium() && !isFreeNode(book, i);
     var size = def.exam ? 84 : 68;
-    html += '<button class="g-node ' + st + (def.exam ? ' exam' : '') + (isCurrent ? ' current' : '') + '"' +
+    html += '<button class="g-node ' + (teaser ? 'premium' : st) + (def.exam ? ' exam' : '') + (isCurrent && !teaser ? ' current' : '') + '"' +
       ' style="left:' + (x - size/2) + 'px;top:' + (y - size/2) + 'px;width:' + size + 'px;height:' + size + 'px;' +
-      (st !== 'locked' ? '--node-color:' + meta.color + ';' : '') + '"' +
+      (st !== 'locked' && !teaser ? '--node-color:' + meta.color + ';' : '') + '"' +
       ' onclick="gStartLesson(\'' + book + '\',' + i + ')"' +
-      (st === 'locked' ? ' disabled aria-label="' + def.name + ' — verrouillé"' : ' aria-label="' + def.name + (rec.stars ? ' — ' + rec.stars + ' étoile(s)' : '') + '"') + '>' +
-      '<span class="g-node-icon">' + (st === 'locked' ? '🔒' : def.icon) + '</span>' +
-      (isCurrent ? '<span class="g-node-pulse"></span><span class="g-node-cta">COMMENCER</span>' : '') +
+      (teaser ? ' aria-label="' + def.name + ' — inclus dans l’accès complet"'
+              : (st === 'locked' ? ' disabled aria-label="' + def.name + ' — verrouillé"'
+                                 : ' aria-label="' + def.name + (rec.stars ? ' — ' + rec.stars + ' étoile(s)' : '') + '"')) + '>' +
+      '<span class="g-node-icon">' + (teaser ? '🔒' : (st === 'locked' ? '🔒' : def.icon)) + '</span>' +
+      (isCurrent && !teaser ? '<span class="g-node-pulse"></span><span class="g-node-cta">COMMENCER</span>' : '') +
       '</button>' +
       '<div class="g-node-label" style="left:' + (x - 70) + 'px;top:' + (y + size/2 + 2) + 'px;">' +
         '<span>' + def.name + '</span>' +
         (st === 'done' ? '<span class="g-node-stars">' + starStr(rec.stars) + '</span>' : '') +
+        (teaser ? '<span class="g-node-premium-tag">Accès complet</span>' : '') +
       '</div>';
   }
 
@@ -498,8 +519,8 @@ window.gJumpToTarget = function(){
 var session = null; // { book, index, exam, combo, comboMax, xpBase, xpCombo, xpCrit }
 
 window.gStartLesson = function(book, index){
-  // essai gratuit : seule la première leçon est ouverte sans code premium
-  if (!isPremium() && !(book === 'boite' && index === 0)) {
+  // essai gratuit : les 3 premières leçons de La Boîte sont ouvertes sans code
+  if (!isPremium() && !isFreeNode(book, index)) {
     window.gShowPaywall();
     return;
   }
@@ -828,8 +849,7 @@ function finishLesson(){
       (passed
         ? (isPremium()
             ? '<button class="g-btn-primary" style="background:' + m.color + '" onclick="gCloseResult(true)">CONTINUER LE PARCOURS →</button>'
-            : '<p class="g-fail-hint" style="color:var(--teal);">🎁 Leçon gratuite réussie ✓ — la suite du parcours se débloque avec le pack complet.</p>' +
-              '<button class="g-btn-primary" style="background:' + m.color + '" onclick="gCloseResult(true)">VOIR MON PARCOURS →</button>')
+            : trialOutro(s.book, s.index, m))
         : '<p class="g-fail-hint">Il faut au moins ' + (s.exam ? '7/10' : '3/5') + ' pour débloquer la suite.</p>' +
           '<button class="g-btn-primary" onclick="gRetryLesson(\'' + s.book + '\',' + s.index + ')">RÉESSAYER</button>' +
           '<button class="g-btn-ghost" onclick="gCloseResult(true)">Retour au parcours</button>') +
@@ -839,6 +859,26 @@ function finishLesson(){
   else SFX.wrong();
 
   function row(l, v){ return '<div class="g-xp-row"><span>' + l + '</span><b>' + v + ' XP</b></div>'; }
+}
+
+/* Fin de leçon pour un visiteur sans code. Tant qu'il reste des leçons
+   offertes, on nomme la suivante (gradient du but : on accélère quand le
+   but est visible). Sur la dernière, on fait le bilan de ce qu'il possède
+   déjà avant de proposer l'accès complet — c'est cet acquis qui décide. */
+function trialOutro(book, index, m){
+  var free = FREE_TRIAL_NODES[book] || 0;
+  var reste = free - (index + 1);
+  if (reste > 0) {
+    var suivante = NODE_DEFS[index + 1];
+    return '<p class="g-fail-hint" style="color:var(--teal);">🎁 Leçon offerte ' + (index + 1) + ' sur ' + free + ' ✓ — il t’en reste ' +
+      reste + ' : « ' + suivante.name +' ».</p>' +
+      '<button class="g-btn-primary" style="background:' + m.color + '" onclick="gCloseResult(true);gStartLesson(\'' + book + '\',' + (index + 1) + ')">LEÇON SUIVANTE →</button>' +
+      '<button class="g-btn-ghost" onclick="gCloseResult(true)">Voir mon parcours</button>';
+  }
+  return '<p class="g-fail-hint" style="color:var(--teal);">🎉 Tu as terminé les ' + free + ' leçons offertes — et tu as gardé ' +
+    G.xp + ' XP. Il reste 21 leçons, les 3 œuvres et les annales corrigées.</p>' +
+    '<button class="g-btn-primary" style="background:var(--gold);color:#1a1008" onclick="gCloseResult(true);gShowPaywall()">DÉBLOQUER LA SUITE →</button>' +
+    '<button class="g-btn-ghost" onclick="gCloseResult(true)">Plus tard</button>';
 }
 
 function finishReview(s, sc, total){
@@ -1211,7 +1251,11 @@ window.gStartTrial = function(){
   track('trial_start');
   G.trialUsed = true; save();
   window.showScreen('parcours', window.gGetParcoursBtn());
-  setTimeout(function(){ window.gStartLesson('boite', 0); }, 350);
+  /* reprendre là où il s'est arrêté : on ne renvoie jamais un visiteur
+     de retour sur une leçon déjà réussie */
+  var start = 0;
+  while (start < FREE_TRIAL_NODES.boite - 1 && (G.nodes[nodeId('boite', start)] || {}).stars > 0) start++;
+  setTimeout(function(){ window.gStartLesson('boite', start); }, 350);
 };
 window.gShowPaywall = function(){
   track('paywall_view');
@@ -1219,6 +1263,52 @@ window.gShowPaywall = function(){
   var lock = document.getElementById('premiumLockScreen');
   if (lock) { lock.style.display = 'flex'; lock.scrollTop = 0; }
 };
+/* ------------------------------------------------------- page de vente
+   Le verrou premium est une page longue : navigation interne + avis. */
+window.pfGo = function(id){
+  var el = document.getElementById(id);
+  var box = document.getElementById('premiumLockScreen');
+  if (!el || !box) return;
+  /* C'est le verrou qui défile, pas la fenêtre : scrollIntoView vise le
+     mauvais conteneur quand les deux sont scrollables. On calcule donc
+     la position nous-mêmes, en dégageant la hauteur de la barre fixe. */
+  var bar = box.querySelector('.pf-bar');
+  var marge = (bar ? bar.offsetHeight : 0) + 12;
+  var cible = box.scrollTop + el.getBoundingClientRect().top - box.getBoundingClientRect().top - marge;
+  cible = Math.max(0, Math.min(cible, box.scrollHeight - box.clientHeight));
+
+  if (Math.abs(cible - box.scrollTop) < 2) return;
+  /* On demande le défilement doux, puis on vérifie qu'il a bien eu lieu :
+     `behavior:'smooth'` est ignoré par certains moteurs et par les réglages
+     « moins d'animations », ce qui laissait le bouton sans effet. */
+  try { box.scrollTo({ top: cible, behavior: 'smooth' }); }
+  catch (e) { box.scrollTop = cible; }
+  setTimeout(function(){
+    if (Math.abs(box.scrollTop - cible) > 4) box.scrollTop = cible;
+  }, 600);
+};
+
+/* Avis d'élèves — lus depuis assets/data/avis.js. Section masquée tant
+   qu'aucun avis réel n'a été ajouté : mieux vaut pas d'avis que de faux. */
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, function(c){
+    return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+  });
+}
+function renderAvis(){
+  var sec = document.getElementById('pf-avis');
+  var grid = document.getElementById('pfAvisGrid');
+  if (!sec || !grid) return;
+  var liste = (window.PF_DATA && window.PF_DATA.avis) || [];
+  if (!liste.length) { sec.style.display = 'none'; return; }
+  grid.innerHTML = liste.map(function(a){
+    return '<figure><blockquote>« ' + escapeHtml(a.texte) + ' »</blockquote>' +
+           '<figcaption>' + escapeHtml(a.nom || '') +
+           (a.role ? ' · ' + escapeHtml(a.role) : '') + '</figcaption></figure>';
+  }).join('');
+  sec.style.display = '';
+}
+
 function updateTrialBanner(){
   var b = document.getElementById('trialProgressBanner');
   if (!b) return;
@@ -1235,7 +1325,16 @@ function updateTrialBanner(){
   }
   var tbtn = document.getElementById('trialStartBtn');
   if (tbtn && G.trialUsed) {
-    tbtn.innerHTML = '🎮 Rejouer ma leçon gratuite<span>Ta progression est conservée</span>';
+    var free = FREE_TRIAL_NODES.boite, faites = 0;
+    for (var i = 0; i < free; i++) if ((G.nodes[nodeId('boite', i)] || {}).stars > 0) faites++;
+    /* à 0 leçon terminée, « continuer » serait faux : on garde l'appel
+       d'origine, qui promet les 3 leçons */
+    if (faites >= free) {
+      tbtn.innerHTML = '🎮 Rejouer mes leçons gratuites<span>Ta progression est conservée</span>';
+    } else if (faites > 0) {
+      tbtn.innerHTML = '🎮 Continuer mes leçons gratuites<span>' + faites + ' sur ' + free +
+        ' terminée' + (faites > 1 ? 's' : '') + ' · ta progression est conservée</span>';
+    }
   }
 }
 
@@ -1470,6 +1569,7 @@ document.addEventListener('DOMContentLoaded', function(){
   renderLeaderboard();
   syncLeaderboard();
   updateTrialBanner(); // visiteur de retour non premium : montre ses acquis
+  renderAvis();        // page de vente : avis réels, ou section masquée
   setInterval(regenHearts, 60000);
   // visite : 1 max par jour et par appareil
   try {

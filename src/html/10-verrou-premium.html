@@ -1,84 +1,294 @@
-<div id="premiumLockScreen" role="dialog" aria-modal="true" aria-labelledby="premiumLockTitle" style="position:fixed;inset:0;width:100%;min-height:100vh;background:radial-gradient(circle at top,#2a1a0d 0%,#1a1008 55%,#0f0904 100%);color:#fefcf8;display:flex;align-items:center;justify-content:center;z-index:999999;padding:17px;font-family:'Tajawal',Arial,sans-serif;overflow:auto;">
-  <div class="premium-lock-panel optimized-final">
+<!-- ============================================================================
+     PAGE DE VENTE / VERROU PREMIUM
+     C'est le seul écran que voit un visiteur sans code : c'est donc une vraie
+     page de vente, pas un simple mur. Ordre des sections calé sur la façon
+     dont une décision d'achat se prend :
+       promesse → preuve visuelle → volume → problème vécu → méthode →
+       contenu → échantillon réel → pourquoi ça marche → prix → objections → code
+     Contrainte de build : chaque onclick est compilé par tools/build-html.mjs.
+     Pas d'apostrophe française dans un onclick, jamais.
+============================================================================ -->
+<div id="premiumLockScreen" role="dialog" aria-modal="true" aria-labelledby="premiumLockTitle">
+  <div class="pf-landing">
 
-    <section class="premium-card-final premium-main-final" aria-label="Aperçu et valeur de la plateforme">
-      <span class="premium-badge-final">🎁 Aperçu gratuit</span>
+    <!-- ------------------------------------------------ barre fixe -->
+    <header class="pf-bar">
+      <span class="pf-bar-brand">📚 1BAC Français <b>·</b> Régional</span>
+      <nav class="pf-bar-nav">
+        <button type="button" class="pf-bar-link" onclick="pfGo('pf-contenu')">Le contenu</button>
+        <button type="button" class="pf-bar-link" onclick="pfGo('pf-offre')">Le prix</button>
+        <button type="button" class="pf-bar-code" onclick="pfGo('pf-code')">J’ai un code</button>
+      </nav>
+    </header>
 
-      <h1>Réviser le Français pour le régional devient simple, clair et guidé.</h1>
-      <p class="premium-subtitle-final">
-        Une plateforme Premium conçue pour les élèves de 1BAC Maroc : comprendre les œuvres,
-        retenir l’essentiel, s’entraîner avec méthode et répondre comme à l’examen.
-      </p>
+    <!-- ------------------------------------------------------- hero -->
+    <section class="pf-hero">
+      <div class="pf-hero-text">
+        <span class="pf-tag">Élèves de 1<sup>re</sup> année du baccalauréat — Maroc</span>
 
-      <button type="button" id="trialStartBtn" class="g-trial-cta" onclick="gStartTrial()">
-        🎮 Essayer gratuitement — 1 leçon offerte
-        <span>Sans inscription · 5 questions · 2 minutes</span>
-      </button>
+        <h1 id="premiumLockTitle">Le régional de Français,<br>sans le stress de la veille.</h1>
 
-      <div class="premium-benefits-final" aria-label="Bénéfices principaux">
-        <div class="premium-benefit-final">
-          <strong>Moins de confusion</strong>
-          <span>Les trois œuvres sont organisées dans un parcours clair.</span>
-        </div>
-        <div class="premium-benefit-final">
-          <strong>Révision plus rapide</strong>
-          <span>Résumés, fiches, vocabulaire et quiz au même endroit.</span>
-        </div>
-        <div class="premium-benefit-final">
-          <strong>Réponses type régional</strong>
-          <span>Méthode, exemples corrigés et réponses modèles.</span>
-        </div>
+        <p class="pf-lead">
+          Les trois œuvres au programme — <b>La Boîte à Merveilles</b>, <b>Antigone</b>,
+          <b>Le Dernier Jour d’un Condamné</b> — transformées en un parcours où tu
+          <b>réponds</b> au lieu de relire. Avec la méthode de l’examen et des annales
+          corrigées question par question.
+        </p>
+
+        <button type="button" id="trialStartBtn" class="pf-cta-trial" onclick="gStartTrial()">
+          🎮 Commencer gratuitement — 3 leçons offertes
+          <span>Sans inscription · sans carte bancaire · 6 minutes</span>
+        </button>
+
+        <div id="trialProgressBanner" class="g-trial-banner" style="display:none;"></div>
+
+        <ul class="pf-chips">
+          <li>✅ Aucune inscription</li>
+          <li>✅ Ta progression est gardée</li>
+          <li>✅ Fonctionne sans connexion</li>
+          <li>✅ Sur téléphone</li>
+        </ul>
+
+        <button type="button" class="pf-scroll-hint" onclick="pfGo('pf-contenu')">
+          Voir ce qu’il y a dedans ↓
+        </button>
       </div>
 
-      <div class="premium-proof-final">
-        <div class="premium-sample-final">
-          <h3>📖 Aperçu concret — Antigone</h3>
-          <p><strong>Idée essentielle :</strong> Antigone refuse l’ordre de Créon parce qu’elle place la conscience morale au-dessus de la loi politique.</p>
-          <p><strong>Réponse type Bac :</strong> Antigone incarne la résistance intérieure : elle préfère mourir plutôt que trahir ses valeurs et accepter une injustice.</p>
+      <!-- réplique fidèle d'une leçon : le visiteur voit le produit avant d'acheter -->
+      <div class="pf-hero-demo" aria-hidden="true">
+        <div class="pf-demo-frame">
+          <div class="pf-demo-hud">
+            <span class="pf-demo-hearts">❤️❤️❤️❤️🤍</span>
+            <span class="pf-demo-bar"><i style="width:62%"></i></span>
+            <span class="pf-demo-xp">⚡ 240 XP</span>
+          </div>
+          <p class="pf-demo-cat">✍️ Contexte &amp; auteur — La Boîte à Merveilles</p>
+          <p class="pf-demo-q">Quel âge a Sidi Mohammed au début du récit ?</p>
+          <div class="pf-demo-opts">
+            <span>Quatre ans</span>
+            <span class="ok">Six ans ✓</span>
+            <span>Dix ans</span>
+            <span>Douze ans</span>
+          </div>
+          <div class="pf-demo-feedback">
+            <b>+10 XP · Combo ×3 🔥</b>
+            <span>Le narrateur adulte se souvient de ses six ans : c’est le point de départ du récit d’enfance.</span>
+          </div>
         </div>
+        <p class="pf-demo-legend">Une leçon = 5 questions, environ 2 minutes.</p>
+      </div>
+    </section>
 
-        <div class="premium-sample-final">
-          <h3>🎯 Ce que l’élève reçoit</h3>
-          <ul>
-            <li>Résumés détaillés des trois œuvres</li>
-            <li>Fiches personnages, thèmes et vocabulaire</li>
-            <li>Quiz corrigés pour vérifier les acquis</li>
-            <li>Méthode régional + réponses modèles</li>
-          </ul>
+    <!-- --------------------------------------------- volume du contenu -->
+    <section class="pf-numbers" aria-label="Ce que contient la plateforme">
+      <div><b>330</b><span>questions corrigées</span></div>
+      <div><b>24</b><span>leçons progressives</span></div>
+      <div><b>6</b><span>sujets d’examen entiers</span></div>
+      <div><b>42</b><span>corrections détaillées</span></div>
+      <div><b>3</b><span>œuvres au programme</span></div>
+      <div><b>9</b><span>dossiers de cours</span></div>
+    </section>
+
+    <!-- ------------------------------------------------ le problème -->
+    <section class="pf-section pf-problem">
+      <h2>Trois raisons de perdre des points au régional</h2>
+      <div class="pf-grid-3">
+        <article>
+          <span class="pf-emoji">😵‍💫</span>
+          <h3>Tu relis, et tu oublies</h3>
+          <p>Relire un résumé donne l’impression de savoir. Le jour de l’épreuve, la page blanche arrive quand même — parce que relire n’est pas se souvenir.</p>
+          <p class="pf-answer">→ Ici, tu ne lis pas : tu réponds. À chaque question, ton cerveau va chercher l’information au lieu de la reconnaître.</p>
+        </article>
+        <article>
+          <span class="pf-emoji">🎯</span>
+          <h3>Tu connais l’histoire, mais tu réponds mal</h3>
+          <p>Beaucoup d’élèves savent de quoi parle Antigone et perdent quand même la moitié des points : la question demandait une figure de style, un relevé, une justification.</p>
+          <p class="pf-answer">→ Ici, chaque correction dit la méthode attendue, la réponse type, et le piège du régional.</p>
+        </article>
+        <article>
+          <span class="pf-emoji">🤷</span>
+          <h3>Tu ne sais pas où tu en es</h3>
+          <p>À trois semaines de l’examen, la vraie question n’est pas « ai-je travaillé ? » mais « sur quoi vais-je me planter ? ». Personne ne te le dit.</p>
+          <p class="pf-answer">→ Ici, un bilan par compétence affiche ton pourcentage de maîtrise, œuvre par œuvre.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- -------------------------------------------- comment ça marche -->
+    <section class="pf-section pf-how">
+      <h2>Comment ça se passe</h2>
+      <ol class="pf-steps">
+        <li>
+          <span class="pf-step-n">1</span>
+          <h3>Tu suis le parcours</h3>
+          <p>Huit étapes par œuvre, du contexte à l’examen blanc. Chacune s’ouvre quand la précédente est réussie — tu ne te demandes jamais quoi faire ensuite.</p>
+        </li>
+        <li>
+          <span class="pf-step-n">2</span>
+          <h3>Tu gagnes — ou tu recommences</h3>
+          <p>XP, niveaux, série de jours, cœurs. Une erreur n’est pas une punition : la question revient toute seule le lendemain, puis 3 jours après, puis 7.</p>
+        </li>
+        <li>
+          <span class="pf-step-n">3</span>
+          <h3>Tu passes l’épreuve pour de vrai</h3>
+          <p>Examen blanc chronométré en 12 minutes, sujets d’annales entiers, atelier de production écrite noté sur 8 avec la grille officielle.</p>
+        </li>
+      </ol>
+    </section>
+
+    <!-- ----------------------------------------------- ce que tu as -->
+    <section class="pf-section" id="pf-contenu">
+      <h2>Ce que tu débloques avec l’accès complet</h2>
+      <p class="pf-section-sub">Tout est déjà écrit, corrigé et vérifié. Rien à attendre après l’achat.</p>
+      <div class="pf-features">
+        <article><b>📜 Annales corrigées</b><span>6 sujets entiers au format du régional (10 points d’étude de texte + 10 points de production), avec les 42 questions corrigées une par une.</span></article>
+        <article><b>🧠 330 questions</b><span>Contexte, analyse, faits de langue, réaction personnelle — les quatre types que l’examen pose vraiment.</span></article>
+        <article><b>📖 Résumés &amp; fiches</b><span>Les trois œuvres chapitre par chapitre, personnages, thèmes, citations à retenir.</span></article>
+        <article><b>🖊️ Production écrite guidée</b><span>Un atelier en 4 étapes qui t’aide à construire ton plan, puis se note sur 8 avec la grille officielle.</span></article>
+        <article><b>📜 Études de texte</b><span>12 extraits travaillés comme à l’épreuve : le texte reste sous les yeux pendant les questions.</span></article>
+        <article><b>🔁 Répétition espacée</b><span>Ce que tu rates revient à J+1, J+3 puis J+7. C’est la technique qui fait la différence entre savoir et retenir.</span></article>
+        <article><b>📊 Bilan par compétence</b><span>Ton pourcentage de maîtrise pour chaque type de question et chaque œuvre — tu sais exactement quoi réviser.</span></article>
+        <article><b>🏆 Ligue &amp; badges</b><span>Classement hebdomadaire entre élèves, 12 badges à décrocher, série de jours à ne pas casser.</span></article>
+        <article><b>📴 Hors connexion</b><span>Installe la plateforme comme une application. Elle continue de fonctionner sans internet et sans consommer tes données.</span></article>
+      </div>
+    </section>
+
+    <!-- ------------------------------------------- échantillon réel -->
+    <section class="pf-section pf-sample">
+      <h2>Un vrai extrait, pas une promesse</h2>
+      <p class="pf-section-sub">Voici exactement à quoi ressemble une correction d’annale à l’intérieur.</p>
+
+      <div class="pf-sample-card">
+        <span class="pf-sample-badge">Étude de texte · question 4 · 2 points</span>
+        <p class="pf-sample-q">« Relevez dans le passage une figure de style et précisez son effet. »</p>
+
+        <div class="pf-sample-block">
+          <b>🧭 Méthode</b>
+          <p>Ne réponds jamais par le seul nom de la figure. Le barème attend trois choses : le <b>relevé exact</b> entre guillemets, le <b>nom</b> de la figure, puis l’<b>effet</b> produit sur le lecteur. Une réponse sur trois parties, une phrase chacune.</p>
+        </div>
+        <div class="pf-sample-block">
+          <b>✅ Réponse attendue</b>
+          <p>« Le patio ressemblait à un puits de lumière » est une comparaison, marquée par l’outil « ressemblait à ». Elle transforme un lieu banal en espace lumineux et protecteur, et traduit le regard émerveillé de l’enfant sur son univers quotidien.</p>
+        </div>
+        <div class="pf-sample-block pf-sample-trap">
+          <b>⚠️ Le piège du régional</b>
+          <p>Confondre comparaison et métaphore. S’il y a un outil de comparaison (« comme », « tel », « ressemblait à »), c’est une comparaison. Sans outil, c’est une métaphore. Cette confusion coûte un point entier chaque année.</p>
+        </div>
+      </div>
+      <p class="pf-sample-foot">Les 42 questions des 6 sujets sont corrigées à ce niveau de détail.</p>
+    </section>
+
+    <!-- ------------------------------------------- pourquoi ça marche -->
+    <section class="pf-section pf-science">
+      <h2>Pourquoi cette méthode fonctionne</h2>
+      <div class="pf-grid-3">
+        <article>
+          <h3>Se tester, pas relire</h3>
+          <p>Chercher une réponse dans sa mémoire fixe le souvenir bien plus solidement que la relire. C’est l’effet de test, l’un des résultats les mieux établis en psychologie de l’apprentissage.</p>
+        </article>
+        <article>
+          <h3>Revoir au bon moment</h3>
+          <p>Une notion revue juste avant d’être oubliée tient beaucoup plus longtemps. La plateforme calcule ce moment pour chaque question que tu as ratée — tu n’as rien à planifier.</p>
+        </article>
+        <article>
+          <h3>Des séances courtes</h3>
+          <p>Deux minutes par leçon, cinq questions. Assez court pour être fait dans le bus, assez régulier pour que la mémoire s’installe. Réviser 15 minutes par jour bat 3 heures la veille.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------------- avis (réels) -->
+    <section class="pf-section pf-avis" id="pf-avis" style="display:none;">
+      <h2>Ce qu’en disent les élèves</h2>
+      <div class="pf-avis-grid" id="pfAvisGrid"></div>
+    </section>
+
+    <!-- --------------------------------------------------- l'offre -->
+    <section class="pf-section pf-offer" id="pf-offre">
+      <div class="pf-offer-card">
+        <span class="pf-tag pf-tag-center">🔓 Accès complet</span>
+        <h2>Pack complet 1BAC Français</h2>
+        <p class="pf-offer-sub">Un paiement unique. Accès jusqu’à ton examen.</p>
+
+        <div class="pf-price"><strong>100</strong><span>DH</span></div>
+        <p class="pf-price-note">Soit le prix d’un seul cours particulier — pour toute l’année.</p>
+
+        <ul class="pf-offer-list">
+          <li>Les 3 œuvres, 24 leçons, 330 questions</li>
+          <li>6 sujets d’annales avec 42 corrections détaillées</li>
+          <li>Atelier de production écrite noté</li>
+          <li>Répétition espacée et bilan par compétence</li>
+          <li>Mises à jour incluses jusqu’au régional</li>
+          <li>Utilisable sur 2 appareils (téléphone + ordinateur)</li>
+        </ul>
+
+        <a href="https://wa.me/212767484041?text=Bonjour%2C%20je%20veux%20acc%C3%A9der%20%C3%A0%20la%20plateforme%20Premium%201BAC%20Fran%C3%A7ais%20%C3%A0%20100%20DH.%20Merci%20de%20m%E2%80%99envoyer%20les%20instructions%20de%20paiement."
+           target="_blank" rel="noopener"
+           class="pf-cta-buy"
+           aria-label="Acheter l’accès Premium 1BAC Français via WhatsApp">
+          💬 Débloquer sur WhatsApp
+        </a>
+        <p class="pf-offer-how">Tu écris sur WhatsApp → tu reçois les instructions de paiement → ton code arrive après validation.</p>
+
+        <div class="pf-offer-trust">
+          <span>🔒 Aucune donnée bancaire ne transite par le site</span>
+          <span>💬 Une vraie personne te répond</span>
         </div>
       </div>
     </section>
 
-    <aside class="premium-card-final premium-action-final" aria-label="Accès Premium et achat">
-      <span class="premium-badge-final" style="margin-left:auto;margin-right:auto;">🔒 Accès Premium</span>
-      <h2 id="premiumLockTitle">Pack complet 1BAC Français</h2>
+    <!-- ------------------------------------------------------- FAQ -->
+    <section class="pf-section pf-faq">
+      <h2>Les questions qu’on nous pose</h2>
 
-      <div id="trialProgressBanner" class="g-trial-banner" style="display:none;"></div>
+      <details>
+        <summary>Est-ce que je peux essayer avant de payer ?</summary>
+        <p>Oui. Trois leçons complètes de La Boîte à Merveilles sont ouvertes à tout le monde, sans inscription et sans donner le moindre renseignement. Les XP que tu gagnes pendant l’essai sont conservés : si tu débloques ensuite, tu reprends exactement où tu t’es arrêté.</p>
+      </details>
+      <details>
+        <summary>Le contenu correspond-il bien au programme officiel ?</summary>
+        <p>Oui. Les trois œuvres sont celles du programme de 1<sup>re</sup> année du baccalauréat au Maroc, et les sujets reprennent le format du régional : 10 points d’étude de texte, 10 points de production écrite. Les sujets d’entraînement sont signalés comme tels, sans faire croire qu’il s’agit de sujets tombés.</p>
+      </details>
+      <details>
+        <summary>Comment se passe le paiement ?</summary>
+        <p>Tu écris sur WhatsApp, tu reçois les instructions de paiement en privé, et ton code d’accès t’est envoyé une fois le paiement validé. Aucune coordonnée bancaire n’est demandée ni stockée sur le site.</p>
+      </details>
+      <details>
+        <summary>Sur combien d’appareils puis-je l’utiliser ?</summary>
+        <p>Deux — typiquement ton téléphone et l’ordinateur de la maison. Ta progression te suit d’un appareil à l’autre. Cette limite existe pour que le code ne circule pas dans toute la classe ; si tu changes de téléphone, écris-nous et on libère ton code.</p>
+      </details>
+      <details>
+        <summary>Faut-il internet pour travailler ?</summary>
+        <p>Seulement la première fois. Ensuite, ajoute la plateforme à ton écran d’accueil : elle s’ouvre comme une application et fonctionne sans connexion. Pratique dans le bus, ou quand il ne reste plus de data.</p>
+      </details>
+      <details>
+        <summary>Je suis professeur — puis-je l’utiliser avec ma classe ?</summary>
+        <p>Écris-nous sur WhatsApp. Des codes en nombre pour un établissement, c’est possible et le tarif n’est pas le même.</p>
+      </details>
+    </section>
 
-      <div class="premium-price-final">
-        <strong>100 DH</strong><span>/ accès complet</span>
-      </div>
+    <!-- ------------------------------------------------- CTA + code -->
+    <section class="pf-section pf-final" id="pf-code">
+      <h2>Prêt à commencer ?</h2>
+      <p class="pf-section-sub">Essaie d’abord. Tu décideras après.</p>
 
-      <a href="https://wa.me/212767484041?text=Bonjour%2C%20je%20veux%20acc%C3%A9der%20%C3%A0%20la%20plateforme%20Premium%201BAC%20Fran%C3%A7ais%20%C3%A0%20100%20DH.%20Merci%20de%20m%E2%80%99envoyer%20les%20instructions%20de%20paiement." target="_blank" rel="noopener" aria-label="Acheter l’accès Premium 1BAC Français via WhatsApp" class="premium-primary-cta-final">
-        💬 Acheter l’accès Premium sur WhatsApp
-      </a>
+      <button type="button" class="pf-cta-trial pf-cta-trial-final" onclick="gStartTrial()">
+        🎮 Commencer mes 3 leçons gratuites
+        <span>Sans inscription · sans carte bancaire</span>
+      </button>
 
-      <div class="premium-reassurance-final" aria-label="Éléments de confiance">
-        <span>✅ Annales corrigées question par question</span>
-        <span>✅ Paiement guidé</span>
-        <span>✅ Code après validation</span>
-        <span>✅ Support WhatsApp</span>
-      </div>
-
-      <div class="premium-login-final">
-        <p>Déjà acheté ? Entrez votre code d’accès.</p>
+      <div class="pf-login">
+        <p>Tu as déjà acheté ton accès ? Entre ton code.</p>
         <input id="premiumAccessCode" type="password" autocomplete="off" placeholder="Code d’accès" aria-label="Code d’accès premium">
         <button type="button" onclick="premiumCheckAccess()">Accéder maintenant</button>
-        <p id="premiumAccessError" role="alert" aria-live="polite" style="display:none;margin:10px 0 0;color:#ffb4a8;font-size:13px;">Code incorrect. Vérifiez votre code puis réessayez.</p>
+        <p id="premiumAccessError" role="alert" aria-live="polite" style="display:none;">Code incorrect. Vérifiez votre code puis réessayez.</p>
       </div>
+    </section>
 
-      <span class="premium-small-note-final">Aucune coordonnée bancaire n’est stockée dans ce fichier. Les instructions sont envoyées en privé via WhatsApp.</span>
-    </aside>
+    <footer class="pf-foot">
+      <p>1BAC Français — Parcours régional · Maroc</p>
+      <p>Plateforme de révision indépendante, sans lien avec le Ministère de l’Éducation nationale.</p>
+    </footer>
 
   </div>
 </div>

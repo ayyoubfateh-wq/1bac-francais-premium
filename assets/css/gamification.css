@@ -137,6 +137,20 @@ button.g-hud-item:hover{background:var(--gold-pale);}
   box-shadow:0 4px 0 rgba(0,0,0,.12);
   cursor:not-allowed;
 }
+/* visiteur sans code : la suite du parcours est montrée, pas cachée — elle
+   reste cliquable et mène à l'offre. Doré terne = « ceci existe et t'attend »,
+   là où le gris de .locked dit « pas encore accessible ». */
+.g-node.premium{
+  background:linear-gradient(160deg,#e8d5a8,#c8b487);
+  box-shadow:0 4px 0 rgba(0,0,0,.16), 0 8px 18px rgba(26,16,8,.14);
+  cursor:pointer;
+}
+.g-node.premium .g-node-icon{opacity:.72;font-size:23px;}
+.g-node-premium-tag{
+  font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--gold);background:rgba(200,146,42,.13);
+  border:1px solid rgba(200,146,42,.30);border-radius:999px;padding:2px 8px;
+}
 .g-node.done{filter:saturate(.85);}
 .g-node.done::after{
   content:'✓';position:absolute;right:-2px;top:-2px;

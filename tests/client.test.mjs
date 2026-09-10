@@ -14,6 +14,19 @@ const ASSETS = path.join(ROOT, 'assets', 'js');
 /* Contenu premium généré par le build (banque complète + écrans). */
 const CONTENT = JSON.parse(fs.readFileSync(path.join(ROOT, 'private', 'content.json'), 'utf8'));
 
+/* Données d'essai RÉELLEMENT publiées : on exécute le fichier livré dans
+   dist/ plutôt que d'en refaire une copie ici. Une copie divergerait du
+   build sans que rien ne le signale — et c'est exactement la frontière
+   gratuit/payant qu'on veut tester. */
+function loadTrialData() {
+  const p = path.join(ROOT, 'dist', 'assets', 'data', 'trial.js');
+  if (!fs.existsSync(p)) throw new Error('dist/assets/data/trial.js absent — lancer `npm run build` avant les tests');
+  const sandbox = { window: {} };
+  new Function('window', fs.readFileSync(p, 'utf8'))(sandbox.window);
+  return sandbox.window.PF_DATA;
+}
+const TRIAL = loadTrialData();
+
 const SCREEN_IDS = ['home', 'parcours', 'espace', 'production', 'auteurs', 'resumes', 'fiches',
   'methode', 'modeles', 'quiz', 'vocabulaire', 'bareme', 'regionaux', 'cadre', 'chat'];
 
@@ -49,10 +62,15 @@ function bootstrap({ premium = false, preSeed = null } = {}) {
   if (premium) doc.documentElement.classList.add('premium-unlocked');
 
   fb.window.PF_DATA = {
-    questions: { boite: CONTENT.data.questions.boite.filter((q) => q.cat === 'Contextualisation'), antigone: [], condamne: [] },
+    questions: {
+      boite: TRIAL.questions.boite.slice(),
+      antigone: TRIAL.questions.antigone.slice(),
+      condamne: TRIAL.questions.condamne.slice(),
+    },
     etudes: { boite: [], antigone: [], condamne: [] },
     sujets: [],
     annales: [],
+    avis: [],
   };
 
   if (preSeed) preSeed(fb);
@@ -99,11 +117,16 @@ export async function run() {
     assert(typeof fb.window.showScreen === 'function', 'showScreen doit exister');
     assert(typeof fb.window.gStartLesson === 'function', 'gStartLesson doit exister');
   });
-  await test('données d’essai : banque limitée à la Boîte (Contexte)', () => {
+  await test('données d’essai : 3 leçons de la Boîte, rien des autres œuvres', () => {
     const fb = bootstrap();
     const Q = fb.window.PF_DATA.questions;
-    assert(Q.boite.length >= 5 && Q.antigone.length === 0 && Q.condamne.length === 0, 'essai limité attendu');
-    assert(Q.boite.every((q) => q.cat === 'Contextualisation'), 'essai = Contexte uniquement');
+    assert(Q.antigone.length === 0 && Q.condamne.length === 0, 'aucune question des œuvres payantes attendue');
+    const cats = ['Contextualisation', 'Analyse', 'Fait de langue'];
+    for (const c of cats) {
+      const n = Q.boite.filter((q) => q.cat === c).length;
+      assert(n >= 5, `au moins 5 questions « ${c} » attendues pour l’essai, obtenu : ${n}`);
+    }
+    assert(Q.boite.every((q) => cats.includes(q.cat)), 'l’essai ne doit publier que les 3 catégories offertes');
   });
 
   suite('client · anti-répétition (mélange des réponses)');
@@ -139,12 +162,34 @@ export async function run() {
   });
 
   suite('client · barrière d’essai (paywall)');
-  await test('sans premium : leçon 2 renvoie au paywall', () => {
+  await test('sans premium : la 4e leçon renvoie au paywall', () => {
     const fb = bootstrap({ premium: false });
-    fb.window.gStartLesson('boite', 1); fb.runTimers();
+    fb.window.gStartLesson('boite', 3); fb.runTimers();
     eq(fb.document.getElementById('premiumLockScreen').style.display, 'flex');
   });
-  await test('sans premium : leçon d’essai (boite 0) jouable', () => {
+  await test('sans premium : les 3 leçons offertes s’enchaînent jusqu’au mur', () => {
+    const fb = bootstrap({ premium: false });
+    const lock = fb.document.getElementById('premiumLockScreen');
+    lock.style.display = 'none'; // l'essai a démarré : le mur est refermé
+    for (const i of [0, 1, 2]) {
+      fb.window.gStartLesson('boite', i); fb.runTimers();
+      const qs = fb.evalIn('qs');
+      assert(qs && qs.length === 5, `leçon offerte ${i} : 5 questions attendues, obtenu ${qs && qs.length}`);
+      eq(lock.style.display, 'none', `leçon offerte ${i} ne doit pas rouvrir le paywall`);
+      answerLesson(fb, [true, true, true, true, true]);
+      const res = fb.document.getElementById('gLessonResult');
+      if (res) res.remove();
+    }
+    // la 4e leçon est bien ouverte côté parcours, mais payante
+    fb.window.gStartLesson('boite', 3); fb.runTimers();
+    eq(lock.style.display, 'flex', 'la 4e leçon doit ramener à l’offre');
+  });
+  await test('sans premium : une autre œuvre reste fermée', () => {
+    const fb = bootstrap({ premium: false });
+    fb.window.gStartLesson('antigone', 0); fb.runTimers();
+    eq(fb.document.getElementById('premiumLockScreen').style.display, 'flex');
+  });
+  await test('gStartTrial lance la première leçon offerte', () => {
     const fb = bootstrap({ premium: false });
     fb.window.gStartTrial(); fb.runTimers();
     assert(fb.evalIn('qs') && fb.evalIn('qs').length === 5, 'leçon d’essai de 5 questions attendue');

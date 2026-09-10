@@ -13,6 +13,7 @@ var SHELL = [
   './assets/css/style.css?v=__PF_BUILD__',
   './assets/css/gamification.css?v=__PF_BUILD__',
   './assets/data/trial.js?v=__PF_BUILD__',
+  './assets/data/avis.js?v=__PF_BUILD__',
   './assets/js/app.js?v=__PF_BUILD__',
   './assets/js/gamification.js?v=__PF_BUILD__',
   './assets/js/production.js?v=__PF_BUILD__',

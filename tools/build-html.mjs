@@ -101,18 +101,30 @@ const contenuJson = JSON.stringify(contenu.data);
 contenu.version = crypto.createHash('sha256').update(contenuJson).digest('hex').slice(0, 12);
 
 /* --------------------------------------------------- données d'essai
-   La leçon offerte = nœud « Contexte & auteur » de La Boîte à Merveilles.
-   On ne publie QUE ce pool ; le reste des structures existe, vide. */
+   Les 3 leçons offertes = les 3 premiers nœuds de La Boîte à Merveilles
+   (Contexte & auteur, Analyse de l'œuvre, Langue & style). Un essai
+   chiffré et généreux convertit mieux qu'une leçon unique : le visiteur
+   a le temps de gagner des XP, un niveau et une série — c'est cet acquis
+   qu'il ne veut plus perdre au moment du paywall (effet de dotation).
+   On ne publie QUE ces pools ; le reste des structures existe, vide.
+   Les catégories doivent rester alignées sur NODE_DEFS[0..2] et sur
+   FREE_TRIAL_NODES dans assets/js/gamification.js. */
+const CATS_ESSAI = ['Contextualisation', 'Analyse', 'Fait de langue'];
+const MAX_PAR_CAT = 12; // assez pour rejouer sans revoir les mêmes 5 questions
 const trial = {
   questions: {
-    boite: questions.boite.filter((q) => q.cat === 'Contextualisation'),
+    boite: CATS_ESSAI.flatMap((cat) => {
+      const pool = questions.boite.filter((q) => q.cat === cat);
+      if (pool.length < 5) err(`essai gratuit : moins de 5 questions « ${cat} » pour boite`);
+      return pool.slice(0, MAX_PAR_CAT);
+    }),
     antigone: [],
     condamne: [],
   },
   etudes: { boite: [], antigone: [], condamne: [] },
   sujets: [],
 };
-if (!trial.questions.boite.length) err('essai gratuit vide (aucune question Contextualisation pour boite)');
+if (!trial.questions.boite.length) err('essai gratuit vide (aucune question d’essai pour boite)');
 const trialJs =
   '/* Données d\'ESSAI (leçon offerte) — seules données présentes sur le site\n' +
   '   public. Le contenu complet est servi par /api/content après\n' +
@@ -152,6 +164,7 @@ const FICHIERS_VERSIONNES = [
   'assets/css/style.css',
   'assets/css/gamification.css',
   'assets/data/trial.js',
+  'assets/data/avis.js',
   'assets/js/app.js',
   'assets/js/gamification.js',
   'assets/js/production.js',
@@ -182,6 +195,7 @@ if (errors.length) {
 
 fs.writeFileSync(path.join(DIST, 'index.html'), outStamped, 'utf8');
 fs.writeFileSync(path.join(DIST, 'assets', 'data', 'trial.js'), trialJs, 'utf8');
+fs.copyFileSync(path.join(ROOT, 'assets', 'data', 'avis.js'), path.join(DIST, 'assets', 'data', 'avis.js'));
 copyDir(path.join(ROOT, 'assets', 'css'), path.join(DIST, 'assets', 'css'));
 copyDir(path.join(ROOT, 'assets', 'img'), path.join(DIST, 'assets', 'img'));
 fs.mkdirSync(path.join(DIST, 'assets', 'js'), { recursive: true });
@@ -227,7 +241,7 @@ function minify(rel, loader) {
   fs.writeFileSync(p, outCode, 'utf8');
   apres += Buffer.byteLength(outCode);
 }
-for (const f of ['assets/js/app.js', 'assets/js/gamification.js', 'assets/js/production.js', 'assets/js/annales.js', 'assets/js/content-loader.js', 'assets/data/trial.js', 'sw.js']) {
+for (const f of ['assets/js/app.js', 'assets/js/gamification.js', 'assets/js/production.js', 'assets/js/annales.js', 'assets/js/content-loader.js', 'assets/data/trial.js', 'assets/data/avis.js', 'sw.js']) {
   minify(f, 'js');
 }
 for (const f of ['assets/css/style.css', 'assets/css/gamification.css']) {
@@ -265,7 +279,7 @@ scanDir(DIST);
 
 console.log(`✅ Site public assemblé : dist/ (${out.length} caractères, ${manifest.fragments.length} fragments, ${ECRANS_ATTENDUS.length} écrans)`);
 console.log(`✅ Contenu premium : private/content.json (version ${contenu.version}) — ${ECRANS_PROTEGES.length} écrans protégés + banque complète`);
-console.log(`✅ Essai public limité à ${trial.questions.boite.length} questions (Contexte & auteur, La Boîte à Merveilles)`);
+console.log(`✅ Essai public limité à ${trial.questions.boite.length} questions — 3 leçons de La Boîte à Merveilles (${CATS_ESSAI.join(', ')})`);
 console.log('✅ Garde anti-fuite : aucun contenu premium dans dist/');
 console.log(`✅ Minifié JS+CSS : ${(avant / 1024).toFixed(0)} Ko → ${(apres / 1024).toFixed(0)} Ko (−${Math.round(100 * (1 - apres / avant))} %)`);
 console.log(`✅ Version du build : ${BUILD} (assets tamponnés + cache SW dédié — fini les versions mélangées)`);
