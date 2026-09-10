@@ -1259,6 +1259,19 @@ html.premium-unlocked #premiumLockScreen{display:none!important;}
 }
 #premiumAccessError{margin:10px 0 0!important;color:#ffb4a8!important;font-size:13px;}
 
+.pf-fiches{
+  margin:44px 0 0;padding:22px 24px;border-radius:20px;
+  border:1px solid rgba(232,201,122,.22);background:rgba(254,252,248,.05);
+}
+.pf-fiches strong{display:block;margin-bottom:10px;color:#f6d985;font-size:14px;}
+.pf-fiches ul{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(2,1fr);gap:8px 20px;}
+.pf-fiches a{
+  color:rgba(254,252,248,.76);font-size:13px;text-decoration:none;
+  border-bottom:1px solid rgba(232,201,122,.26);
+}
+.pf-fiches a:hover{color:#f6d985;border-bottom-color:#f6d985;}
+@media(max-width:700px){.pf-fiches ul{grid-template-columns:1fr;}}
+
 .pf-foot{
   padding:30px 0 0;border-top:1px solid rgba(232,201,122,.14);
   text-align:center;color:rgba(254,252,248,.42);font-size:12px;line-height:1.7;

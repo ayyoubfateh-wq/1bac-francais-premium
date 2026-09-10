@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { results } from './harness.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const SUITES = ['server.test.mjs', 'client.test.mjs'];
+const SUITES = ['server.test.mjs', 'client.test.mjs', 'pages.test.mjs'];
 
 for (const s of SUITES) {
   const mod = await import(pathToFileURL(path.join(ROOT, 'tests', s)).href);

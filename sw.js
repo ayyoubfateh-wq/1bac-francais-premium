@@ -42,17 +42,28 @@ self.addEventListener('fetch', function(e){
   if (url.origin !== self.location.origin) return;
   if (url.pathname.indexOf('/api/') !== -1 || url.pathname.indexOf('/.netlify/') !== -1) return;
 
-  /* la page elle-même : réseau d'abord, cache seulement hors-ligne */
+  /* Navigation : réseau d'abord, cache seulement hors-ligne.
+     ATTENTION : le site contient AUSSI des pages publiques (/antigone,
+     /la-boite-a-merveilles…). Chacune doit être mise en cache SOUS SA
+     PROPRE URL — sinon la dernière page visitée écrase la coque de
+     l'application, et l'élève hors connexion ouvre une fiche de révision
+     au lieu de son parcours. */
   if (e.request.mode === 'navigate') {
+    var estApp = url.pathname === '/' || url.pathname === '/index.html';
+    var cle = estApp ? './index.html' : url.pathname;
     e.respondWith(
       fetch(e.request).then(function(res){
         if (res && res.status === 200) {
           var copie = res.clone();
-          caches.open(CACHE).then(function(c){ c.put('./index.html', copie); });
+          caches.open(CACHE).then(function(c){ c.put(cle, copie); });
         }
         return res;
       }).catch(function(){
-        return caches.match('./index.html', { ignoreSearch: true });
+        return caches.match(cle, { ignoreSearch: true }).then(function(r){
+          /* une page publique jamais visitée hors connexion : on renvoie
+             l'application, qui elle fonctionne sans réseau */
+          return r || caches.match('./index.html', { ignoreSearch: true });
+        });
       })
     );
     return;

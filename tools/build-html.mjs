@@ -19,6 +19,7 @@ import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import esbuild from 'esbuild';
 import { loadContent } from './load-content.mjs';
+import { genererPagesPubliques } from './build-pages.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SRC = path.join(ROOT, 'src', 'html');
@@ -275,9 +276,14 @@ function scanDir(dir) {
     }
   }
 }
+/* Pages publiques de référencement — générées AVANT la garde anti-fuite
+   pour qu'elles soient scannées comme le reste de dist/. */
+const seo = genererPagesPubliques(DIST);
+
 scanDir(DIST);
 
 console.log(`✅ Site public assemblé : dist/ (${out.length} caractères, ${manifest.fragments.length} fragments, ${ECRANS_ATTENDUS.length} écrans)`);
+console.log(`✅ Pages publiques (référencement) : ${seo.pages} pages, ${seo.mots} mots + sitemap.xml + robots.txt`);
 console.log(`✅ Contenu premium : private/content.json (version ${contenu.version}) — ${ECRANS_PROTEGES.length} écrans protégés + banque complète`);
 console.log(`✅ Essai public limité à ${trial.questions.boite.length} questions — 3 leçons de La Boîte à Merveilles (${CATS_ESSAI.join(', ')})`);
 console.log('✅ Garde anti-fuite : aucun contenu premium dans dist/');
