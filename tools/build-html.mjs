@@ -28,7 +28,7 @@ const PRIVATE = path.join(ROOT, 'private');
 
 /* Écrans pédagogiques réservés aux membres (extraits du HTML public). */
 const ECRANS_PROTEGES = ['auteurs', 'resumes', 'fiches', 'methode', 'modeles', 'vocabulaire', 'bareme', 'regionaux', 'cadre'];
-const ECRANS_ATTENDUS = ['parcours', 'production', 'espace', 'home', 'auteurs', 'resumes', 'fiches', 'methode', 'modeles', 'quiz', 'vocabulaire', 'bareme', 'regionaux', 'cadre', 'chat'];
+const ECRANS_ATTENDUS = ['parcours', 'production', 'espace', 'home', 'auteurs', 'resumes', 'fiches', 'methode', 'modeles', 'quiz', 'vocabulaire', 'bareme', 'regionaux', 'cadre', 'chat', 'langue'];
 
 const errors = [];
 const err = (m) => errors.push(m);

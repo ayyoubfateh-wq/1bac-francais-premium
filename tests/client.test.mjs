@@ -28,7 +28,7 @@ function loadTrialData() {
 const TRIAL = loadTrialData();
 
 const SCREEN_IDS = ['home', 'parcours', 'espace', 'production', 'auteurs', 'resumes', 'fiches',
-  'methode', 'modeles', 'quiz', 'vocabulaire', 'bareme', 'regionaux', 'cadre', 'chat'];
+  'methode', 'modeles', 'quiz', 'vocabulaire', 'bareme', 'regionaux', 'cadre', 'chat', 'langue'];
 
 function bootstrap({ premium = false, preSeed = null } = {}) {
   const fb = createFakeBrowser();
@@ -73,6 +73,11 @@ function bootstrap({ premium = false, preSeed = null } = {}) {
     avis: [],
     langue: {}, // déclaré vide côté public, rempli par /api/content
   };
+
+  /* le référentiel du programme est une donnée, pas un moteur : il est
+     chargé avant eux dans la page réelle, et doit l'être ici aussi —
+     sans lui, Le Fondouk ne sait pas quels ateliers existent. */
+  new Function('window', fs.readFileSync(path.join(ROOT, 'assets', 'data', 'referentiel.js'), 'utf8'))(fb.window);
 
   if (preSeed) preSeed(fb);
   fb.loadEngines(ASSETS, ['app.js', 'gamification.js', 'production.js', 'annales.js', 'content-loader.js']);
@@ -219,6 +224,32 @@ export async function run() {
         assert(q.opts.length === 4 && q.opts[q.ans], `${id} q${i + 1} : réponse correcte introuvable`);
       });
     });
+  });
+
+  suite('client · Le Fondouk (atelier de la langue)');
+  await test('une leçon d’atelier se joue et enregistre sa progression', () => {
+    const fb = bootstrap({ premium: true });
+    injectFull(fb);
+    const D = fb.window.PF_DATA;
+    Object.keys(CONTENT.data.langue || {}).forEach((k) => { D.langue[k] = CONTENT.data.langue[k]; });
+
+    fb.window.gFondoukLecon('gra-types'); fb.runTimers();
+    const qsel = fb.evalIn('qs');
+    assert(qsel && qsel.length === 5, `5 questions attendues, obtenu ${qsel && qsel.length}`);
+    answerLesson(fb, [true, true, true, true, true]);
+
+    const g = readG(fb);
+    const rec = g.nodes['langue-gra-types'];
+    assert(rec && rec.stars === 3, 'la notion doit être enregistrée à 3 étoiles');
+    assert(!fb.document.documentElement.classList.contains('g-en-lecon'), 'le mode leçon doit être quitté');
+  });
+
+  await test('un atelier sans questions n’est pas jouable', () => {
+    const fb = bootstrap({ premium: true });
+    injectFull(fb);
+    // aucune banque de langue injectée : rien ne doit démarrer
+    fb.window.gFondoukLecon('fig-chiasme'); fb.runTimers();
+    assert(!fb.evalIn('qs') || fb.evalIn('qs').length !== 5, 'aucune leçon ne doit démarrer sans questions');
   });
 
   await test('purge des SRS d’essai au passage en banque complète', () => {

@@ -681,9 +681,14 @@ function ensureLessonBar(){
 function updateLessonBar(){
   var bar = document.getElementById('gLessonBar');
   if (!bar || !session) return;
+  /* trois origines possibles : une révision, un atelier du Fondouk (dont
+     l'index est un identifiant de notion, pas un numéro de nœud), ou une
+     leçon d'œuvre. */
   var title = session.review
     ? '📅 Révisions du jour · consolide ta mémoire'
-    : NODE_DEFS[session.index].icon + ' ' + NODE_DEFS[session.index].name;
+    : session.notion
+      ? session.notionIcone + ' ' + session.notionNom
+      : NODE_DEFS[session.index].icon + ' ' + NODE_DEFS[session.index].name;
   bar.innerHTML =
     '<button class="g-lesson-quit" onclick="gQuitLesson()" aria-label="Quitter la leçon">✕</button>' +
     '<span class="g-lesson-title">' + title + '</span>' +
@@ -817,7 +822,9 @@ function finishLesson(){
   var total = qs.length;
   var sc = score;
   if (s.review) { finishReview(s, sc, total); return; }
-  var def = NODE_DEFS[s.index];
+  /* une leçon du Fondouk n a ni nœud ni œuvre : on lui fabrique son
+     identité à partir de la notion travaillée */
+  var def = s.notion ? { icon: s.notionIcone, name: s.notionNom } : NODE_DEFS[s.index];
   var stars = starsForScore(sc, total, s.exam);
   var passed = stars > 0;
 
@@ -839,7 +846,7 @@ function finishLesson(){
   quitterModeLecon();
   var totalXP = s.xpBase + s.xpCombo + s.xpCrit + bonus;
 
-  var m = BOOK_META[s.book];
+  var m = s.notion ? { name: s.atelierJeu, color: "#0e8a6f" } : BOOK_META[s.book];
   var overlay = document.createElement('div');
   overlay.className = 'g-overlay';
   overlay.id = 'gLessonResult';
@@ -861,7 +868,9 @@ function finishLesson(){
       '</div>' +
       (passed
         ? (isPremium()
-            ? '<button class="g-btn-primary" style="background:' + m.color + '" onclick="gCloseResult(true)">CONTINUER LE PARCOURS →</button>'
+            ? (s.notion
+                ? '<button class="g-btn-primary" style="background:' + m.color + '" onclick="gCloseResult(true);gFondoukRetour(&quot;' + REF().notions[s.notion].atelier + '&quot;)">RETOUR À L’ATELIER →</button>'
+                : '<button class="g-btn-primary" style="background:' + m.color + '" onclick="gCloseResult(true)">CONTINUER LE PARCOURS →</button>')
             : trialOutro(s.book, s.index, m))
         : '<p class="g-fail-hint">Il faut au moins ' + (s.exam ? '7/10' : '3/5') + ' pour débloquer la suite.</p>' +
           '<button class="g-btn-primary" onclick="gRetryLesson(\'' + s.book + '\',' + s.index + ')">RÉESSAYER</button>' +
@@ -1178,6 +1187,7 @@ window.gJoinLeague = function(){
   toast('🏆 Bienvenue dans la ligue, ' + pseudo + ' !');
   syncLeaderboard();
   renderLeaderboard();
+  if (window.gFondoukRefresh) window.gFondoukRefresh();
 };
 
 /* ---------------------------------------------------------------- badges
@@ -1544,9 +1554,11 @@ window.gContentRefresh = function(){
   renderHUD();
   renderPath();
   window.gRenderMascotte();
+  if (window.gFondoukRefresh) window.gFondoukRefresh();
   renderBilan();
   renderBadges();
   renderLeaderboard();
+  if (window.gFondoukRefresh) window.gFondoukRefresh();
 };
 
 /* ---------------------------------------------- pont atelier production
@@ -1581,6 +1593,7 @@ document.addEventListener('DOMContentLoaded', function(){
   renderHUD();
   renderPath();
   window.gRenderMascotte();
+  if (window.gFondoukRefresh) window.gFondoukRefresh();
   renderBilan();
   renderBadges();
   renderLeaderboard();
@@ -1588,6 +1601,7 @@ document.addEventListener('DOMContentLoaded', function(){
   updateTrialBanner(); // visiteur de retour non premium : montre ses acquis
   renderAvis();        // page de vente : avis réels, ou section masquée
   window.gRenderMascotte();
+  if (window.gFondoukRefresh) window.gFondoukRefresh();
   setInterval(regenHearts, 60000);
   // visite : 1 max par jour et par appareil
   try {
@@ -1744,5 +1758,173 @@ function mascotteReaction(ok){
     '<span class="pf-verdict">' + verdict + '<em>' + phrase + '</em></span>';
 }
 window.gMascotteReaction = mascotteReaction;
+
+
+/* ============================================================================
+   LE FONDOUK — le 4e monde : l'atelier de la langue
+
+   Dix ateliers, un par famille du programme officiel. Dans chaque atelier,
+   une notion = un niveau de 5 questions. L'élève voit « Le Palais des
+   Figures » ; il ne voit jamais « rubrique langue de la progression ».
+
+   Deux règles de progression, choisies pour ne jamais bloquer :
+   - les ateliers sont tous ouverts : on choisit son chantier ;
+   - à l'intérieur d'un atelier, les niveaux s'enchaînent, parce qu'une
+     notion en prépare une autre (la cause avant la conséquence).
+   Seules les notions qui ont des questions apparaissent. Les autres sont
+   annoncées en bas, sans faux niveau à cliquer.
+============================================================================ */
+function REF(){ return window.PF_REFERENTIEL || null; }
+function LANGUE(){ return (window.PF_DATA && window.PF_DATA.langue) || {}; }
+
+/* identifiant de progression : réutilise G.nodes, comme les œuvres */
+function notionId(id){ return 'langue-' + id; }
+
+function notionsJouables(atelier){
+  var banque = LANGUE();
+  return atelier.notions.filter(function(n){ return (banque[n.id] || []).length >= 5; });
+}
+function notionFaite(id){
+  var r = G.nodes[notionId(id)];
+  return !!(r && r.stars > 0);
+}
+function etatNotion(liste, i){
+  if (notionFaite(liste[i].id)) return 'done';
+  if (i === 0) return 'open';
+  return notionFaite(liste[i - 1].id) ? 'open' : 'locked';
+}
+
+/* ---------------------------------------------------------------- rendus */
+/* Vue courante du Fondouk : 'liste', ou l'identifiant de l'atelier ouvert.
+   Sans cette mémoire, n'importe quel rafraîchissement déclenché ailleurs
+   (fin de leçon, synchronisation) refermerait l'atelier que l'élève est en
+   train de parcourir. */
+var vueFondouk = 'liste';
+
+window.gFondoukRefresh = function(){
+  var wrap = document.getElementById('gFondouk');
+  var R = REF();
+  if (!wrap || !R) return;
+  if (vueFondouk !== 'liste') { window.gFondoukOuvrir(vueFondouk); return; }
+  var banque = LANGUE();
+
+  if (!Object.keys(banque).length) {
+    wrap.innerHTML = '<p class="g-fondouk-vide">Les ateliers se chargent…</p>';
+    return;
+  }
+
+  var html = '<div class="g-ateliers">';
+  R.ateliers.forEach(function(a){
+    var jouables = notionsJouables(a);
+    var faites = jouables.filter(function(n){ return notionFaite(n.id); }).length;
+    var pct = jouables.length ? Math.round(100 * faites / jouables.length) : 0;
+    var vide = jouables.length === 0;
+    html +=
+      '<button class="g-atelier' + (vide ? ' vide' : '') + (pct === 100 ? ' complet' : '') + '"' +
+        (vide ? ' disabled' : ' onclick="gFondoukOuvrir(\'' + a.id + '\')"') +
+        ' aria-label="' + a.jeu + ' — ' + faites + ' sur ' + jouables.length + '">' +
+        '<span class="g-atelier-icone">' + a.icone + '</span>' +
+        '<span class="g-atelier-txt">' +
+          '<b>' + a.jeu + '</b>' +
+          '<small>' + a.promesse + '</small>' +
+        '</span>' +
+        '<span class="g-atelier-etat">' +
+          (vide ? '<em>bientôt</em>'
+                : '<span class="g-atelier-compte">' + faites + '/' + jouables.length + '</span>' +
+                  '<span class="g-atelier-jauge"><i style="width:' + pct + '%"></i></span>') +
+        '</span>' +
+      '</button>';
+  });
+  html += '</div>';
+
+  var prets = R.ateliers.reduce(function(n, a){ return n + notionsJouables(a).length; }, 0);
+  html += '<p class="g-fondouk-note">' + prets + ' niveaux ouverts sur les ' +
+    R.totalNotions + ' outils du programme. Les autres arrivent.</p>';
+  wrap.innerHTML = html;
+};
+
+window.gFondoukOuvrir = function(atelierId){
+  var R = REF();
+  var wrap = document.getElementById('gFondouk');
+  if (!R || !wrap) return;
+  var a = R.ateliers.filter(function(x){ return x.id === atelierId; })[0];
+  if (!a) return;
+  vueFondouk = atelierId;
+  var liste = notionsJouables(a);
+
+  var html =
+    '<button class="g-retour" onclick="gFondoukListe()">← Tous les ateliers</button>' +
+    '<div class="g-atelier-tete">' +
+      '<span class="g-atelier-icone grand">' + a.icone + '</span>' +
+      '<div><h3>' + a.jeu + '</h3><p>' + a.promesse + '</p></div>' +
+    '</div>' +
+    '<ol class="g-niveaux">';
+
+  liste.forEach(function(n, i){
+    var st = etatNotion(liste, i);
+    var rec = G.nodes[notionId(n.id)] || {};
+    html +=
+      '<li class="g-niveau ' + st + '">' +
+        '<button' + (st === 'locked' ? ' disabled' : ' onclick="gFondoukLecon(\'' + n.id + '\')"') + '>' +
+          '<span class="g-niveau-num">' + (st === 'done' ? '✓' : (st === 'locked' ? '🔒' : (i + 1))) + '</span>' +
+          '<span class="g-niveau-txt">' +
+            '<b>' + n.nom + '</b>' +
+            '<small>' + n.def + '</small>' +
+          '</span>' +
+          (st === 'done' ? '<span class="g-niveau-etoiles">' + starStr(rec.stars || 0) + '</span>' : '') +
+        '</button>' +
+      '</li>';
+  });
+  html += '</ol>';
+  wrap.innerHTML = html;
+  wrap.scrollIntoView({ block: 'nearest' });
+};
+
+/* ---------------------------------------------------------------- leçon
+   On réutilise intégralement le moteur de quiz : même barre, mêmes XP,
+   mêmes cœurs, même répétition espacée. Seule la fabrication de `session`
+   change — c'est ce qui garantit qu'un correctif sur les leçons d'œuvres
+   profite aussi au Fondouk, et l'inverse. */
+window.gFondoukLecon = function(notion){
+  var R = REF();
+  if (!R || !R.notions[notion]) return;
+  var n = R.notions[notion];
+  var pool = (LANGUE()[notion] || []);
+  if (pool.length < 5) { toast('Cet atelier n’est pas encore ouvert.'); return; }
+
+  regenHearts();
+  if (G.hearts <= 0) { showRefillModal('boite'); return; }
+
+  session = {
+    book: 'langue', index: notion, notion: notion,
+    notionNom: n.nom, notionIcone: '🏛️', atelierJeu: n.atelierJeu,
+    exam: false, support: null, timed: false, timerText: '',
+    combo: 0, comboMax: 0, xpBase: 0, xpCombo: 0, xpCrit: 0,
+  };
+
+  currentBookName = n.atelierJeu;
+  qs = samplePool(pool, 5); cur = 0; score = 0; answers = [];
+  var quizBtn = Array.from(document.querySelectorAll('.sidebar-menu button')).find(function(b){
+    var oc = b.getAttribute('onclick'); return oc && oc.indexOf("'quiz'") !== -1;
+  });
+  window.showScreen('quiz', quizBtn || document.querySelector('.sidebar-menu button'));
+  document.getElementById('quiz-select-screen').style.display = 'none';
+  document.getElementById('quiz-results-screen').style.display = 'none';
+  document.getElementById('quiz-game-screen').style.display = 'block';
+  ensureLessonBar();
+  renderQ();
+  updateLessonBar();
+};
+
+/* après une leçon du Fondouk, on revient à son atelier, pas au parcours */
+window.gFondoukListe = function(){ vueFondouk = "liste"; window.gFondoukRefresh(); };
+
+window.gFondoukRetour = function(atelierId){
+  var btn = Array.from(document.querySelectorAll('.sidebar-menu button')).find(function(b){
+    var oc = b.getAttribute('onclick'); return oc && oc.indexOf("'langue'") !== -1;
+  });
+  window.showScreen('langue', btn);
+  if (atelierId) window.gFondoukOuvrir(atelierId); else window.gFondoukRefresh();
+};
 
 })();

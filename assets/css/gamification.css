@@ -1104,3 +1104,76 @@ html.g-en-lecon .ai-exp{
   #gameHud .g-level-name{display:none;}
   #gameHud .g-sound{display:none;}
 }
+
+/* ============================================================================
+   LE FONDOUK — atelier de la langue
+   Une cour d'ateliers : on choisit son chantier, on y entre, on monte ses
+   niveaux. Même vocabulaire visuel que la leçon — épaisseur, relief, appui.
+============================================================================ */
+.g-fondouk-intro{
+  font-family:var(--g-police);font-size:15px;line-height:1.6;
+  color:var(--g-muted);max-width:60ch;margin:0 0 22px;
+}
+.g-fondouk-note{
+  font-family:var(--g-police);font-size:13px;font-weight:700;
+  color:var(--g-muted);text-align:center;margin:20px 0 0;
+}
+.g-fondouk-vide{font-family:var(--g-police);color:var(--g-muted);}
+
+.g-ateliers{display:grid;gap:12px;}
+@media(min-width:760px){.g-ateliers{grid-template-columns:repeat(2,1fr);}}
+
+.g-atelier{
+  display:flex;align-items:center;gap:14px;text-align:left;width:100%;
+  font-family:var(--g-police);cursor:pointer;
+  background:var(--g-surface);color:var(--g-ink);
+  border:2px solid var(--g-line-fort);border-bottom-width:var(--g-profondeur);
+  border-radius:18px;padding:15px 16px;min-height:78px;
+  transition:transform .06s ease,border-color .15s ease;
+}
+.g-atelier:hover:not(:disabled){border-color:var(--g-juste);}
+.g-atelier:active:not(:disabled){transform:translateY(2px);border-bottom-width:2px;}
+.g-atelier.vide{opacity:.55;cursor:default;border-style:dashed;}
+.g-atelier.complet{border-color:var(--g-juste);border-bottom-color:var(--g-juste-ombre);background:var(--g-juste-fond);}
+.g-atelier-icone{font-size:30px;flex:none;line-height:1;}
+.g-atelier-icone.grand{font-size:42px;}
+.g-atelier-txt{flex:1;min-width:0;}
+.g-atelier-txt b{display:block;font-size:16px;font-weight:900;line-height:1.2;}
+.g-atelier-txt small{display:block;font-size:12.5px;font-weight:600;color:var(--g-muted);line-height:1.4;margin-top:3px;}
+.g-atelier-etat{flex:none;width:64px;text-align:right;}
+.g-atelier-etat em{font-style:normal;font-size:11px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--g-muted);}
+.g-atelier-compte{display:block;font-size:14px;font-weight:900;font-variant-numeric:tabular-nums;}
+.g-atelier-jauge{display:block;height:7px;border-radius:999px;background:var(--g-line);overflow:hidden;margin-top:5px;}
+.g-atelier-jauge i{display:block;height:100%;border-radius:999px;background:var(--g-juste);}
+
+.g-retour{
+  font-family:var(--g-police);font-size:13px;font-weight:800;cursor:pointer;
+  background:none;border:none;color:var(--g-muted);padding:6px 0;margin-bottom:10px;
+}
+.g-retour:hover{color:var(--g-ink);}
+.g-atelier-tete{display:flex;align-items:center;gap:14px;margin-bottom:20px;}
+.g-atelier-tete h3{font-family:var(--g-police);font-size:20px;font-weight:900;margin:0;color:var(--g-ink);}
+.g-atelier-tete p{font-family:var(--g-police);font-size:13.5px;font-weight:600;color:var(--g-muted);margin:2px 0 0;}
+
+.g-niveaux{list-style:none;padding:0;margin:0;display:grid;gap:10px;counter-reset:niv;}
+.g-niveau button{
+  display:flex;align-items:center;gap:13px;width:100%;text-align:left;cursor:pointer;
+  font-family:var(--g-police);background:var(--g-surface);color:var(--g-ink);
+  border:2px solid var(--g-line-fort);border-bottom-width:var(--g-profondeur);
+  border-radius:16px;padding:13px 15px;min-height:66px;
+  transition:transform .06s ease;
+}
+.g-niveau button:active:not(:disabled){transform:translateY(2px);border-bottom-width:2px;}
+.g-niveau.done button{background:var(--g-juste-fond);border-color:var(--g-juste);border-bottom-color:var(--g-juste-ombre);}
+.g-niveau.locked button{opacity:.5;cursor:not-allowed;background:var(--g-bg);}
+.g-niveau-num{
+  flex:none;width:34px;height:34px;border-radius:11px;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--g-bg);border:2px solid var(--g-line-fort);
+  font-size:14px;font-weight:900;color:var(--g-muted);
+}
+.g-niveau.done .g-niveau-num{background:var(--g-juste);border-color:var(--g-juste);color:#fff;}
+.g-niveau-txt{flex:1;min-width:0;}
+.g-niveau-txt b{display:block;font-size:15.5px;font-weight:900;line-height:1.25;}
+.g-niveau-txt small{display:block;font-size:12.5px;font-weight:600;color:var(--g-muted);line-height:1.45;margin-top:3px;}
+.g-niveau-etoiles{flex:none;display:flex;gap:1px;}
