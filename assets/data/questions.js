@@ -1,5 +1,8 @@
 /* Contenu — QCM par œuvre. « ans » = index de la bonne réponse (0 = 1re option).
-   Source unique de vérité. Après toute modification : `npm run validate`. */
+   « notion » rattache la question au programme officiel (assets/data/referentiel.js) :
+   c'est ce qui permet au bilan de dire « tu maîtrises les subordonnées de but à 40 % »
+   au lieu de « analyse : 60 % ». Source unique de vérité — après toute modification :
+   `npm run validate`. Rattachement automatique : node tools/rattache-notions.mjs */
 window.PF_DATA = window.PF_DATA || {};
 window.PF_DATA.questions = {
   "boite": [
@@ -197,6 +200,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Fait de langue",
+      "notion": "fig-comparaison",
       "q": "Dans “un bouton de nacre brillait comme un soleil”, quelle figure de style reconnaît-on ?",
       "opts": [
         "Une comparaison",
@@ -209,6 +213,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Fait de langue",
+      "notion": "tps-imparfait",
       "q": "Quel est l’effet de l’imparfait dans “je sortais rarement” ?",
       "opts": [
         "Exprimer une habitude passée",
@@ -221,6 +226,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Fait de langue",
+      "notion": "lex-champ-lexical",
       "q": "Quel champ lexical domine dans “trésor, richesses, inestimable” ?",
       "opts": [
         "La valeur et le précieux",
@@ -245,6 +251,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Fait de langue",
+      "notion": "fig-comparaison",
       "q": "Dans “ma boîte devenait un trésor”, le mot “trésor” fonctionne comme…",
       "opts": [
         "Une métaphore",
@@ -257,6 +264,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Fait de langue",
+      "notion": "reg-lyrique",
       "q": "Le registre “lyrique” sert surtout à exprimer…",
       "opts": [
         "Les émotions personnelles",
@@ -269,6 +277,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Fait de langue",
+      "notion": "tps-imparfait",
       "q": "Quel temps verbal est fréquent dans les souvenirs d’enfance ?",
       "opts": [
         "L’imparfait",
@@ -545,6 +554,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Analyse",
+      "notion": "nar-focalisation",
       "q": "Comment le point de vue narratif fonctionne-t-il dans le roman ?",
       "opts": [
         "L’adulte qui se souvient prête sa plume au regard de l’enfant qu’il était",
@@ -617,6 +627,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Fait de langue",
+      "notion": "tps-passe-simple",
       "q": "Quels temps dominent la narration au passé ?",
       "opts": [
         "L’imparfait (descriptions, habitudes) et le passé simple (actions)",
@@ -629,6 +640,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Fait de langue",
+      "notion": "reg-realiste",
       "q": "Les mots « msid », « chouafa » ou « derb » sont…",
       "opts": [
         "Des emprunts à l’arabe qui ancrent le récit dans la culture marocaine",
@@ -641,6 +653,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Fait de langue",
+      "notion": "fig-comparaison",
       "q": "Dans « mes rêves prenaient leur vol », la figure de style est…",
       "opts": [
         "Une métaphore",
@@ -665,6 +678,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Fait de langue",
+      "notion": "fig-comparaison",
       "q": "À quoi reconnaît-on une comparaison ?",
       "opts": [
         "À un outil comparatif explicite (comme, tel que, semblable à…)",
@@ -689,6 +703,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Fait de langue",
+      "notion": "lex-champ-lexical",
       "q": "Chouafa, sorcellerie, saints, amulettes… ces mots forment un champ lexical de…",
       "opts": [
         "La superstition et des croyances populaires",
@@ -941,6 +956,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Fait de langue",
+      "notion": "nar-focalisation",
       "q": "Le msid décrit à travers la peur de l’enfant : ce choix narratif s’appelle…",
       "opts": [
         "La focalisation interne",
@@ -953,6 +969,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Fait de langue",
+      "notion": "dis-direct",
       "q": "Dans « Il m’a dit qu’il partirait aux moissons », les paroles sont rapportées au…",
       "opts": [
         "Discours indirect",
@@ -965,6 +982,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Fait de langue",
+      "notion": "tps-imparfait",
       "q": "Dans « chaque matin, je me rendais au msid », l’imparfait exprime…",
       "opts": [
         "L’habitude, la répétition dans le passé",
@@ -977,6 +995,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Fait de langue",
+      "notion": "fig-comparaison",
       "q": "Parler d’« une pluie de coups » pour les punitions du fqih, c’est employer…",
       "opts": [
         "Une métaphore",
@@ -1001,6 +1020,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Fait de langue",
+      "notion": "lex-champ-lexical",
       "q": "« Pénombre, obscurité, lueur, clarté » : ces mots forment un champ lexical de…",
       "opts": [
         "La lumière et de l’ombre",
@@ -1267,6 +1287,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Analyse",
+      "notion": "gra-opposition",
       "q": "Quelle opposition structure le dialogue Antigone / Créon ?",
       "opts": [
         "L’absolu contre le compromis",
@@ -1339,6 +1360,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Fait de langue",
+      "notion": "gra-negation",
       "q": "Quel type de phrase domine dans “Je ne veux pas comprendre” ?",
       "opts": [
         "Phrase négative",
@@ -1579,6 +1601,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Analyse",
+      "notion": "arg-exemples",
       "q": "Quel argument-choc Créon utilise-t-il pour désacraliser le geste d’Antigone ?",
       "opts": [
         "Ses deux frères étaient des voyous, et les corps étaient méconnaissables",
@@ -1627,6 +1650,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Analyse",
+      "notion": "nar-schema-actantiel",
       "q": "Quel est le rôle du Chœur chez Anouilh ?",
       "opts": [
         "Commenter l’action et réfléchir sur la nature de la tragédie",
@@ -1723,6 +1747,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Fait de langue",
+      "notion": "fig-paradoxe",
       "q": "Dire que la tragédie est « propre » et « reposante » relève de…",
       "opts": [
         "Du paradoxe, qui provoque la réflexion",
@@ -1735,6 +1760,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Fait de langue",
+      "notion": "arg-strategies",
       "q": "Que traduit le tutoiement de Créon envers Antigone pendant leur face-à-face ?",
       "opts": [
         "Une proximité familiale mise au service de la persuasion",
@@ -1807,6 +1833,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Réaction / opinion",
+      "notion": "arg-exemples",
       "q": "Créon a-t-il raison de faire exécuter l’édit ? Quelle réponse est la mieux ARGUMENTÉE ?",
       "opts": [
         "« Son souci de l’ordre se comprend, mais sacrifier la conscience à la raison d’État le condamne à une victoire vide, payée de tous les siens. »",
@@ -2047,6 +2074,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Fait de langue",
+      "notion": "tps-present",
       "q": "Le Prologue parle des personnages au présent : cette valeur du présent est…",
       "opts": [
         "Un présent de commentaire, hors du temps de l’action",
@@ -2107,6 +2135,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Réaction / opinion",
+      "notion": "fig-metaphore",
       "q": "Pour un devoir sur le pouvoir, quelle citation de Créon exploiter ?",
       "opts": [
         "Sa comparaison de l’État à un navire qu’il faut bien gouverner",
@@ -2119,6 +2148,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Réaction / opinion",
+      "notion": "arg-exemples",
       "q": "Sujet : « L’héroïsme a-t-il un genre ? » Quel usage de la pièce est le plus fin ?",
       "opts": [
         "Montrer qu’Anouilh confie l’héroïsme à une « petite maigre », renversant les modèles du héros fort et masculin",
@@ -2289,6 +2319,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Analyse",
+      "notion": "arg-strategies",
       "q": "Quel registre domine dans le roman ?",
       "opts": [
         "Pathétique et engagé",
@@ -2301,6 +2332,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Analyse",
+      "notion": "reg-pathetique",
       "q": "Pourquoi la scène avec Marie est-elle pathétique ?",
       "opts": [
         "Elle montre l’innocence brisée et la rupture familiale",
@@ -2373,6 +2405,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Fait de langue",
+      "notion": "fig-anaphore",
       "q": "Dans “toujours seul…, toujours glacé…, toujours courbé…”, quelle figure domine ?",
       "opts": [
         "Anaphore",
@@ -2397,6 +2430,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Fait de langue",
+      "notion": "lex-champ-lexical",
       "q": "Le champ lexical dominant dans “mort, condamné, exécution, guillotine” est celui…",
       "opts": [
         "De la mort et de la justice pénale",
@@ -2421,6 +2455,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Fait de langue",
+      "notion": "reg-pathetique",
       "q": "Le registre pathétique cherche principalement à…",
       "opts": [
         "Susciter la pitié du lecteur",
@@ -2481,6 +2516,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Réaction / opinion",
+      "notion": "arg-exemples",
       "q": "Pourquoi Marie renforce-t-elle l’argument contre la peine de mort ?",
       "opts": [
         "Elle montre que la peine touche aussi des innocents",
@@ -2505,6 +2541,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Réaction / opinion",
+      "notion": "arg-exemples",
       "q": "Quelle conclusion est la plus pertinente ?",
       "opts": [
         "Le roman convainc en faisant ressentir l’angoisse d’un homme avant d’argumenter abstraitement",
@@ -2601,6 +2638,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Contextualisation",
+      "notion": "reg-pathetique",
       "q": "Qui est Marie dans le roman ?",
       "opts": [
         "La fille du condamné, âgée de trois ans",
@@ -2661,6 +2699,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Analyse",
+      "notion": "reg-pathetique",
       "q": "Que signifie le moment où Marie appelle son père « monsieur » ?",
       "opts": [
         "Il est déjà mort socialement : même sa fille ne le reconnaît plus",
@@ -2685,6 +2724,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Analyse",
+      "notion": "eno-implicite",
       "q": "Que démontre le parcours du friauche (bagne, récidive, condamnation) ?",
       "opts": [
         "Que le système pénal fabrique les criminels qu’il prétend punir",
@@ -2721,6 +2761,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Analyse",
+      "notion": "arg-strategies",
       "q": "Sur quel levier l’argumentation du ROMAN (sans la préface) repose-t-elle surtout ?",
       "opts": [
         "L’émotion : faire vivre l’agonie de l’intérieur pour rendre la peine insupportable",
@@ -2769,6 +2810,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Fait de langue",
+      "notion": "gra-types",
       "q": "« Condamné à mort ! » : que marque la phrase exclamative en ouverture ?",
       "opts": [
         "L’intensité de l’obsession et de l’angoisse dès le premier mot",
@@ -2781,6 +2823,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Fait de langue",
+      "notion": "tps-present",
       "q": "Quel effet produit l’usage dominant du présent et de la première personne ?",
       "opts": [
         "Une immersion immédiate dans la conscience du condamné",
@@ -2805,6 +2848,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Fait de langue",
+      "notion": "fig-antithese",
       "q": "Opposer dans une même page la lumière du matin et l’échafaud relève de…",
       "opts": [
         "L’antithèse",
@@ -2829,6 +2873,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Fait de langue",
+      "notion": "lex-niveaux",
       "q": "L’argot du friauche et des prisons produit quel effet ?",
       "opts": [
         "Un effet de réel qui documente un monde ignoré du lecteur bourgeois",
@@ -2841,6 +2886,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Fait de langue",
+      "notion": "arg-strategies",
       "q": "Quelle différence entre l’argumentation du roman et celle de la préface de 1832 ?",
       "opts": [
         "Le roman argumente indirectement (récit, émotion) ; la préface directement (thèse, arguments)",
@@ -2877,6 +2923,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Réaction / opinion",
+      "notion": "arg-exemples",
       "q": "Quelle problématique convient à une dissertation sur ce roman ?",
       "opts": [
         "Comment Hugo transforme-t-il l’agonie d’un seul homme en réquisitoire universel contre la peine de mort ?",
@@ -2949,6 +2996,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Réaction / opinion",
+      "notion": "nar-ouverture-cloture",
       "q": "Quelle citation retenir pour illustrer l’obsession de la mort ?",
       "opts": [
         "« Condamné à mort ! Voilà cinq semaines que j’habite avec cette pensée. »",
@@ -2961,6 +3009,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Contextualisation",
+      "notion": "nar-ouverture-cloture",
       "q": "Depuis combien de temps le narrateur vit-il avec sa condamnation au début du roman ?",
       "opts": [
         "Cinq semaines",
@@ -3033,6 +3082,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Analyse",
+      "notion": "lex-niveaux",
       "q": "Quel effet produit la vieille chanson en argot entendue par le condamné ?",
       "opts": [
         "Elle lui révèle, entre effroi et fascination, tout un monde criminel qui a sa langue et sa poésie",
@@ -3057,6 +3107,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Analyse",
+      "notion": "arg-exemples",
       "q": "Quel rôle jouent les souvenirs heureux (enfance, Pepa) dans l’économie du récit ?",
       "opts": [
         "Le contraste entre la vie d’avant et la cellule rend l’attente plus déchirante",
@@ -3141,6 +3192,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Fait de langue",
+      "notion": "fig-gradation",
       "q": "Une gradation du type « chaque jour, chaque heure, chaque minute » produit quel effet ?",
       "opts": [
         "Un resserrement en étau qui mime le temps qui fond",
@@ -3153,6 +3205,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Fait de langue",
+      "notion": "reg-ironique",
       "q": "Quand on vante devant le condamné la guillotine comme une mort « douce » et un progrès, l’écriture de Hugo relève de…",
       "opts": [
         "L’ironie : faire entendre le contraire de ce qui est dit pour dénoncer",
@@ -3165,6 +3218,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Fait de langue",
+      "notion": "reg-pathetique",
       "q": "Quelle est la différence entre les registres pathétique et tragique dans ce roman ?",
       "opts": [
         "Le pathétique fait pleurer sur la souffrance ; le tragique naît de la fatalité inéluctable de la mort programmée",
@@ -3237,6 +3291,7 @@ window.PF_DATA.questions = {
     },
     {
       "cat": "Réaction / opinion",
+      "notion": "arg-these",
       "q": "Sujet : « Écrire peut aider à survivre. » Comment mobiliser le roman ?",
       "opts": [
         "Montrer que le journal est le dernier espace de liberté du condamné : tant qu’il écrit, il pense, donc il vit",

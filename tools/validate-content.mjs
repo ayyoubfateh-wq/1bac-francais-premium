@@ -35,7 +35,7 @@ function main() {
     console.error('❌ Impossible de charger le contenu : ' + e.message);
     process.exit(1);
   }
-  const { questions, etudes, sujets, annales } = data;
+  const { questions, etudes, sujets, annales, referentiel } = data;
 
   /* ---- QCM ---- */
   let totalQ = 0;
@@ -110,6 +110,37 @@ function main() {
     if (a.type === 'reel' && !a.annee) err(where + ' : une annale réelle exige son année');
   });
 
+  /* ---- Rattachement au programme officiel ----------------------------
+     Chaque question DEVRAIT porter l'identifiant d'une notion du
+     référentiel. Une notion inconnue est une ERREUR (faute de frappe ou
+     notion supprimée) ; une question non rattachée est un AVERTISSEMENT
+     tant que la reprise du contenu n'est pas terminée. La couverture est
+     affichée à chaque build : c'est la mesure de l'avancement réel. */
+  const notionsConnues = referentiel.notions;
+  const compteParNotion = {};
+  Object.keys(notionsConnues).forEach((id) => { compteParNotion[id] = 0; });
+  let rattachees = 0, orphelines = 0;
+
+  function verifieNotion(q, where) {
+    if (!q.notion) { orphelines++; return; }
+    if (!notionsConnues[q.notion]) {
+      err(`${where} : notion inconnue « ${q.notion} » (absente de assets/data/referentiel.js)`);
+      return;
+    }
+    compteParNotion[q.notion]++;
+    rattachees++;
+  }
+
+  BOOKS.forEach((b) => {
+    (questions[b] || []).forEach((q, i) => verifieNotion(q, `${b} q${i + 1}`));
+    (etudes[b] || []).forEach((e, i) => (e.questions || []).forEach((q, j) => verifieNotion(q, `${b} étude${i + 1} q${j + 1}`)));
+  });
+  (annales || []).forEach((a, i) => (a.etude || []).forEach((q, j) => verifieNotion(q, `annale${i + 1} q${j + 1}`)));
+
+  const couvertes = Object.values(compteParNotion).filter((n) => n > 0).length;
+  const total = Object.keys(compteParNotion).length;
+  const vides = Object.entries(compteParNotion).filter(([, n]) => n === 0).map(([id]) => id);
+
   /* ---- Rapport ---- */
   console.log('');
   console.log('  Contenu chargé :');
@@ -118,6 +149,14 @@ function main() {
   console.log('  • Sujets écrits    : ' + sujets.length);
   console.log('  • Annales corrigées: ' + annales.length + ' (' + annales.reduce((s,a)=>s+a.etude.length,0) + ' questions corrigées)');
   console.log('  • TOTAL banque     : ' + (totalQ + totalE) + ' questions');
+  console.log('');
+  console.log('  Programme officiel (' + total + ' notions, référentiel CNEE) :');
+  console.log('  • Notions couvertes : ' + couvertes + ' / ' + total + '  (' + Math.round((100 * couvertes) / total) + ' %)');
+  console.log('  • Questions rattachées : ' + rattachees + ' — non rattachées : ' + orphelines);
+  if (vides.length) {
+    const apercu = vides.slice(0, 8).join(', ');
+    console.log('  • Sans aucune question : ' + vides.length + (vides.length > 8 ? ' (dont ' + apercu + '…)' : ' (' + apercu + ')'));
+  }
   console.log('');
 
   if (warnings.length) {

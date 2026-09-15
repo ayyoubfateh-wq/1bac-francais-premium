@@ -164,6 +164,7 @@ function copyDir(from, to) {
 const FICHIERS_VERSIONNES = [
   'assets/css/style.css',
   'assets/css/gamification.css',
+  'assets/data/referentiel.js',
   'assets/data/trial.js',
   'assets/data/avis.js',
   'assets/js/app.js',
@@ -196,7 +197,9 @@ if (errors.length) {
 
 fs.writeFileSync(path.join(DIST, 'index.html'), outStamped, 'utf8');
 fs.writeFileSync(path.join(DIST, 'assets', 'data', 'trial.js'), trialJs, 'utf8');
-fs.copyFileSync(path.join(ROOT, 'assets', 'data', 'avis.js'), path.join(DIST, 'assets', 'data', 'avis.js'));
+for (const f of ['avis.js', 'referentiel.js']) {
+  fs.copyFileSync(path.join(ROOT, 'assets', 'data', f), path.join(DIST, 'assets', 'data', f));
+}
 copyDir(path.join(ROOT, 'assets', 'css'), path.join(DIST, 'assets', 'css'));
 copyDir(path.join(ROOT, 'assets', 'img'), path.join(DIST, 'assets', 'img'));
 fs.mkdirSync(path.join(DIST, 'assets', 'js'), { recursive: true });
@@ -247,7 +250,7 @@ function minify(rel, loader) {
   fs.writeFileSync(p, outCode, 'utf8');
   apres += Buffer.byteLength(outCode);
 }
-for (const f of ['assets/js/app.js', 'assets/js/gamification.js', 'assets/js/production.js', 'assets/js/annales.js', 'assets/js/content-loader.js', 'assets/data/trial.js', 'assets/data/avis.js', 'sw.js']) {
+for (const f of ['assets/js/app.js', 'assets/js/gamification.js', 'assets/js/production.js', 'assets/js/annales.js', 'assets/js/content-loader.js', 'assets/data/trial.js', 'assets/data/avis.js', 'assets/data/referentiel.js', 'sw.js']) {
   minify(f, 'js');
 }
 for (const f of ['assets/css/style.css', 'assets/css/gamification.css']) {

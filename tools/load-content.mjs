@@ -28,9 +28,19 @@ export function loadContent() {
       throw new Error(`Erreur de syntaxe dans assets/data/${f} : ${e.message}`);
     }
   }
+  /* le référentiel du programme : colonne vertébrale à laquelle toute
+     question doit pouvoir se rattacher */
+  try {
+    vm.runInContext(fs.readFileSync(DATA('referentiel.js'), 'utf8'), ctx, { filename: 'referentiel.js', timeout: 5000 });
+  } catch (e) {
+    throw new Error(`Erreur dans assets/data/referentiel.js : ${e.message}`);
+  }
+
   const D = ctx.window.PF_DATA || {};
   if (!D.questions) throw new Error('assets/data/questions.js n\'a pas défini window.PF_DATA.questions');
   if (!D.etudes) throw new Error('assets/data/etudes.js n\'a pas défini window.PF_DATA.etudes');
   if (!D.sujets) throw new Error('assets/data/sujets.js n\'a pas défini window.PF_DATA.sujets');
-  return { questions: D.questions, etudes: D.etudes, sujets: D.sujets, annales: D.annales, errors: {} };
+  const R = ctx.window.PF_REFERENTIEL;
+  if (!R || !R.notions) throw new Error('assets/data/referentiel.js n\'a pas défini window.PF_REFERENTIEL');
+  return { questions: D.questions, etudes: D.etudes, sujets: D.sujets, annales: D.annales, referentiel: R, errors: {} };
 }
