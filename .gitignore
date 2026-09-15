@@ -14,3 +14,6 @@ generated-codes/
 
 # Sauvegardes des données serveur (données clients — privé)
 /backups/
+
+# corpus d examens telecharge (scans publics, hors depot)
+corpus/
