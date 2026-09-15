@@ -15,7 +15,7 @@ export function loadContent() {
   const ctx = { window: {} };
   ctx.globalThis = ctx;
   vm.createContext(ctx);
-  for (const f of ['questions.js', 'etudes.js', 'sujets.js', 'annales.js']) {
+  for (const f of ['questions.js', 'etudes.js', 'sujets.js', 'annales.js', 'langue.js']) {
     let src;
     try {
       src = fs.readFileSync(DATA(f), 'utf8');
@@ -42,5 +42,5 @@ export function loadContent() {
   if (!D.sujets) throw new Error('assets/data/sujets.js n\'a pas défini window.PF_DATA.sujets');
   const R = ctx.window.PF_REFERENTIEL;
   if (!R || !R.notions) throw new Error('assets/data/referentiel.js n\'a pas défini window.PF_REFERENTIEL');
-  return { questions: D.questions, etudes: D.etudes, sujets: D.sujets, annales: D.annales, referentiel: R, errors: {} };
+  return { questions: D.questions, etudes: D.etudes, sujets: D.sujets, annales: D.annales, langue: D.langue || {}, referentiel: R, errors: {} };
 }

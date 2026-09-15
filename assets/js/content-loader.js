@@ -53,6 +53,13 @@
       D.annales.length = 0;
       Array.prototype.push.apply(D.annales, data.annales);
     }
+    /* atelier de la langue : un objet indexé par notion, pas un tableau.
+       Même principe — on MUTE l'objet existant, jamais on ne le remplace. */
+    if (data.langue) {
+      if (!D.langue) D.langue = {};
+      Object.keys(D.langue).forEach(function (k) { delete D.langue[k]; });
+      Object.keys(data.langue).forEach(function (k) { D.langue[k] = data.langue[k]; });
+    }
     if (data.sujets) {
       D.sujets.length = 0;
       Array.prototype.push.apply(D.sujets, data.sujets);

@@ -94,9 +94,9 @@ verifieOnclicks(out, 'page publique');
 for (const id of Object.keys(screensPrives)) verifieOnclicks(screensPrives[id], 'écran ' + id);
 
 /* --------------------------------------------------- contenu premium */
-const { questions, etudes, sujets, annales } = loadContent();
+const { questions, etudes, sujets, annales, langue } = loadContent();
 const contenu = {
-  data: { questions, etudes, sujets, annales, screens: screensPrives },
+  data: { questions, etudes, sujets, annales, langue, screens: screensPrives },
 };
 const contenuJson = JSON.stringify(contenu.data);
 contenu.version = crypto.createHash('sha256').update(contenuJson).digest('hex').slice(0, 12);
@@ -134,7 +134,10 @@ const trialJs =
   'window.PF_DATA.questions = ' + JSON.stringify(trial.questions) + ';\n' +
   'window.PF_DATA.etudes = ' + JSON.stringify(trial.etudes) + ';\n' +
   'window.PF_DATA.sujets = ' + JSON.stringify(trial.sujets) + ';\n' +
-  'window.PF_DATA.annales = [];\n';
+  'window.PF_DATA.annales = [];\n' +
+  /* l'atelier de la langue est entièrement premium : la structure existe
+     côté public, vide, pour que les moteurs trouvent toujours l'objet. */
+  'window.PF_DATA.langue = {};\n';
 
 if (errors.length) {
   console.error('❌ Build refusé :');

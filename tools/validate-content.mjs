@@ -35,7 +35,7 @@ function main() {
     console.error('❌ Impossible de charger le contenu : ' + e.message);
     process.exit(1);
   }
-  const { questions, etudes, sujets, annales, referentiel } = data;
+  const { questions, etudes, sujets, annales, langue, referentiel } = data;
 
   /* ---- QCM ---- */
   let totalQ = 0;
@@ -136,6 +136,19 @@ function main() {
     (etudes[b] || []).forEach((e, i) => (e.questions || []).forEach((q, j) => verifieNotion(q, `${b} étude${i + 1} q${j + 1}`)));
   });
   (annales || []).forEach((a, i) => (a.etude || []).forEach((q, j) => verifieNotion(q, `annale${i + 1} q${j + 1}`)));
+
+  /* atelier de la langue : la notion est la CLÉ, pas un champ de la question */
+  Object.entries(langue || {}).forEach(([id, qs]) => {
+    if (!notionsConnues[id]) { err(`assets/data/langue.js : notion inconnue « ${id} »`); return; }
+    qs.forEach((q, i) => {
+      const where = `langue ${id} q${i + 1}`;
+      if (!q.q || !Array.isArray(q.opts) || q.opts.length !== 4) err(`${where} : 4 options attendues`);
+      if (typeof q.ans !== 'number' || q.ans < 0 || q.ans > 3) err(`${where} : réponse hors bornes`);
+      if (!q.exp || q.exp.length < 60) err(`${where} : explication trop courte pour enseigner`);
+      if (new Set(q.opts).size !== 4) err(`${where} : deux options identiques`);
+      compteParNotion[id]++; rattachees++;
+    });
+  });
 
   const couvertes = Object.values(compteParNotion).filter((n) => n > 0).length;
   const total = Object.keys(compteParNotion).length;

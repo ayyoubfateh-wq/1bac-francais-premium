@@ -71,6 +71,7 @@ function bootstrap({ premium = false, preSeed = null } = {}) {
     sujets: [],
     annales: [],
     avis: [],
+    langue: {}, // déclaré vide côté public, rempli par /api/content
   };
 
   if (preSeed) preSeed(fb);
@@ -204,6 +205,22 @@ export async function run() {
     eq([fb.window.PF_DATA.questions.boite.length, fb.window.PF_DATA.questions.antigone.length, fb.window.PF_DATA.questions.condamne.length], [90, 90, 90]);
     assert(fb.window.PF_DATA.sujets.length === 9, '9 sujets attendus');
   });
+  await test('atelier de la langue : injecté en place, et absent de l’essai', () => {
+    const fb = bootstrap({ premium: true });
+    const refAvant = fb.window.PF_DATA.langue;
+    assert(refAvant && Object.keys(refAvant).length === 0, 'l’essai public ne doit contenir aucune question de langue');
+    const D = fb.window.PF_DATA, data = CONTENT.data;
+    Object.keys(data.langue || {}).forEach((k) => { D.langue[k] = data.langue[k]; });
+    assert(D.langue === refAvant, 'l’objet doit être muté, jamais remplacé (les moteurs en gardent la référence)');
+    const notions = Object.keys(D.langue);
+    assert(notions.length >= 20, `au moins 20 notions attendues, obtenu ${notions.length}`);
+    notions.forEach((id) => {
+      D.langue[id].forEach((q, i) => {
+        assert(q.opts.length === 4 && q.opts[q.ans], `${id} q${i + 1} : réponse correcte introuvable`);
+      });
+    });
+  });
+
   await test('purge des SRS d’essai au passage en banque complète', () => {
     const fb = bootstrap({ premium: true });
     fb.window.gStartLesson('boite', 0); fb.runTimers();
