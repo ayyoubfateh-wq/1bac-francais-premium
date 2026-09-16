@@ -1218,3 +1218,20 @@ html.g-en-lecon .ai-exp{
   .g-notion-jauge{width:52px;}
   .g-notions-tete span{margin-left:0;width:100%;}
 }
+
+/* --------------------------------------- annales : les trois capacités */
+.an-capacite{
+  display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;
+  margin:22px 0 10px;padding:11px 15px;border-radius:14px;
+  background:var(--g-bg);border-left:4px solid var(--g-juste);
+}
+.an-capacite b{font-family:var(--g-police);font-size:15px;font-weight:900;color:var(--g-ink);}
+.an-capacite-pts{
+  font-family:var(--g-police);font-size:11px;font-weight:900;letter-spacing:.06em;
+  text-transform:uppercase;color:#fff;background:var(--g-juste);
+  border-radius:999px;padding:3px 10px;
+}
+.an-capacite small{
+  flex-basis:100%;font-family:var(--g-police);font-size:12.5px;font-weight:600;
+  line-height:1.5;color:var(--g-muted);
+}

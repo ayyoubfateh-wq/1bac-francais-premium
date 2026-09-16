@@ -97,14 +97,35 @@ function main() {
     if (!BOOKS.includes(a.book)) err(where + ' : œuvre inconnue « ' + a.book + ' »');
     if (!a.academieStyle || !a.titre || !a.oeuvre) err(where + ' : académie, titre ou œuvre manquants');
     if (!a.situation || a.situation.length < 80) err(where + ' : situation absente ou trop courte (support de l’élève)');
-    if (!Array.isArray(a.etude) || a.etude.length < 5) err(where + ' : étude de texte incomplète (min. 5 questions)');
+    /* FORMAT OFFICIEL CNEE, vérifié sur le sujet réel de Casablanca 2024 :
+       exactement 10 items, répartis 2 contextualiser / 6 analyser / 2 réagir,
+       pour 10 points. C'est la structure de l'épreuve : un sujet qui s'en
+       écarte n'entraîne pas à l'examen réel. */
+    const CAPACITES = { contextualiser: 2, analyser: 6, reagir: 2 };
+    if (!Array.isArray(a.etude) || a.etude.length !== 10) {
+      err(where + ' : ' + ((a.etude || []).length) + ' items (le cadre en impose exactement 10)');
+    }
     let pts = 0;
+    const parCapacite = { contextualiser: 0, analyser: 0, reagir: 0 };
     (a.etude || []).forEach((q, j) => {
       pts += q.pts || 0;
       if (!q.q || q.q.length < 10) err(where + ' Q' + (j + 1) + ' : énoncé manquant');
       if (!q.correction || q.correction.length < 60) err(where + ' Q' + (j + 1) + ' : correction absente ou indigente (< 60 car.) — la correction détaillée est notre valeur ajoutée');
+      if (!(q.capacite in CAPACITES)) err(where + ' Q' + (j + 1) + ' : capacité manquante ou inconnue « ' + q.capacite +' » (contextualiser|analyser|reagir)');
+      else parCapacite[q.capacite] += q.pts || 0;
+      /* le cadre proscrit la terminologie critique dans les ÉNONCÉS */
+      const interdits = ['focalisation', 'incipit', 'excipit', 'point de vue'];
+      const enonce = String(q.q).toLowerCase();
+      interdits.forEach((mot) => {
+        if (enonce.includes(mot)) err(where + ' Q' + (j + 1) + ' : « ' + mot + ' » est proscrit dans une consigne par le cadre de référence — reformuler');
+      });
     });
     if (pts !== 10) err(where + ' : étude de texte = ' + pts + ' pts (10 attendus, format officiel)');
+    Object.keys(CAPACITES).forEach((c) => {
+      if (parCapacite[c] !== CAPACITES[c]) {
+        err(where + ' : capacité « ' + c + ' » = ' + parCapacite[c] + ' pts (' + CAPACITES[c] + ' attendus)');
+      }
+    });
     if (!a.production || a.production.pts !== 10) err(where + ' : production écrite absente ou ≠ 10 pts');
     else if (!a.production.correction || a.production.correction.length < 200) err(where + ' : corrigé de production trop court (plan détaillé attendu)');
     if (a.type === 'reel' && !a.annee) err(where + ' : une annale réelle exige son année');

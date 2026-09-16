@@ -62,8 +62,27 @@
 
   function rendreSujet(wrap, a) {
     var L = LIVRES[a.book];
+    /* Les trois capacités du cadre officiel sont annoncées dans le sujet :
+       l'élève doit reconnaître la structure de l'épreuve, pas seulement
+       enchaîner dix questions. C'est ce découpage 2/6/2 que le correcteur
+       applique, et savoir où l'on se trouve change la façon de répondre. */
+    var CAPACITES = {
+      contextualiser: { nom: 'Contextualiser', pts: 2, aide: 'Situer le texte : œuvre, auteur, genre, place du passage. Deux minutes, deux points.' },
+      analyser: { nom: 'Analyser', pts: 6, aide: 'Le plus gros bloc : relever, nommer, expliquer l’effet. C’est ici que tout se joue.' },
+      reagir: { nom: 'Réagir', pts: 2, aide: 'Donner un avis et le justifier, en deux ou trois lignes. Une opinion seule ne vaut rien.' },
+    };
+    var capaciteCourante = null;
     var questions = a.etude.map(function (q, i) {
-      return '<div class="an-q">' +
+      var entete = '';
+      if (q.capacite && q.capacite !== capaciteCourante && CAPACITES[q.capacite]) {
+        capaciteCourante = q.capacite;
+        var c = CAPACITES[q.capacite];
+        entete = '<div class="an-capacite">' +
+          '<b>' + c.nom + '</b><span class="an-capacite-pts">' + c.pts + ' points</span>' +
+          '<small>' + c.aide + '</small>' +
+        '</div>';
+      }
+      return entete + '<div class="an-q">' +
         '<div class="an-q-tete"><span class="an-q-num">Question ' + (i + 1) + '</span><span class="an-q-pts">' + q.pts + ' pt' + (q.pts > 1 ? 's' : '') + '</span></div>' +
         '<p class="an-q-enonce">' + esc(q.q) + '</p>' +
         '<button class="an-volet" onclick="gAnnalesVolet(this)">✦ Voir la correction détaillée</button>' +
