@@ -1788,10 +1788,18 @@ function notionFaite(id){
   var r = G.nodes[notionId(id)];
   return !!(r && r.stars > 0);
 }
+/* AUCUN niveau n'est verrouillé, et c'est délibéré. Verrouiller aurait du
+   sens pour apprendre une langue de zéro, où chaque notion prépare la
+   suivante. Ici l'élève RÉVISE : s'il est faible sur les connecteurs
+   logiques à trois semaines de l'examen, il doit pouvoir y aller tout de
+   suite. L'ordre du programme reste affiché comme un conseil — le premier
+   niveau non réussi est mis en avant — mais il n'interdit jamais rien. */
 function etatNotion(liste, i){
   if (notionFaite(liste[i].id)) return 'done';
-  if (i === 0) return 'open';
-  return notionFaite(liste[i - 1].id) ? 'open' : 'locked';
+  for (var k = 0; k < liste.length; k++) {
+    if (!notionFaite(liste[k].id)) return k === i ? 'conseille' : 'open';
+  }
+  return 'open';
 }
 
 /* ---------------------------------------------------------------- rendus */
@@ -1865,10 +1873,10 @@ window.gFondoukOuvrir = function(atelierId){
     var rec = G.nodes[notionId(n.id)] || {};
     html +=
       '<li class="g-niveau ' + st + '">' +
-        '<button' + (st === 'locked' ? ' disabled' : ' onclick="gFondoukLecon(\'' + n.id + '\')"') + '>' +
-          '<span class="g-niveau-num">' + (st === 'done' ? '✓' : (st === 'locked' ? '🔒' : (i + 1))) + '</span>' +
+        '<button onclick="gFondoukLecon(\'' + n.id + '\')">' +
+          '<span class="g-niveau-num">' + (st === 'done' ? '✓' : (i + 1)) + '</span>' +
           '<span class="g-niveau-txt">' +
-            '<b>' + n.nom + '</b>' +
+            '<b>' + n.nom + (st === 'conseille' ? '<em class="g-niveau-conseil">à faire ensuite</em>' : '') + '</b>' +
             '<small>' + n.def + '</small>' +
           '</span>' +
           (st === 'done' ? '<span class="g-niveau-etoiles">' + starStr(rec.stars || 0) + '</span>' : '') +

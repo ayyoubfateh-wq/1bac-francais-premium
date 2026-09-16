@@ -1165,7 +1165,17 @@ html.g-en-lecon .ai-exp{
 }
 .g-niveau button:active:not(:disabled){transform:translateY(2px);border-bottom-width:2px;}
 .g-niveau.done button{background:var(--g-juste-fond);border-color:var(--g-juste);border-bottom-color:var(--g-juste-ombre);}
-.g-niveau.locked button{opacity:.5;cursor:not-allowed;background:var(--g-bg);}
+/* Plus aucun niveau verrouillé : l'ordre du programme est un conseil, jamais
+   une barrière. Le prochain à faire est simplement mis en avant. */
+.g-niveau.conseille button{border-color:var(--g-or);border-bottom-color:var(--g-or-ombre);}
+.g-niveau.conseille .g-niveau-num{background:var(--g-or);border-color:var(--g-or);color:#3a2a06;}
+.g-niveau-conseil{
+  display:inline-block;margin-left:8px;vertical-align:1px;
+  font-style:normal;font-size:10px;font-weight:900;letter-spacing:.07em;
+  text-transform:uppercase;color:#7a5606;
+  background:rgba(240,180,41,.18);border:1px solid rgba(240,180,41,.45);
+  border-radius:999px;padding:2px 8px;
+}
 .g-niveau-num{
   flex:none;width:34px;height:34px;border-radius:11px;
   display:flex;align-items:center;justify-content:center;
