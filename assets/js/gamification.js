@@ -99,6 +99,44 @@ function samplePool(pool, n){
   return pool.slice().sort(function(){ return Math.random() - .5; }).slice(0, n).map(shuffleQuestion);
 }
 
+/* ------------------------------------------------------- examen blanc
+   Il ne suffit pas de tirer dix questions au hasard : le cadre officiel
+   fixe la composition de l'épreuve — 2 items pour contextualiser, 6 pour
+   analyser, 2 pour réagir. Et la langue n'y est PAS une rubrique séparée :
+   elle est évaluée à l'intérieur de l'analyse. Les questions de l'atelier
+   de la langue entrent donc dans le bloc des six, à parité avec celles
+   qui portent sur l'œuvre.
+   Un examen blanc qui ne respecte pas cette composition n'entraîne pas à
+   l'examen réel — il entraîne à autre chose. */
+function composerExamenBlanc(book){
+  var pool = QUESTIONS[book] || [];
+  function parCat(c){ return pool.filter(function(q){ return q.cat === c; }); }
+
+  var langue = [];
+  var L = (window.PF_DATA && window.PF_DATA.langue) || {};
+  for (var n in L) langue = langue.concat(L[n]);
+
+  var contexte = samplePool(parCat('Contextualisation'), 2);
+  var reaction = samplePool(parCat('Réaction / opinion'), 2);
+
+  /* pendant l'essai gratuit, la banque de langue est vide : l'analyse se
+     rabat alors entièrement sur les questions d'œuvre */
+  var surOeuvre = parCat('Analyse').concat(parCat('Fait de langue'));
+  var partLangue = langue.length >= 3 ? 3 : 0;
+  var analyse = samplePool(surOeuvre, 6 - partLangue)
+    .concat(samplePool(langue, partLangue))
+    .sort(function(){ return Math.random() - .5; });
+
+  var sel = contexte.concat(analyse).concat(reaction);
+  /* filet : si une catégorie manque de questions, on complète au hasard
+     plutôt que de servir un examen plus court que prévu */
+  if (sel.length < 10) {
+    var reste = samplePool(pool.concat(langue), 10 - sel.length);
+    sel = sel.concat(reste);
+  }
+  return sel.slice(0, 10);
+}
+
 /* Révision éclair : 3 rappels par œuvre — regagner un cœur = réviser vraiment */
 var FLASHCARDS = {
   boite: [
@@ -583,7 +621,7 @@ window.gLaunchLesson = function(book, index, timed){
 
   var qsel, support = null;
   if (def.exam) {
-    qsel = samplePool(pool, 10);
+    qsel = composerExamenBlanc(book);
   } else if (def.etude) {
     var etList = ETUDES[book];
     if (!etList || !etList.length) return;

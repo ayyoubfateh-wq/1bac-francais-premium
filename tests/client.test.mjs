@@ -279,6 +279,29 @@ export async function run() {
     eq(s.ok, 4, 'quatre bonnes réponses attendues');
   });
 
+  await test('l’examen blanc reproduit la composition officielle 2/6/2', () => {
+    const fb = bootstrap({ premium: true });
+    injectFull(fb);
+    const D = fb.window.PF_DATA;
+    Object.keys(CONTENT.data.langue || {}).forEach((k) => { D.langue[k] = CONTENT.data.langue[k]; });
+
+    fb.window.gLaunchLesson('boite', 7, false); fb.runTimers(); // index 7 = examen blanc
+    const qsel = fb.evalIn('qs');
+    assert(qsel && qsel.length === 10, `10 questions attendues, obtenu ${qsel && qsel.length}`);
+
+    const cat = (q) => (q.__src || q).cat;
+    eq(qsel.slice(0, 2).filter((q) => cat(q) === 'Contextualisation').length, 2,
+      'les deux premiers items doivent contextualiser');
+    eq(qsel.slice(8).filter((q) => cat(q) === 'Réaction / opinion').length, 2,
+      'les deux derniers items doivent faire réagir');
+
+    /* la langue est évaluée DANS l'analyse : le bloc central doit en contenir */
+    const idsLangue = new Set();
+    Object.values(CONTENT.data.langue).forEach((s) => s.forEach((q) => idsLangue.add(q.q)));
+    const centre = qsel.slice(2, 8).filter((q) => idsLangue.has((q.__src || q).q)).length;
+    assert(centre >= 1, 'le bloc analyser doit intégrer des questions de langue');
+  });
+
   await test('un atelier sans questions n’est pas jouable', () => {
     const fb = bootstrap({ premium: true });
     injectFull(fb);
