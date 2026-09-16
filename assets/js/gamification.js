@@ -140,6 +140,7 @@ function load(){
     srs: {},     // 'boite:12' -> { box: 0..2, due: 'YYYY-MM-DD' }
     badges: {},  // 'serie-3' -> 'YYYY-MM-DD' (date d'obtention)
     catStats: {}, // 'Analyse' -> { ok: 12, total: 15 }
+    notionStats: {}, // 'gra-but' -> { ok: 4, total: 5 } — maîtrise fine, par notion du programme
     graduatedTotal: 0,
     reviewsDone: 0,
     perfectLessons: 0,
@@ -278,10 +279,27 @@ function qid(q){
     var i = QUESTIONS[BOOKS[b]].indexOf(src);
     if (i > -1) return BOOKS[b] + ':' + i;
   }
+  /* Les questions de l'atelier de la langue ne sont dans aucune œuvre : sans
+     ce second passage, qid renvoyait null et TOUTE la répétition espacée du
+     Fondouk était silencieusement inopérante — une erreur sur une subordonnée
+     de but n'était jamais reprogrammée. */
+  var L = (window.PF_DATA && window.PF_DATA.langue) || {};
+  for (var n in L) {
+    var j = L[n].indexOf(src);
+    if (j > -1) return 'langue:' + n + ':' + j;
+  }
   return null;
 }
 function qFromId(id){
   var parts = id.split(':');
+  /* « langue:<notion>:<index> » — l'atelier de la langue est indexé par
+     notion, pas par œuvre. Sans ce cas, les révisions du Fondouk ne se
+     rechargeaient jamais. */
+  if (parts[0] === 'langue') {
+    var L = (window.PF_DATA && window.PF_DATA.langue) || {};
+    var serie = L[parts[1]];
+    return serie ? serie[parseInt(parts[2], 10)] : null;
+  }
   var pool = QUESTIONS[parts[0]];
   return pool ? pool[parseInt(parts[1], 10)] : null;
 }
@@ -730,6 +748,18 @@ window.answerQ = function(idx, btn){
   var cs = G.catStats[cat] = G.catStats[cat] || { ok: 0, total: 0 };
   cs.total++;
   if (ok) cs.ok++;
+
+  /* Maîtrise fine, notion par notion du programme officiel. C'est ce qui
+     permet de dire « subordonnées de but : 40 % » au lieu de « analyse :
+     60 % ». Dans le Fondouk la notion est celle de la session ; ailleurs
+     elle est portée par la question elle-même. */
+  var nid = (session && session.notion) || q.notion || (q.__src && q.__src.notion);
+  if (nid) {
+    if (!G.notionStats) G.notionStats = {};
+    var ns = G.notionStats[nid] = G.notionStats[nid] || { ok: 0, total: 0 };
+    ns.total++;
+    if (ok) ns.ok++;
+  }
   save();
 
   // répétition espacée : toute erreur est planifiée à J+1, toute réussite
@@ -1079,8 +1109,58 @@ function renderBilan(){
         '<div class="g-gauge-txt"><b style="color:' + color + ';">' + pct + '%</b><span>' + label + '</span></div>' +
       '</div>' +
       '<div class="g-bilan-cats">' + bars + '</div>' +
-    '</div>' + advice;
+    '</div>' + advice + blocNotions();
 }
+
+/* -------------------------------------------- maîtrise notion par notion
+   Le diagnostic par grande catégorie dit « analyse : 60 % », ce qui
+   n'indique pas quoi réviser. Ici on nomme les notions précises du
+   programme sur lesquelles l'élève trébuche, et chaque ligne ouvre
+   directement l'atelier correspondant. */
+function blocNotions(){
+  var R = window.PF_REFERENTIEL;
+  var stats = G.notionStats || {};
+  if (!R) return '';
+
+  var faibles = [];
+  Object.keys(stats).forEach(function(id){
+    var s = stats[id], n = R.notions[id];
+    if (!n || s.total < 3) return; // sous 3 réponses, le taux ne veut rien dire
+    faibles.push({ id: id, nom: n.nom, atelier: n.atelier, jeu: n.atelierJeu,
+      taux: Math.round(100 * s.ok / s.total), total: s.total });
+  });
+
+  if (!faibles.length) {
+    return '<div class="g-notions-vide">Joue quelques niveaux du Fondouk : ton diagnostic descendra alors au niveau de la notion — « subordonnées de but : 40 % » plutôt que « analyse : 60 % ».</div>';
+  }
+
+  faibles.sort(function(a, b){ return a.taux - b.taux; });
+  var pires = faibles.slice(0, 5);
+  var solides = faibles.filter(function(f){ return f.taux >= 80; }).length;
+
+  return '<div class="g-notions">' +
+    '<div class="g-notions-tete">' +
+      '<b>Tes notions à reprendre</b>' +
+      '<span>' + solides + ' notion' + (solides > 1 ? 's' : '') + ' solide' + (solides > 1 ? 's' : '') +
+        ' sur ' + faibles.length + ' évaluée' + (faibles.length > 1 ? 's' : '') + '</span>' +
+    '</div>' +
+    pires.map(function(f){
+      var couleur = f.taux >= 70 ? 'var(--g-juste)' : f.taux >= 45 ? 'var(--g-or)' : 'var(--g-faux)';
+      return '<button class="g-notion-ligne" onclick="gFondoukAller(&quot;' + f.id + '&quot;)">' +
+        '<span class="g-notion-nom"><b>' + f.nom + '</b><small>' + f.jeu + '</small></span>' +
+        '<span class="g-notion-jauge"><i style="width:' + f.taux + '%;background:' + couleur + '"></i></span>' +
+        '<span class="g-notion-taux" style="color:' + couleur + '">' + f.taux + '%</span>' +
+      '</button>';
+    }).join('') +
+  '</div>';
+}
+
+/* Depuis le bilan, on ouvre l'atelier de la notion et on lance sa leçon. */
+window.gFondoukAller = function(notionId){
+  var R = window.PF_REFERENTIEL;
+  if (!R || !R.notions[notionId]) return;
+  window.gFondoukLecon(notionId);
+};
 
 /* ------------------------------------------------------------ classement
    Comparaison sociale entre pairs = levier d'engagement majeur chez les
@@ -1371,6 +1451,9 @@ window.showScreen = function(id, btn){
     return;
   }
   quitterModeLecon(); // quitter une leçon par la navigation rend l'habillage
+  /* « Mon espace » doit refléter la dernière leçon jouée : sans ce rendu,
+     le bilan restait figé sur l'état du chargement de la page. */
+  if (id === 'espace') { renderBilan(); renderBadges(); renderLeaderboard(); }
   return origShowScreenG.apply(this, arguments);
 };
 var origStartQuiz = window.startQuiz;

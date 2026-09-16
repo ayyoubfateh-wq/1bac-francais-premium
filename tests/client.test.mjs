@@ -244,6 +244,41 @@ export async function run() {
     assert(!fb.document.documentElement.classList.contains('g-en-lecon'), 'le mode leçon doit être quitté');
   });
 
+  await test('une erreur dans le Fondouk est reprogrammée en révision', () => {
+    const fb = bootstrap({ premium: true });
+    injectFull(fb);
+    const D = fb.window.PF_DATA;
+    Object.keys(CONTENT.data.langue || {}).forEach((k) => { D.langue[k] = CONTENT.data.langue[k]; });
+
+    fb.window.gFondoukLecon('gra-but'); fb.runTimers();
+    answerLesson(fb, [false, true, true, true, true]);
+
+    const g = readG(fb);
+    const ids = Object.keys(g.srs);
+    assert(ids.length >= 1, 'l’erreur doit être planifiée en répétition espacée');
+    assert(ids.some((id) => id.startsWith('langue:')),
+      `l’identifiant doit désigner l’atelier de la langue, obtenu : ${ids.join(', ')}`);
+    /* la question doit pouvoir être RETROUVÉE le jour de la révision */
+    const q = fb.evalIn(`(function(){var i=${JSON.stringify(ids.find((x) => x.startsWith('langue:')))};` +
+      'var p=i.split(":");return (window.PF_DATA.langue[p[1]]||[])[parseInt(p[2],10)]||null;})()');
+    assert(q && q.q, 'la question révisée doit être rechargeable depuis son identifiant');
+  });
+
+  await test('la maîtrise est suivie notion par notion', () => {
+    const fb = bootstrap({ premium: true });
+    injectFull(fb);
+    const D = fb.window.PF_DATA;
+    Object.keys(CONTENT.data.langue || {}).forEach((k) => { D.langue[k] = CONTENT.data.langue[k]; });
+
+    fb.window.gFondoukLecon('fig-metaphore'); fb.runTimers();
+    answerLesson(fb, [true, true, false, true, true]);
+
+    const st = readG(fb).notionStats || {};
+    const s = st['fig-metaphore'];
+    assert(s && s.total === 5, `5 réponses attendues sur la notion, obtenu ${s && s.total}`);
+    eq(s.ok, 4, 'quatre bonnes réponses attendues');
+  });
+
   await test('un atelier sans questions n’est pas jouable', () => {
     const fb = bootstrap({ premium: true });
     injectFull(fb);
