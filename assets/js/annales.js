@@ -158,8 +158,12 @@
    sujet au relevé suffit à mettre la page à jour. C'est la garantie qu'un
    chiffre montré à l'élève ne peut pas mentir.
 
-   Ce bloc est PUBLIC : c'est l'argument qui donne envie de payer, pas ce
-   qu'on vend. L'entraînement, lui, reste derrière le code membre.
+   Le bloc est rendu à DEUX endroits, et c'est voulu :
+   - #gTombePublic, sur la page de vente — lisible sans rien acheter. C'est
+     la preuve qu'on connaît l'épreuve ; c'est elle qui donne envie.
+   - #gTombe, dans l'écran des régionaux (protégé) — le membre le retrouve
+     au-dessus des annales qu'il va travailler.
+   Ce qui se vend n'est pas le constat, c'est l'entraînement qui en découle.
 =========================================================================== */
 (function () {
   var LIVRES = {
@@ -220,9 +224,12 @@
   }
 
   function rendre() {
-    var wrap = document.getElementById('gTombe');
     var d = S();
-    if (!wrap || !d || !d.calcule) return;
+    if (!d || !d.calcule) return;
+    var cibles = ['gTombe', 'gTombePublic']
+      .map(function (id) { return document.getElementById(id); })
+      .filter(Boolean);
+    if (!cibles.length) return;
     var c = d.calcule;
     var n = c.nbSujets;
 
@@ -259,7 +266,7 @@
       return '<li><span class="tb-aca">' + esc(t.academie) + '</span> ' + esc(t.sujet) + '</li>';
     }).join('');
 
-    wrap.innerHTML =
+    var html =
       '<section class="tombe">' +
         '<div class="tb-tete">' +
           '<div class="tb-titre">Ce qui tombe vraiment</div>' +
@@ -292,6 +299,8 @@
 
         '<div class="tb-source">' + esc(d.couverture) + ' — ' + esc(d.source) + '</div>' +
       '</section>';
+
+    cibles.forEach(function (el) { el.innerHTML = html; });
   }
 
   window.gTombeRefresh = rendre;

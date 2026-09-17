@@ -46,7 +46,8 @@ function bootstrap({ premium = false, preSeed = null } = {}) {
   }
   for (const s of SCREEN_IDS) el('div', s, 'screen' + (s === 'parcours' ? ' active' : ''));
   ['gameHud', 'gReviewCard', 'gContinueCard', 'gPath', 'gBilan', 'gLeague', 'gBadges',
-    'gInstallCard', 'gProd', 'gAnnales', 'gTombe', 'trialProgressBanner', 'trialStartBtn'].forEach((id) => el('div', id));
+    'gInstallCard', 'gProd', 'gAnnales', 'gTombe', 'gTombePublic',
+    'trialProgressBanner', 'trialStartBtn'].forEach((id) => el('div', id));
   ['boite', 'antigone', 'condamne'].forEach((bk) => {
     const t = doc.createElement('button');
     t.setAttribute('class', 'g-book-tab'); t.setAttribute('data-book', bk);
@@ -381,6 +382,13 @@ export async function run() {
     assert(gT, '#gTombe attendu dans l’écran des sujets régionaux');
     fb.window.gTombeRefresh(); fb.runTimers();
     const html = gT.innerHTML;
+
+    /* le même bloc doit s'afficher sur la page de vente : c'est là qu'il
+       convainc quelqu'un qui n'a pas encore payé. Un rendu qui ne remplirait
+       que l'écran membre priverait le bloc de sa raison d'être. */
+    const gP = fb.document.getElementById('gTombePublic');
+    assert(gP && gP.innerHTML.includes('Ce qui tombe vraiment'),
+      'le bloc doit aussi être rendu sur la page de vente (#gTombePublic)');
     assert(html.includes('Ce qui tombe vraiment'), 'titre attendu');
     const compte = (s) => (html.match(new RegExp(s, 'g')) || []).length;
     /* une jauge par œuvre du programme + les exercices les plus fréquents */
