@@ -1235,3 +1235,76 @@ html.g-en-lecon .ai-exp{
   flex-basis:100%;font-family:var(--g-police);font-size:12.5px;font-weight:600;
   line-height:1.5;color:var(--g-muted);
 }
+
+/* ======================================================================
+   CE QUI TOMBE VRAIMENT — le dépouillement des sujets officiels.
+   Volontairement sobre : c'est une preuve, pas une animation. La largeur
+   des jauges EST la donnée, donc rien ne doit la rendre approximative.
+====================================================================== */
+.tombe{
+  border:1px solid var(--sand);border-radius:18px;background:var(--white);
+  padding:20px 18px;margin-bottom:1.75rem;
+  box-shadow:0 10px 30px rgba(26,16,8,.06);
+}
+.tb-tete{border-bottom:1px solid var(--sand);padding-bottom:14px;margin-bottom:16px;}
+.tb-titre{
+  font-family:var(--serif,Georgia,serif);font-size:24px;font-weight:800;
+  color:var(--ink);line-height:1.15;
+}
+.tb-sous{font-size:13px;line-height:1.6;color:rgba(26,16,8,.72);margin:8px 0 0;}
+.tb-sous b{color:var(--ink);}
+
+.tb-verdict{
+  font-size:13.5px;line-height:1.55;border-radius:12px;padding:12px 14px;
+  background:var(--gold-pale);border:1px solid var(--border);color:var(--ink);
+}
+.tb-verdict.tb-ok{background:#e8f5ee;border-color:rgba(26,107,90,.28);}
+.tb-verdict b{color:var(--teal);}
+
+.tb-bloc{margin-top:20px;}
+.tb-bloc h4{
+  font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--gold);margin:0 0 10px;
+}
+.tb-liste{display:flex;flex-direction:column;gap:7px;}
+.tb-ligne{display:flex;align-items:center;gap:10px;}
+.tb-nom{
+  flex:0 0 42%;font-size:12.5px;line-height:1.3;color:var(--ink);
+  /* le nom peut être long : il passe à la ligne plutôt que d'écraser la jauge */
+  overflow-wrap:anywhere;
+}
+.tb-piste{
+  flex:1 1 auto;height:9px;border-radius:99px;background:var(--sand-light);
+  overflow:hidden;min-width:40px;
+}
+.tb-jauge{
+  height:100%;border-radius:99px;
+  background:linear-gradient(90deg,var(--teal),#2aa183);
+}
+.tb-val{
+  flex:0 0 auto;font-size:12px;font-weight:800;color:var(--ink);
+  font-variant-numeric:tabular-nums;
+}
+.tb-val span{font-weight:600;color:var(--muted);}
+
+.tb-note{font-size:11.5px;line-height:1.55;color:var(--muted);margin:9px 0 0;}
+.tb-themes{margin:10px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:7px;}
+.tb-themes li{
+  font-size:12.5px;line-height:1.45;color:rgba(26,16,8,.8);
+  border-left:3px solid var(--sand);padding-left:10px;
+}
+.tb-aca{display:block;font-size:10px;font-weight:800;letter-spacing:.05em;
+  text-transform:uppercase;color:var(--gold);}
+.tb-source{
+  margin-top:18px;padding-top:12px;border-top:1px dashed var(--sand);
+  font-size:11px;line-height:1.5;color:var(--muted);font-style:italic;
+}
+
+@media (max-width:520px){
+  .tombe{padding:16px 14px;}
+  .tb-titre{font-size:20px;}
+  /* sous 520px la jauge passe sous son libellé : elle reste lisible */
+  .tb-ligne{flex-wrap:wrap;}
+  .tb-nom{flex:1 1 100%;}
+  .tb-piste{flex:1 1 auto;}
+}

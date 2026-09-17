@@ -149,3 +149,151 @@
 
   document.addEventListener('DOMContentLoaded', rendre);
 })();
+
+/* ===========================================================================
+   CE QUI TOMBE VRAIMENT — rendu du dépouillement des sujets officiels.
+
+   Tout ce qui s'affiche ici est calculé par statistiques-regional.js à partir
+   des relevés. Aucun pourcentage n'est écrit en dur dans le HTML : ajouter un
+   sujet au relevé suffit à mettre la page à jour. C'est la garantie qu'un
+   chiffre montré à l'élève ne peut pas mentir.
+
+   Ce bloc est PUBLIC : c'est l'argument qui donne envie de payer, pas ce
+   qu'on vend. L'entraînement, lui, reste derrière le code membre.
+=========================================================================== */
+(function () {
+  var LIVRES = {
+    boite: { nom: 'La Boîte à Merveilles', icone: '📦' },
+    antigone: { nom: 'Antigone', icone: '🏛️' },
+    condamne: { nom: 'Le Dernier Jour d’un Condamné', icone: '⛓️' },
+  };
+
+  /* Libellés lisibles. Une forme absente de cette table s'affiche telle
+     quelle : mieux vaut un intitulé brut qu'une donnée masquée. */
+  var FORMES = {
+    'tableau': 'Tableau d’identification (auteur, titre, genre…)',
+    'avis-justifie': 'Donner son avis et le justifier',
+    'figure-de-style': 'Reconnaître une figure de style',
+    'vrai-faux': 'Vrai ou faux',
+    'champ-lexical': 'Relever un champ lexical',
+    'question-simple': 'Question de compréhension directe',
+    'question-justifier': 'Répondre puis justifier par le texte',
+    'situer': 'Situer le passage dans l’œuvre',
+    'sentiment': 'Identifier un sentiment',
+    'releve-indice': 'Relever un indice dans le texte',
+    'qcm': 'Question à choix multiple',
+    'discours-rapporte': 'Passer au discours indirect',
+    'tonalite': 'Identifier le registre / la tonalité',
+    'releve-phrase': 'Relever une phrase',
+    'releve-expression': 'Relever une expression',
+    'releve-sentiment': 'Relever ce qui exprime un sentiment',
+    'qcm-justifier': 'QCM à justifier',
+    'connecteur': 'Rapport logique d’un connecteur',
+    'valeur-temps': 'Valeur d’un temps verbal',
+    'situation-enonciation': 'Qui parle, à qui, où',
+    'cadre-spatio-temporel': 'Quand et où se passe la scène',
+    'melioratif-pejoratif': 'Mélioratif ou péjoratif',
+    'registre-de-langue': 'Niveau de langue d’un mot',
+    'analyse-grammaticale': 'Analyse grammaticale',
+    'transformation': 'Transformer une phrase',
+    'tableau-analyse': 'Tableau d’analyse à compléter',
+    'lexique-destinataire': 'Lexique et destinataire',
+    'releve-arguments': 'Relever des arguments',
+    'proposer-titre': 'Proposer un titre',
+  };
+
+  function S() {
+    return (window.PF_DATA && window.PF_DATA.statsRegional) || null;
+  }
+  function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  /* Barre de fréquence : la largeur EST la proportion, pas une décoration. */
+  function barre(n, total, libelle) {
+    var pct = Math.round((n / total) * 100);
+    return '<div class="tb-ligne">' +
+      '<div class="tb-nom">' + esc(libelle) + '</div>' +
+      '<div class="tb-piste"><div class="tb-jauge" style="width:' + pct + '%;"></div></div>' +
+      '<div class="tb-val">' + n + '<span>/' + total + '</span></div>' +
+    '</div>';
+  }
+
+  function rendre() {
+    var wrap = document.getElementById('gTombe');
+    var d = S();
+    if (!wrap || !d || !d.calcule) return;
+    var c = d.calcule;
+    var n = c.nbSujets;
+
+    /* --- l'invariant : la structure --- */
+    var struct = c.structureRespectee
+      ? '<div class="tb-verdict tb-ok">' +
+          '<b>' + n + ' sujets sur ' + n + '</b> suivent exactement la même structure : ' +
+          '<b>2 questions</b> pour contextualiser, <b>6</b> pour analyser, <b>2</b> pour réagir. ' +
+          'Aucune exception.' +
+        '</div>'
+      : '<div class="tb-verdict">La structure varie d’un sujet à l’autre.</div>';
+
+    /* --- les œuvres --- */
+    var oeuvres = c.oeuvres.map(function (o) {
+      var L = LIVRES[o.cle] || { nom: o.cle, icone: '📖' };
+      return barre(o.n, n, L.icone + ' ' + L.nom);
+    }).join('');
+    var absentes = Object.keys(LIVRES).filter(function (k) {
+      return !c.oeuvres.some(function (o) { return o.cle === k; });
+    });
+    if (absentes.length) {
+      oeuvres += absentes.map(function (k) {
+        return barre(0, n, LIVRES[k].icone + ' ' + LIVRES[k].nom);
+      }).join('');
+    }
+
+    /* --- les exercices, du plus fréquent au plus rare --- */
+    var top = c.presence.slice(0, 8).map(function (p) {
+      return barre(p.sujets, n, FORMES[p.forme] || p.forme);
+    }).join('');
+
+    /* --- les sujets de production --- */
+    var themes = c.themes.map(function (t) {
+      return '<li><span class="tb-aca">' + esc(t.academie) + '</span> ' + esc(t.sujet) + '</li>';
+    }).join('');
+
+    wrap.innerHTML =
+      '<section class="tombe">' +
+        '<div class="tb-tete">' +
+          '<div class="tb-titre">Ce qui tombe vraiment</div>' +
+          '<p class="tb-sous">Nous avons lu, question par question, les <b>' + n + ' sujets officiels</b> ' +
+            'de la session normale ' + esc(d.sujets[0].annee) + ' — soit <b>' + c.nbItems + ' questions</b>. ' +
+            'Voici ce qu’ils disent. Pas une impression : un comptage.</p>' +
+        '</div>' +
+
+        struct +
+
+        '<div class="tb-bloc">' +
+          '<h4>Quelle œuvre est tombée ?</h4>' +
+          '<div class="tb-liste">' + oeuvres + '</div>' +
+          '<p class="tb-note">Un seul millésime : ces proportions disent ce qui <em>est</em> tombé en ' +
+            esc(d.sujets[0].annee) + ', pas ce qui tombera. On révise les trois œuvres.</p>' +
+        '</div>' +
+
+        '<div class="tb-bloc">' +
+          '<h4>Les exercices les plus fréquents</h4>' +
+          '<div class="tb-liste">' + top + '</div>' +
+          '<p class="tb-note">Lecture : « apparaît dans X sujets sur ' + n + ' ».</p>' +
+        '</div>' +
+
+        '<div class="tb-bloc">' +
+          '<h4>Les sujets de production écrite</h4>' +
+          '<p class="tb-note" style="margin-top:0;">Aucun n’était une dissertation littéraire. ' +
+            'Tous demandaient un avis argumenté sur une question de société.</p>' +
+          '<ul class="tb-themes">' + themes + '</ul>' +
+        '</div>' +
+
+        '<div class="tb-source">' + esc(d.couverture) + ' — ' + esc(d.source) + '</div>' +
+      '</section>';
+  }
+
+  window.gTombeRefresh = rendre;
+  document.addEventListener('DOMContentLoaded', rendre);
+})();

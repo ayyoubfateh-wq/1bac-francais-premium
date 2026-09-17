@@ -46,7 +46,7 @@ function bootstrap({ premium = false, preSeed = null } = {}) {
   }
   for (const s of SCREEN_IDS) el('div', s, 'screen' + (s === 'parcours' ? ' active' : ''));
   ['gameHud', 'gReviewCard', 'gContinueCard', 'gPath', 'gBilan', 'gLeague', 'gBadges',
-    'gInstallCard', 'gProd', 'gAnnales', 'trialProgressBanner', 'trialStartBtn'].forEach((id) => el('div', id));
+    'gInstallCard', 'gProd', 'gAnnales', 'gTombe', 'trialProgressBanner', 'trialStartBtn'].forEach((id) => el('div', id));
   ['boite', 'antigone', 'condamne'].forEach((bk) => {
     const t = doc.createElement('button');
     t.setAttribute('class', 'g-book-tab'); t.setAttribute('data-book', bk);
@@ -78,6 +78,10 @@ function bootstrap({ premium = false, preSeed = null } = {}) {
      chargé avant eux dans la page réelle, et doit l'être ici aussi —
      sans lui, Le Fondouk ne sait pas quels ateliers existent. */
   new Function('window', fs.readFileSync(path.join(ROOT, 'assets', 'data', 'referentiel.js'), 'utf8'))(fb.window);
+
+  /* Le dépouillement des sujets officiels est public comme le référentiel :
+     il se charge avant les moteurs, sinon « Ce qui tombe vraiment » est vide. */
+  new Function('window', fs.readFileSync(path.join(ROOT, 'assets', 'data', 'statistiques-regional.js'), 'utf8'))(fb.window);
 
   if (preSeed) preSeed(fb);
   fb.loadEngines(ASSETS, ['app.js', 'gamification.js', 'production.js', 'annales.js', 'content-loader.js']);
@@ -351,6 +355,58 @@ export async function run() {
     assert(gA.innerHTML.includes('an-correction'), 'corrections présentes');
     fb.window.gAnnalesOuvre(null); fb.runTimers();
     assert(gA.innerHTML.includes('an-carte'), 'retour à la liste attendu');
+  });
+
+  await test('« Ce qui tombe vraiment » : les chiffres viennent du relevé, pas du HTML', () => {
+    /* Le risque propre à ce bloc n'est pas qu'il plante : c'est qu'il affiche
+       un chiffre qui ne correspond plus aux sujets dépouillés. On vérifie donc
+       que chaque nombre montré est bien recalculé à partir des relevés. */
+    const fb = bootstrap({ premium: true }); injectFull(fb);
+    const S = fb.window.PF_DATA.statsRegional;
+    const c = S.calcule;
+
+    eq(c.nbSujets, S.sujets.length, 'le compte de sujets doit suivre le relevé');
+    eq(c.nbItems, S.sujets.length * 10, '10 questions par sujet officiel');
+    assert(c.structureRespectee, 'tous les sujets relevés doivent tenir le 2/6/2');
+
+    /* chaque notion citée doit exister dans le programme : sinon le lien
+       « ça tombe → va réviser cette notion » pointe dans le vide */
+    const inconnues = [];
+    S.sujets.forEach((s) => s.items.forEach((i) => {
+      if (i.notion && !fb.window.PF_REFERENTIEL.notions[i.notion]) inconnues.push(i.notion);
+    }));
+    eq(inconnues.length, 0, 'notions hors référentiel : ' + inconnues.join(', '));
+
+    const gT = fb.document.getElementById('gTombe');
+    assert(gT, '#gTombe attendu dans l’écran des sujets régionaux');
+    fb.window.gTombeRefresh(); fb.runTimers();
+    const html = gT.innerHTML;
+    assert(html.includes('Ce qui tombe vraiment'), 'titre attendu');
+    const compte = (s) => (html.match(new RegExp(s, 'g')) || []).length;
+    /* une jauge par œuvre du programme + les exercices les plus fréquents */
+    assert(compte('tb-jauge') >= 3 + 8, 'jauges attendues, obtenu : ' + compte('tb-jauge'));
+    /* le verdict doit citer le vrai total, pas un nombre écrit en dur */
+    assert(html.includes(c.nbSujets + ' sujets sur ' + c.nbSujets),
+      'le verdict doit reprendre le total calculé (' + c.nbSujets + ')');
+    eq(compte('<li>'), c.nbSujets, 'un thème de production par sujet');
+    /* les trois œuvres sont montrées, y compris celle qui n'est pas tombée :
+       cacher un zéro ferait croire qu'on peut l'impasser */
+    ['La Boîte à Merveilles', 'Antigone', 'Condamné'].forEach((o) => {
+      assert(html.includes(o), 'œuvre absente de l’affichage : ' + o);
+    });
+  });
+
+  await test('régression : aucun faux sujet « authentique » ne subsiste', () => {
+    /* Bug réel (17/09/2026) : l'écran des régionaux présentait des sujets
+       INVENTÉS sous l'étiquette « sujets authentiques par académie », avec un
+       barème 6/6/8 qui n'existe dans aucun sujet officiel. Un élève qui
+       s'entraînait dessus préparait une épreuve qui n'existe pas. */
+    const ecran = String((CONTENT.data.screens || {}).regionaux || '');
+    assert(ecran.length > 0, 'écran regionaux attendu dans le contenu membre');
+    assert(!/authentiques? par académie/i.test(ecran), 'plus d’étiquette « authentique » sur du contenu inventé');
+    assert(!/\(6 points\)[\s\S]*\(8 points\)/.test(ecran), 'barème 6/6/8 inexistant — interdit');
+    /* le barème réel, lui, doit être annoncé */
+    assert(/10 points/.test(ecran) && /2.{0,30}6.{0,30}2/s.test(ecran), 'barème officiel 10 pts en 2/6/2 attendu');
   });
 
   await test('régression : images des écrans injectés remplacées après injection', () => {
