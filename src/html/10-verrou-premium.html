@@ -80,13 +80,15 @@
     </section>
 
     <!-- --------------------------------------------- volume du contenu -->
+    <!-- Nombres injectés au build depuis le contenu réel : voir
+         CHIFFRES_VITRINE dans tools/build-html.mjs. Ne rien saisir à la main. -->
     <section class="pf-numbers" aria-label="Ce que contient la plateforme">
-      <div><b>330</b><span>questions corrigées</span></div>
-      <div><b>24</b><span>leçons progressives</span></div>
-      <div><b>6</b><span>sujets d’examen entiers</span></div>
-      <div><b>42</b><span>corrections détaillées</span></div>
+      <div><b>__PF_NB_QUESTIONS__</b><span>questions corrigées</span></div>
+      <div><b>__PF_NB_LECONS__</b><span>leçons progressives</span></div>
+      <div><b>__PF_NB_ANNALES__</b><span>sujets d’examen entiers</span></div>
+      <div><b>__PF_NB_CORRECTIONS__</b><span>corrections détaillées</span></div>
       <div><b>3</b><span>œuvres au programme</span></div>
-      <div><b>9</b><span>dossiers de cours</span></div>
+      <div><b>__PF_NB_DOSSIERS__</b><span>dossiers de cours</span></div>
     </section>
 
     <!-- ------------------------------ ce qui tombe vraiment (preuve)
@@ -149,8 +151,8 @@
       <h2>Ce que tu débloques avec l’accès complet</h2>
       <p class="pf-section-sub">Tout est déjà écrit, corrigé et vérifié. Rien à attendre après l’achat.</p>
       <div class="pf-features">
-        <article><b>📜 Annales corrigées</b><span>6 sujets entiers au format du régional (10 points d’étude de texte + 10 points de production), avec les 42 questions corrigées une par une.</span></article>
-        <article><b>🧠 330 questions</b><span>Contexte, analyse, faits de langue, réaction personnelle — les quatre types que l’examen pose vraiment.</span></article>
+        <article><b>📜 Annales corrigées</b><span>__PF_NB_ANNALES__ sujets entiers au format du régional (10 points d’étude de texte + 10 points de production), avec les __PF_NB_ANNALE_ITEMS__ questions corrigées une par une.</span></article>
+        <article><b>🧠 __PF_NB_QUESTIONS__ questions</b><span>Contexte, analyse, faits de langue, réaction personnelle — les quatre types que l’examen pose vraiment.</span></article>
         <article><b>📖 Résumés &amp; fiches</b><span>Les trois œuvres chapitre par chapitre, personnages, thèmes, citations à retenir.</span></article>
         <article><b>🖊️ Production écrite guidée</b><span>Un atelier en 4 étapes qui t’aide à construire ton plan, puis se note sur 8 avec la grille officielle.</span></article>
         <article><b>📜 Études de texte</b><span>12 extraits travaillés comme à l’épreuve : le texte reste sous les yeux pendant les questions.</span></article>
@@ -183,7 +185,7 @@
           <p>Confondre comparaison et métaphore. S’il y a un outil de comparaison (« comme », « tel », « ressemblait à »), c’est une comparaison. Sans outil, c’est une métaphore. Cette confusion coûte un point entier chaque année.</p>
         </div>
       </div>
-      <p class="pf-sample-foot">Les 42 questions des 6 sujets sont corrigées à ce niveau de détail.</p>
+      <p class="pf-sample-foot">Les __PF_NB_ANNALE_ITEMS__ questions des __PF_NB_ANNALES__ sujets sont corrigées à ce niveau de détail.</p>
     </section>
 
     <!-- ------------------------------------------- pourquoi ça marche -->
@@ -222,7 +224,7 @@
         <p class="pf-price-note">Soit le prix d’un seul cours particulier — pour toute l’année.</p>
 
         <ul class="pf-offer-list">
-          <li>Les 3 œuvres, 24 leçons, 330 questions</li>
+          <li>Les 3 œuvres, __PF_NB_LECONS__ leçons, __PF_NB_QUESTIONS__ questions</li>
           <li>6 sujets d’annales avec 42 corrections détaillées</li>
           <li>Atelier de production écrite noté</li>
           <li>Répétition espacée et bilan par compétence</li>

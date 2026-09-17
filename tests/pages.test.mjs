@@ -73,4 +73,31 @@ export async function run() {
       }
     }
   });
+
+  await test('les chiffres de la page de vente sont ceux du contenu réel', () => {
+    /* Bug réel (17/09/2026) : la vitrine annonçait « 330 questions » alors
+       que la plateforme en servait 875 — plus de la moitié du produit passée
+       sous silence sur la page censée convaincre. Ces nombres sont désormais
+       injectés au build ; ce test garantit qu'ils le restent, et qu'on ne
+       réintroduit pas un chiffre écrit à la main. */
+    const contenu = JSON.parse(fs.readFileSync(path.join(ROOT, 'private', 'content.json'), 'utf8')).data;
+    const html = fs.readFileSync(path.join(DIST, 'index.html'), 'utf8');
+
+    assert(!/__PF_NB_[A-Z]+__/.test(html), 'jeton de vitrine non remplacé dans dist/index.html');
+
+    const L = ['boite', 'antigone', 'condamne'];
+    const somme = (t) => t.reduce((a, b) => a + b, 0);
+    const attendu =
+      somme(L.map((b) => contenu.questions[b].length)) +
+      somme(L.map((b) => somme(contenu.etudes[b].map((e) => (e.questions || e.qs || []).length)))) +
+      somme(Object.values(contenu.langue).map((a) => a.length)) +
+      somme(contenu.annales.map((a) => a.etude.length));
+
+    const bloc = (html.match(/<section class="pf-numbers"[\s\S]*?<\/section>/) || [''])[0];
+    assert(bloc, 'section des chiffres introuvable sur la page de vente');
+    assert(bloc.includes('>' + attendu + '<'),
+      `la vitrine doit annoncer ${attendu} questions — bloc : ${bloc.replace(/\s+/g, ' ')}`);
+    assert(bloc.includes('>' + contenu.annales.length + '<'),
+      `la vitrine doit annoncer ${contenu.annales.length} sujets d’examen`);
+  });
 }

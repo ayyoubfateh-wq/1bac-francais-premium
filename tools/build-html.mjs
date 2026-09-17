@@ -101,6 +101,44 @@ const contenu = {
 const contenuJson = JSON.stringify(contenu.data);
 contenu.version = crypto.createHash('sha256').update(contenuJson).digest('hex').slice(0, 12);
 
+/* ------------------------------------------ les chiffres de la vitrine
+   La page de vente annonçait « 330 questions » longtemps après qu'on en
+   servait 875 : plus de la moitié du produit invisible sur la page censée
+   convaincre. On les compte donc ici, à la source, et on les injecte.
+   Un chiffre saisi à la main vieillit ; celui-là suit le contenu. */
+const LIVRES = ['boite', 'antigone', 'condamne'];
+const somme = (t) => t.reduce((a, b) => a + b, 0);
+const nbQuestions =
+  somme(LIVRES.map((b) => questions[b].length)) +
+  somme(LIVRES.map((b) => somme(etudes[b].map((e) => (e.questions || e.qs || []).length)))) +
+  somme(Object.values(langue).map((a) => a.length)) +
+  somme((annales || []).map((a) => a.etude.length));
+/* une leçon = un niveau jouable : les nœuds des 3 parcours + les notions
+   du Fondouk qui ont assez de questions pour être ouvertes */
+const NOEUDS_PAR_OEUVRE = 7;
+const nbLecons = LIVRES.length * NOEUDS_PAR_OEUVRE +
+  Object.values(langue).filter((a) => a.length >= 5).length;
+const nbAnnales = (annales || []).length;
+/* une correction détaillée = un item d'annale corrigé + un sujet de
+   production dont le corrigé est rédigé */
+const nbCorrections = somme((annales || []).map((a) => a.etude.length)) +
+  (annales || []).filter((a) => a.production && a.production.correction).length;
+const nbDossiers = Object.keys(screensPrives).length;
+
+const CHIFFRES_VITRINE = {
+  __PF_NB_QUESTIONS__: nbQuestions,
+  __PF_NB_LECONS__: nbLecons,
+  __PF_NB_ANNALES__: nbAnnales,
+  __PF_NB_ANNALE_ITEMS__: somme((annales || []).map((a) => a.etude.length)),
+  __PF_NB_CORRECTIONS__: nbCorrections,
+  __PF_NB_DOSSIERS__: nbDossiers,
+};
+for (const [jeton, valeur] of Object.entries(CHIFFRES_VITRINE)) {
+  if (!out.includes(jeton)) err(`jeton de vitrine absent du HTML : ${jeton}`);
+  if (!Number.isFinite(valeur) || valeur <= 0) err(`chiffre de vitrine invalide : ${jeton} = ${valeur}`);
+  out = out.split(jeton).join(String(valeur));
+}
+
 /* --------------------------------------------------- données d'essai
    Les 3 leçons offertes = les 3 premiers nœuds de La Boîte à Merveilles
    (Contexte & auteur, Analyse de l'œuvre, Langue & style). Un essai
